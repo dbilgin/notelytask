@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:notelytask/cubit/selected_note_cubit.dart';
+import 'package:notelytask/cubits/selected_note_cubit.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/screens/details_page.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
