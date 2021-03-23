@@ -4,9 +4,22 @@ import 'package:notelytask/models/note.dart';
 class NotesCubit extends HydratedCubit<List<Note>> {
   NotesCubit() : super([]);
 
-  void addNote(Note note) {
-    state.add(note);
-    emit(state);
+  void setNote(Note note) {
+    var index = state.indexWhere((element) => element.id == note.id);
+    if (index == -1) {
+      state.add(note);
+    } else {
+      state[index] = note;
+    }
+
+    emit([...state]);
+  }
+
+  void deleteNote(Note note) {
+    var index = state.indexWhere((element) => element.id == note.id);
+    note.isDeleted = true;
+    state[index] = note;
+    emit([...state]);
   }
 
   @override
@@ -21,6 +34,7 @@ class NotesCubit extends HydratedCubit<List<Note>> {
 
   @override
   Map<String, dynamic> toJson(List<Note> state) {
-    return {'notes': state.map((e) => e.toJson()).toList()};
+    var map = {'notes': state.map((e) => e.toJson()).toList()};
+    return map;
   }
 }

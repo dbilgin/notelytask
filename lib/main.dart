@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notelytask/models/note.dart';
+import 'package:notelytask/cubit/navigator_cubit.dart';
+import 'package:notelytask/cubit/selected_note_cubit.dart';
 import 'package:notelytask/screens/home_page.dart';
 import 'cubit/notes_cubit.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -19,20 +20,26 @@ void main() async {
 }
 
 class App extends StatelessWidget {
+  final GlobalKey<NavigatorState> _navigatorKey =
+      new GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => NotesCubit(),
-      child: BlocBuilder<NotesCubit, List<Note>>(
-        builder: (_, theme) {
-          return MaterialApp(
+      create: (_) => SelectedNoteCubit(),
+      child: BlocProvider(
+        create: (_) => NavigatorCubit(_navigatorKey),
+        child: BlocProvider(
+          create: (_) => NotesCubit(),
+          child: MaterialApp(
             title: 'NotelyTask',
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
             home: HomePage(),
-          );
-        },
+            navigatorKey: _navigatorKey,
+          ),
+        ),
       ),
     );
   }
