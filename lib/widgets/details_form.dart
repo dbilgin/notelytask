@@ -61,14 +61,7 @@ class _DetailsFormState extends State<DetailsForm> {
       context.read<NotesCubit>().setNote(note);
     }
 
-    _debounce = Timer(const Duration(milliseconds: 500), _debouncedSubmit);
-  }
-
-  String? _validate(value) {
-    if (value == null || value.isEmpty) {
-      return 'This field is required';
-    }
-    return null;
+    _debounce = Timer(const Duration(milliseconds: 200), _debouncedSubmit);
   }
 
   @override
@@ -76,28 +69,34 @@ class _DetailsFormState extends State<DetailsForm> {
     return SingleChildScrollView(
       child: Form(
         key: _formKey,
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _titleController,
-              validator: _validate,
-              textInputAction: TextInputAction.next,
-            ),
-            TextFormField(
-              maxLines: null,
-              decoration: InputDecoration(
-                hintText: 'description',
-                hintStyle: TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _titleController,
+                textInputAction: TextInputAction.next,
+                style: Theme.of(context).textTheme.headline4,
+                decoration: InputDecoration(
+                  hintText: 'Title',
+                  hintStyle: TextStyle(color: Colors.grey),
+                  border: InputBorder.none,
                 ),
               ),
-              minLines: 10,
-              keyboardType: TextInputType.multiline,
-              controller: _textController,
-              validator: _validate,
-            ),
-          ],
+              TextFormField(
+                maxLines: double.maxFinite.floor(),
+                minLines: null,
+                decoration: InputDecoration(
+                  hintText: 'Description',
+                  hintStyle: TextStyle(color: Colors.grey),
+                  border: InputBorder.none,
+                ),
+                keyboardType: TextInputType.multiline,
+                controller: _textController,
+                // expands: true,
+              ),
+            ],
+          ),
         ),
       ),
     );

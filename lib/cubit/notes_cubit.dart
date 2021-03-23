@@ -6,6 +6,11 @@ class NotesCubit extends HydratedCubit<List<Note>> {
 
   void setNote(Note note) {
     var index = state.indexWhere((element) => element.id == note.id);
+    if (note.title.isEmpty && note.text.isEmpty) {
+      if (index != -1) deleteNote(note);
+      return;
+    }
+
     if (index == -1) {
       state.add(note);
     } else {
