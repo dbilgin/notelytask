@@ -53,30 +53,8 @@ jobs:
     # Statically analyze the Dart code for any errors.
     - run: flutter analyze .
 
-    - name: Update local.properties
-      run: |
-        export PATH=/home/runner/.local/bin:$PATH
-        pip install shyaml
-        version=$(cat pubspec.yaml | shyaml get-value version)
-        versionNumber="$(cut -d'+' -f1 <<< ${version})"
-        buildNumber="$(cut -d'+' -f2 <<< ${version})"
-        echo -e "\nflutter.buildMode=release" >> android/local.properties
-        echo -e "flutter.versionName=${versionNumber}" >> android/local.properties
-        echo -e "flutter.versionCode=${buildNumber}" >> android/local.properties
-        cat android/local.properties
-    - name: Wrap Gradle
-      run: |
-        cd android
-        gradle wrapper --gradle-version=6.5
     - name: Build Release
-      run: |
-        cd android
-        ./gradlew bundleRelease
-    # Upload generated bundle to the artifacts.
-    # - uses: actions/upload-artifact@v1
-    #   with:
-    #     name: release-bundle
-    #     path: build/app/outputs/bundle/release/app-release.aab
+      run: flutter build appbundle
 
     - uses: r0adkll/upload-google-play@v1
       with:
