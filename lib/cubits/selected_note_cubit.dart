@@ -7,8 +7,4 @@ class SelectedNoteCubit extends Cubit<Note?> {
   void setNote(Note? note) {
     emit(note);
   }
-
-  Note? getNote() {
-    return state;
-  }
 }

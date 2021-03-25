@@ -15,7 +15,7 @@ class NoteListLayout extends StatelessWidget {
     void _dismissed(DismissDirection direction, Note note) {
       context.read<NotesCubit>().deleteNote(note);
 
-      if (context.read<SelectedNoteCubit>().getNote()?.id == note.id) {
+      if (context.read<SelectedNoteCubit>().state?.id == note.id) {
         context.read<SelectedNoteCubit>().setNote(null);
       }
     }

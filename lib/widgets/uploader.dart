@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:googleapis/drive/v3.dart' as gd;
 import 'package:notelytask/services/googleDrive.dart';
 
 class Uploader extends StatefulWidget {
@@ -8,7 +11,13 @@ class Uploader extends StatefulWidget {
 }
 
 class _UploaderState extends State<Uploader> {
-  final drive = GoogleDrive();
+  GoogleDrive? drive;
+
+  @override
+  void initState() {
+    drive = GoogleDrive(context);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +25,23 @@ class _UploaderState extends State<Uploader> {
       icon: Icon(Icons.shopping_cart),
       tooltip: 'Open shopping cart',
       onPressed: () async {
-        var list = await drive.listFiles();
-        if (list.files != null && list.files!.length > 0) {
-          var f = await drive.readFile(list.files![0].id!);
+        var jsonData = {'who': 'who are you?', 'who2': 'who are you?'};
+
+        var list = await drive?.listFiles();
+        if (list != null &&
+            list.files != null &&
+            (list.files?.length ?? 0) > 0) {
+          var id = list.files![0].id!;
+
+          await drive?.updateFile(id, jsonData);
+
+          // Read
+          gd.Media? f = await drive?.readFile(id);
+
+          String bar = await utf8.decodeStream(f!.stream);
+          drive?.removeFile(id);
+        } else {
+          await drive?.uploadFile(jsonData);
         }
       },
     );

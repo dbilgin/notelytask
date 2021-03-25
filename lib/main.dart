@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/cubits/drive_cubit.dart';
 import 'package:notelytask/cubits/navigator_cubit.dart';
 import 'package:notelytask/cubits/selected_note_cubit.dart';
 import 'package:notelytask/screens/home_page.dart';
@@ -26,18 +27,21 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => SelectedNoteCubit(),
+      create: (_) => DriveCubit(),
       child: BlocProvider(
-        create: (_) => NavigatorCubit(_navigatorKey),
+        create: (_) => SelectedNoteCubit(),
         child: BlocProvider(
-          create: (_) => NotesCubit(),
-          child: MaterialApp(
-            title: 'NotelyTask',
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
+          create: (_) => NavigatorCubit(_navigatorKey),
+          child: BlocProvider(
+            create: (_) => NotesCubit(),
+            child: MaterialApp(
+              title: 'NotelyTask',
+              theme: ThemeData(
+                primarySwatch: Colors.blue,
+              ),
+              home: HomePage(),
+              navigatorKey: _navigatorKey,
             ),
-            home: HomePage(),
-            navigatorKey: _navigatorKey,
           ),
         ),
       ),
