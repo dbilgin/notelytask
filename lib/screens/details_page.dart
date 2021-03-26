@@ -15,7 +15,7 @@ class _DetailsPageState extends State<DetailsPage> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: DetailsForm(key: Key(widget.note?.id ?? ''), note: widget.note),
+      child: DetailsForm(key: Key(widget.note?.id ?? 'new'), note: widget.note),
     );
   }
 }

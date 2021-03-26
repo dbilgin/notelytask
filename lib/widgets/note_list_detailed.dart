@@ -2,18 +2,18 @@ import 'package:flutter/widgets.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/screens/details_page.dart';
-import 'package:notelytask/widgets/note_list_layout.dart';
+import 'package:notelytask/widgets/note_list.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class NoteListDetailedLayout extends StatefulWidget {
+class NoteListDetailed extends StatefulWidget {
   final List<Note> notes;
-  NoteListDetailedLayout({required this.notes});
+  NoteListDetailed({required this.notes});
 
   @override
-  _NoteListDetailedLayoutState createState() => _NoteListDetailedLayoutState();
+  _NoteListDetailedState createState() => _NoteListDetailedState();
 }
 
-class _NoteListDetailedLayoutState extends State<NoteListDetailedLayout> {
+class _NoteListDetailedState extends State<NoteListDetailed> {
   _tap({Note? note}) {
     context.read<SelectedNoteCubit>().setNote(note);
   }
@@ -23,7 +23,7 @@ class _NoteListDetailedLayoutState extends State<NoteListDetailedLayout> {
     return Row(
       children: [
         Expanded(
-          child: NoteListLayout(notes: widget.notes, onTap: _tap),
+          child: NoteList(notes: widget.notes, onTap: _tap),
           flex: 1,
         ),
         BlocBuilder<SelectedNoteCubit, Note?>(

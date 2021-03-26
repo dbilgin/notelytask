@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,8 +6,7 @@ import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
 import 'package:notelytask/screens/details_page.dart';
 import 'package:notelytask/utils.dart';
-import 'package:notelytask/widgets/note_list.dart';
-import 'package:notelytask/widgets/uploader.dart';
+import 'package:notelytask/widgets/note_list_layout.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -29,16 +29,15 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('NotelyTask'),
-        actions: [
-          Uploader(),
-        ],
       ),
-      body: NoteList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToDetails,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), //
+      body: NoteListLayout(),
+      floatingActionButton: !kIsWeb
+          ? FloatingActionButton(
+              onPressed: _navigateToDetails,
+              tooltip: 'Add New Note',
+              child: Icon(Icons.add),
+            )
+          : null,
     );
   }
 }

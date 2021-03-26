@@ -1,40 +1,92 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
+import 'package:notelytask/cubit/selected_note_cubit.dart';
 import 'package:notelytask/models/note.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/screens/details_page.dart';
 import 'package:notelytask/utils.dart';
-import 'package:notelytask/widgets/note_list_detailed_layout.dart';
-import 'package:notelytask/widgets/note_list_layout.dart';
 
 class NoteList extends StatelessWidget {
-  final bool deletedList;
-  NoteList({this.deletedList = false});
+  final List<Note> notes;
+  final Function({Note note}) onTap;
+  NoteList({required this.notes, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    void _navigateToDetails({note}) {
-      context
-          .read<NavigatorCubit>()
-          .push(Scaffold(body: DetailsPage(note: note)));
+    void _dismissed(DismissDirection direction, Note note) {
+      context.read<NotesCubit>().deleteNote(note);
+
+      if (context.read<SelectedNoteCubit>().state?.id == note.id) {
+        context.read<SelectedNoteCubit>().setNote(null);
+      }
     }
 
-    return BlocBuilder<NotesCubit, List<Note>>(
-      builder: (context, List<Note> state) {
-        var filteredNotes =
-            state.where((element) => element.isDeleted == deletedList).toList();
+    void _navigateToDetails({note}) {
+      if (isSmallScreen(context)) {
+        context
+            .read<NavigatorCubit>()
+            .push(Scaffold(body: DetailsPage(note: note)));
+      } else {
+        context.read<SelectedNoteCubit>().setNote(note);
+      }
+    }
 
-        if (isSmallScreen(context)) {
-          return NoteListLayout(
-            notes: filteredNotes,
-            onTap: _navigateToDetails,
-          );
-        } else {
-          return NoteListDetailedLayout(notes: filteredNotes);
-        }
-      },
+    return Column(
+      children: [
+        if (kIsWeb)
+          Container(
+            width: double.infinity,
+            margin: EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: _navigateToDetails,
+              child: Icon(Icons.add),
+            ),
+          ),
+        Expanded(
+          child: ListView.separated(
+            itemBuilder: (context, index) {
+              return Dismissible(
+                key: ValueKey<int>(notes[index].date.millisecondsSinceEpoch),
+                child: ListTile(
+                  onTap: () => onTap(note: notes[index]),
+                  title: Text(notes[index].title),
+                  subtitle: Text(
+                    notes[index].text,
+                    overflow: TextOverflow.fade,
+                    maxLines: 5,
+                  ),
+                  isThreeLine: true,
+                ),
+                onDismissed: (direction) => _dismissed(direction, notes[index]),
+                background: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 24.0),
+                  color: Colors.red,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                        size: 30.0,
+                      ),
+                      Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                        size: 30.0,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            separatorBuilder: (context, index) => const Divider(),
+            itemCount: notes.length,
+          ),
+        ),
+      ],
     );
   }
 }
