@@ -1,0 +1,78 @@
+name: Android CI
+
+# This workflow is triggered on pushes to the repository.
+
+on:
+  create:
+    tags:
+      - v*
+
+# on: push    # Default will running for every branch.
+
+jobs:
+  build:
+    # This job will run on ubuntu virtual machine
+    runs-on: ubuntu-latest
+    steps:
+
+    # Setup Java environment in order to build the Android app.
+    - uses: actions/checkout@v1
+    - run: |
+        echo "${{ secrets.ANDROID_KEY_PROPERTIES }}" > android/key.properties
+        echo "${{ secrets.ANDROID_RELEASE_KEY }}" | base64 --decode > android/app/notely.keystore
+    - name: 'Get Previous tag'
+      id: previoustag
+      uses: "WyriHaximus/github-action-get-previous-tag@master"
+
+    - name: 'Get commit messages'
+      id: commitmessages
+      run: |
+        mkdir whatsNewDirectory
+        prevtag=$(git describe --abbrev=0 --tags ${{ steps.previoustag.outputs.tag }}^)
+        echo $prevtag
+        git log --pretty=format:"%s" $prevtag...${{ steps.previoustag.outputs.tag}} > commits
+        commitList=`cat commits`
+        echo ${commitList:0:400} > whatsNewDirectory/whatsnew-en-US
+        cat whatsNewDirectory/whatsnew-en-US
+    # Setup the flutter environment.
+    - uses: subosito/flutter-action@v1
+      with:
+        channel: 'stable' # 'dev', 'alpha', default to: 'stable'
+        # flutter-version: '1.12.x' # you can also specify exact version of flutter
+
+    - run: flutter doctor -v
+
+    - run: flutter clean
+
+    # Get flutter dependencies.
+    - run: flutter pub get
+
+    # Check for any formatting issues in the code.
+    - run: flutter format --set-exit-if-changed .
+
+    # Statically analyze the Dart code for any errors.
+    - run: flutter analyze .
+
+    - name: Build Release
+      run: flutter build appbundle
+
+    - uses: r0adkll/upload-google-play@v1
+      with:
+        serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+        packageName: com.omedacore.notelytask
+        releaseFiles: build/app/outputs/bundle/release/app-release.aab
+        track: internal
+        inAppUpdatePriority: 5
+        whatsNewDirectory: whatsNewDirectory
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.previoustag.outputs.tag }}
+        release_name: ${{ steps.previoustag.outputs.tag }}
+        body_path: whatsNewDirectory/whatsnew-en-US
+        draft: false
+        prerelease: true
