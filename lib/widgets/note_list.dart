@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notelytask/cubits/navigator_cubit.dart';
-import 'package:notelytask/cubits/notes_cubit.dart';
+import 'package:notelytask/cubit/navigator_cubit.dart';
+import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/screens/details_page.dart';
 import 'package:notelytask/utils.dart';

@@ -20,6 +20,7 @@ dependencies:
   googleapis: 2.0.0
   google_sign_in: 5.0.1
   http: 0.13.1
+  get_storage: 2.0.1
 
 dev_dependencies:
   flutter_test:
