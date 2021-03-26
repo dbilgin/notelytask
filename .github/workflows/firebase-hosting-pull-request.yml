@@ -31,10 +31,9 @@ jobs:
       - name: Build Release
         run: flutter build web
 
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_NOTELYTASK }}'
-          projectId: notelytask
+          args: deploy --only hosting
         env:
-          FIREBASE_CLI_PREVIEWS: hostingchannels
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
