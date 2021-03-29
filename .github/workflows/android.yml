@@ -28,8 +28,12 @@ jobs:
       id: commitmessages
       run: |
         mkdir whatsNewDirectory
-        echo "Added app bar for details page" > whatsNewDirectory/whatsnew-en-US
-
+        prevtag=$(git describe --abbrev=0 --tags ${{ steps.previoustag.outputs.tag }}^)
+        echo $prevtag
+        git log --pretty=format:"%s" $prevtag...${{ steps.previoustag.outputs.tag}} > commits
+        commitList=`cat commits`
+        echo ${commitList:0:400} > whatsNewDirectory/whatsnew-en-US
+        cat whatsNewDirectory/whatsnew-en-US
     # Setup the flutter environment.
     - uses: subosito/flutter-action@v1
       with:
