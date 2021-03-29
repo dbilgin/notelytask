@@ -16,9 +16,14 @@ class NoteListLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void _navigateToDetails({note}) {
-      context
-          .read<NavigatorCubit>()
-          .push(Scaffold(body: DetailsPage(note: note)));
+      context.read<NavigatorCubit>().push(
+            Scaffold(
+              body: DetailsPage(
+                note: note,
+                withAppBar: true,
+              ),
+            ),
+          );
     }
 
     return BlocBuilder<NotesCubit, List<Note>>(

@@ -16,9 +16,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   void _navigateToDetails({note}) {
     if (isSmallScreen(context)) {
-      context
-          .read<NavigatorCubit>()
-          .push(Scaffold(body: DetailsPage(note: note)));
+      context.read<NavigatorCubit>().push(
+            Scaffold(
+              body: DetailsPage(
+                note: note,
+                withAppBar: true,
+              ),
+            ),
+          );
     } else {
       context.read<SelectedNoteCubit>().setNote(note);
     }
