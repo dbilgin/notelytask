@@ -8,27 +8,6 @@ bool isSmallScreen(BuildContext context) {
   return queryData.size.width <= 500;
 }
 
-void showAlertDialog({
-  required BuildContext context,
-  String? details,
-}) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text("An error has occurred."),
-        content: Text("Please try again later. Details: $details"),
-        actions: [
-          TextButton(
-            child: Text("OK"),
-            onPressed: () => context.read<NavigatorCubit>().pop(),
-          ),
-        ],
-      );
-    },
-  );
-}
-
 void saveToRepoAlert({
   required BuildContext context,
   required Function() onPressed,
