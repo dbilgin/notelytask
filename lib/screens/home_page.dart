@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
 import 'package:notelytask/screens/details_page.dart';
+import 'package:notelytask/screens/github_page.dart';
 import 'package:notelytask/utils.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
 
@@ -29,11 +30,22 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _navigateToLogin() {
+    context.read<NavigatorCubit>().push(GithubPage());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('NotelyTask'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_alert),
+            tooltip: 'Settings',
+            onPressed: _navigateToLogin,
+          ),
+        ],
       ),
       body: NoteListLayout(),
       floatingActionButton: !kIsWeb
