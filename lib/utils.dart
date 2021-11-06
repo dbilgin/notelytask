@@ -10,22 +10,29 @@ bool isSmallScreen(BuildContext context) {
 
 void saveToRepoAlert({
   required BuildContext context,
-  required Function() onPressed,
+  required Function(bool keepLocal) onPressed,
 }) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text("Overwrite"),
+        title: Text("Github Connection"),
         content: Text(
-          "If you have existing notes on this repo, they will be replaced.",
+          "Would you like to keep your local data and overwrite your repo?",
         ),
         actions: [
           TextButton(
-            child: Text("OK"),
+            child: Text("Yes"),
             onPressed: () {
               context.read<NavigatorCubit>().pop();
-              onPressed();
+              onPressed(true);
+            },
+          ),
+          TextButton(
+            child: Text("No"),
+            onPressed: () {
+              context.read<NavigatorCubit>().pop();
+              onPressed(false);
             },
           ),
           TextButton(

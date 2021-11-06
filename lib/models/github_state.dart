@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class GithubState extends Equatable {
-  final String? repoUrl;
+  final String? ownerRepo;
   final String? accessToken;
   final String? sha;
 
@@ -11,7 +11,7 @@ class GithubState extends Equatable {
   final int? expiresIn;
 
   GithubState({
-    this.repoUrl,
+    this.ownerRepo,
     this.accessToken,
     this.sha,
     this.deviceCode,
@@ -22,7 +22,7 @@ class GithubState extends Equatable {
 
   factory GithubState.fromJson(Map<String, dynamic> json) {
     return GithubState(
-      repoUrl: json['repoUrl'] as String?,
+      ownerRepo: json['ownerRepo'] as String?,
       accessToken: json['accessToken'] as String?,
       sha: json['sha'] as String?,
       deviceCode: json['deviceCode'] as String?,
@@ -33,7 +33,7 @@ class GithubState extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'repoUrl': repoUrl,
+        'ownerRepo': ownerRepo,
         'accessToken': accessToken,
         'sha': sha,
         'deviceCode': deviceCode,
@@ -43,7 +43,7 @@ class GithubState extends Equatable {
       };
 
   GithubState copyWith({
-    String? repoUrl,
+    String? ownerRepo,
     String? accessToken,
     String? sha,
     String? deviceCode,
@@ -52,7 +52,7 @@ class GithubState extends Equatable {
     int? expiresIn,
   }) {
     return GithubState(
-      repoUrl: repoUrl ?? this.repoUrl,
+      ownerRepo: ownerRepo ?? this.ownerRepo,
       accessToken: accessToken ?? this.accessToken,
       sha: sha ?? this.sha,
       deviceCode: deviceCode ?? this.deviceCode,
@@ -64,7 +64,7 @@ class GithubState extends Equatable {
 
   @override
   List<Object?> get props => [
-        repoUrl,
+        ownerRepo,
         accessToken,
         sha,
         deviceCode,

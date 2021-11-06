@@ -18,7 +18,7 @@ class _GithubPageState extends State<GithubPage> {
 
   @override
   void initState() {
-    repoUrlController.text = context.read<GithubCubit>().state.repoUrl ?? '';
+    repoUrlController.text = context.read<GithubCubit>().state.ownerRepo ?? '';
     localRepoUrl = repoUrlController.text;
     super.initState();
   }
@@ -32,8 +32,8 @@ class _GithubPageState extends State<GithubPage> {
   void saveRepoUrl(String repoUrl) {
     saveToRepoAlert(
       context: context,
-      onPressed: () {
-        context.read<GithubCubit>().setRepoUrl(repoUrl);
+      onPressed: (bool keepLocal) async {
+        await context.read<GithubCubit>().setRepoUrl(repoUrl, keepLocal);
       },
     );
   }
@@ -96,7 +96,7 @@ class _GithubPageState extends State<GithubPage> {
                 ),
               ),
               ElevatedButton(
-                onPressed: localRepoUrl == state.repoUrl
+                onPressed: localRepoUrl == state.ownerRepo
                     ? null
                     : () => saveRepoUrl(repoUrlController.text),
                 child: Text('Save Repo'),
