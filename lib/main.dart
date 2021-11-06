@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
+import 'package:notelytask/repository/github_repository.dart';
 import 'package:notelytask/screens/home_page.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -30,20 +31,31 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider(create: (context) => SelectedNoteCubit()),
-        BlocProvider(create: (context) => NavigatorCubit(_navigatorKey)),
-        BlocProvider(create: (context) => NotesCubit()),
-        BlocProvider(create: (context) => GithubCubit()),
-      ],
-      child: MaterialApp(
-        title: 'NotelyTask',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
+        RepositoryProvider<GithubRepository>(
+          create: (context) => GithubRepository(),
         ),
-        home: HomePage(),
-        navigatorKey: _navigatorKey,
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (context) => SelectedNoteCubit()),
+          BlocProvider(create: (context) => NavigatorCubit(_navigatorKey)),
+          BlocProvider(create: (context) => NotesCubit()),
+          BlocProvider(
+            create: (context) => GithubCubit(
+              githubRepository: context.read<GithubRepository>(),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          title: 'NotelyTask',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: HomePage(),
+          navigatorKey: _navigatorKey,
+        ),
       ),
     );
   }
