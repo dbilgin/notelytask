@@ -82,7 +82,9 @@ class NoteList extends StatelessWidget {
                 ),
               );
             },
-            separatorBuilder: (context, index) => const Divider(),
+            separatorBuilder: (context, index) => const Divider(
+              color: Colors.white,
+            ),
             itemCount: notes.length,
           ),
         ),

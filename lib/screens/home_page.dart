@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
+import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/screens/details_page.dart';
 import 'package:notelytask/screens/github_page.dart';
 import 'package:notelytask/utils.dart';
@@ -15,6 +17,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    context.read<GithubCubit>().getAndUpdateNotes();
+    super.initState();
+  }
+
   void _navigateToDetails({note}) {
     if (isSmallScreen(context)) {
       context.read<NavigatorCubit>().push(
@@ -41,11 +49,19 @@ class _HomePageState extends State<HomePage> {
         title: Text('NotelyTask'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_alert),
-            tooltip: 'Settings',
+            icon: Image.asset('assets/github.png'),
+            tooltip: 'Github Integration',
             onPressed: _navigateToLogin,
           ),
         ],
+        bottom: PreferredSize(
+          child: BlocBuilder<GithubCubit, GithubState>(
+            builder: (context, state) => state.loading
+                ? LinearProgressIndicator(minHeight: 1)
+                : Container(),
+          ),
+          preferredSize: Size(double.infinity, 0),
+        ),
       ),
       body: NoteListLayout(),
       floatingActionButton: !kIsWeb

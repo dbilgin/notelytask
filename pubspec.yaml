@@ -33,6 +33,7 @@ flutter:
   assets:
     - assets/icon.png
     - assets/foreground.png
+    - assets/github.png
     - .env
 
 flutter_icons:

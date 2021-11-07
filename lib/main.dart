@@ -42,19 +42,40 @@ class App extends StatelessWidget {
           BlocProvider(create: (context) => SelectedNoteCubit()),
           BlocProvider(create: (context) => NavigatorCubit(_navigatorKey)),
           BlocProvider(create: (context) => NotesCubit()),
-          BlocProvider(
-            create: (context) => GithubCubit(
-              githubRepository: context.read<GithubRepository>(),
-            ),
-          ),
         ],
-        child: MaterialApp(
-          title: 'NotelyTask',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
+        child: BlocProvider(
+          create: (context) => GithubCubit(
+            notesCubit: context.read<NotesCubit>(),
+            githubRepository: context.read<GithubRepository>(),
           ),
-          home: HomePage(),
-          navigatorKey: _navigatorKey,
+          child: MaterialApp(
+            title: 'NotelyTask',
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+              colorScheme: ColorScheme.light(
+                primary: Color(0xff17181c),
+                secondary: Color(0xff2e8fff),
+              ),
+              scaffoldBackgroundColor: const Color(0xff1f1f24),
+              textTheme: TextTheme(
+                headline4: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                subtitle1: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                bodyText1: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.0,
+                ),
+                caption: TextStyle(color: Colors.white),
+              ),
+            ),
+            home: HomePage(),
+            navigatorKey: _navigatorKey,
+          ),
         ),
       ),
     );
