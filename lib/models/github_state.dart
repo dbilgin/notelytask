@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 class GithubState extends Equatable {
+  final bool loading;
+
   final String? ownerRepo;
   final String? accessToken;
   final String? sha;
@@ -11,6 +13,7 @@ class GithubState extends Equatable {
   final int? expiresIn;
 
   GithubState({
+    this.loading = false,
     this.ownerRepo,
     this.accessToken,
     this.sha,
@@ -22,6 +25,7 @@ class GithubState extends Equatable {
 
   factory GithubState.fromJson(Map<String, dynamic> json) {
     return GithubState(
+      loading: json['loading'] as bool? ?? false,
       ownerRepo: json['ownerRepo'] as String?,
       accessToken: json['accessToken'] as String?,
       sha: json['sha'] as String?,
@@ -33,6 +37,7 @@ class GithubState extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
+        'loading': loading,
         'ownerRepo': ownerRepo,
         'accessToken': accessToken,
         'sha': sha,
@@ -43,6 +48,7 @@ class GithubState extends Equatable {
       };
 
   GithubState copyWith({
+    bool? loading,
     String? ownerRepo,
     String? accessToken,
     String? sha,
@@ -52,6 +58,7 @@ class GithubState extends Equatable {
     int? expiresIn,
   }) {
     return GithubState(
+      loading: loading ?? this.loading,
       ownerRepo: ownerRepo ?? this.ownerRepo,
       accessToken: accessToken ?? this.accessToken,
       sha: sha ?? this.sha,
@@ -64,6 +71,7 @@ class GithubState extends Equatable {
 
   @override
   List<Object?> get props => [
+        loading,
         ownerRepo,
         accessToken,
         sha,
