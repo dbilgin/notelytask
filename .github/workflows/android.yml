@@ -17,6 +17,7 @@ jobs:
 
     # Setup Java environment in order to build the Android app.
     - uses: actions/checkout@v1
+    - run: echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
     - run: |
         echo "${{ secrets.ANDROID_KEY_PROPERTIES }}" > android/key.properties
         echo "${{ secrets.ANDROID_RELEASE_KEY }}" | base64 --decode > android/app/notely.keystore
