@@ -16,35 +16,41 @@ void saveToRepoAlert({
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text("Github Connection"),
+        backgroundColor: Color(0xff2a2a31),
+        title: Text('Github Connection'),
         content: Text(
-          "Would you like to keep your local data and overwrite your repo?",
+          'Would you like to keep your local data and overwrite your repo?',
         ),
         actions: [
           TextButton(
-            child: Text("Yes"),
+            child: Text(
+              'Yes',
+              style: Theme.of(context).textTheme.caption,
+            ),
             onPressed: () {
               context.read<NavigatorCubit>().pop();
               onPressed(true);
             },
           ),
           TextButton(
-            child: Text("No"),
+            child: Text(
+              'No',
+              style: Theme.of(context).textTheme.caption,
+            ),
             onPressed: () {
               context.read<NavigatorCubit>().pop();
               onPressed(false);
             },
           ),
           TextButton(
-            child: Text("Cancel"),
+            child: Text(
+              'Cancel',
+              style: Theme.of(context).textTheme.caption,
+            ),
             onPressed: () => context.read<NavigatorCubit>().pop(),
           ),
         ],
       );
     },
   );
-}
-
-String getGithubApiUrl(String ownerRepo) {
-  return 'https://api.github.com/repos/$ownerRepo/contents/notes.json';
 }

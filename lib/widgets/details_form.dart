@@ -92,6 +92,8 @@ class _DetailsFormState extends State<DetailsForm> {
                 hintText: 'Title',
                 hintStyle: TextStyle(color: Colors.grey),
                 border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
               ),
             ),
             Expanded(
@@ -102,6 +104,8 @@ class _DetailsFormState extends State<DetailsForm> {
                   hintText: 'Description',
                   hintStyle: TextStyle(color: Colors.grey),
                   border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
                 ),
                 keyboardType: TextInputType.multiline,
                 controller: _textController,

@@ -56,8 +56,27 @@ class App extends StatelessWidget {
                 primary: Color(0xff17181c),
                 secondary: Color(0xff2e8fff),
               ),
+              textSelectionTheme: TextSelectionThemeData(
+                cursorColor: Colors.white,
+                selectionColor: Color(0xff2e8fff),
+                selectionHandleColor: Color(0xff2e8fff),
+              ),
+              hintColor: Colors.white,
+              inputDecorationTheme: InputDecorationTheme(
+                labelStyle: TextStyle(color: Colors.white),
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.white),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.white),
+                ),
+              ),
               scaffoldBackgroundColor: const Color(0xff1f1f24),
               textTheme: TextTheme(
+                headline6: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
                 headline4: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class GithubState extends Equatable {
   final bool loading;
+  final bool error;
 
   final String? ownerRepo;
   final String? accessToken;
@@ -14,6 +15,7 @@ class GithubState extends Equatable {
 
   GithubState({
     this.loading = false,
+    this.error = false,
     this.ownerRepo,
     this.accessToken,
     this.sha,
@@ -26,6 +28,7 @@ class GithubState extends Equatable {
   factory GithubState.fromJson(Map<String, dynamic> json) {
     return GithubState(
       loading: json['loading'] as bool? ?? false,
+      error: json['error'] as bool? ?? false,
       ownerRepo: json['ownerRepo'] as String?,
       accessToken: json['accessToken'] as String?,
       sha: json['sha'] as String?,
@@ -38,6 +41,7 @@ class GithubState extends Equatable {
 
   Map<String, dynamic> toJson() => {
         'loading': loading,
+        'error': error,
         'ownerRepo': ownerRepo,
         'accessToken': accessToken,
         'sha': sha,
@@ -49,6 +53,7 @@ class GithubState extends Equatable {
 
   GithubState copyWith({
     bool? loading,
+    bool? error,
     String? ownerRepo,
     String? accessToken,
     String? sha,
@@ -59,6 +64,7 @@ class GithubState extends Equatable {
   }) {
     return GithubState(
       loading: loading ?? this.loading,
+      error: error ?? this.error,
       ownerRepo: ownerRepo ?? this.ownerRepo,
       accessToken: accessToken ?? this.accessToken,
       sha: sha ?? this.sha,
@@ -72,6 +78,7 @@ class GithubState extends Equatable {
   @override
   List<Object?> get props => [
         loading,
+        error,
         ownerRepo,
         accessToken,
         sha,
