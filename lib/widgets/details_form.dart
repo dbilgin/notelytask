@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
 import 'package:notelytask/models/note.dart';
@@ -34,7 +35,8 @@ class _DetailsFormState extends State<DetailsForm> {
       text: _textController.text,
       date: DateTime.now(),
     );
-    _debouncedSubmit(note);
+
+    context.read<NotesCubit>().setNote(note);
     context.read<SelectedNoteCubit>().setNote(note);
 
     _titleController.addListener(_submit);
@@ -52,6 +54,7 @@ class _DetailsFormState extends State<DetailsForm> {
 
   void _debouncedSubmit(Note note) {
     context.read<NotesCubit>().setNote(note);
+    context.read<GithubCubit>().createOrUpdateRemoteNotes();
   }
 
   void _submit() {
@@ -68,7 +71,7 @@ class _DetailsFormState extends State<DetailsForm> {
       date: DateTime.now(),
     );
     _debounce = Timer(
-      const Duration(milliseconds: 200),
+      const Duration(milliseconds: 1000),
       () => _debouncedSubmit(note),
     );
   }
@@ -89,15 +92,20 @@ class _DetailsFormState extends State<DetailsForm> {
                 hintText: 'Title',
                 hintStyle: TextStyle(color: Colors.grey),
                 border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
               ),
             ),
             Expanded(
               child: TextFormField(
                 maxLines: null,
+                style: Theme.of(context).textTheme.bodyText1,
                 decoration: InputDecoration(
                   hintText: 'Description',
                   hintStyle: TextStyle(color: Colors.grey),
                   border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
                 ),
                 keyboardType: TextInputType.multiline,
                 controller: _textController,

@@ -17,8 +17,11 @@ dependencies:
   path_provider: 2.0.1
   json_serializable: 4.1.0
   build_runner: 1.12.2
-  http: 0.13.1
+  http: 0.13.4
   get_storage: 2.0.1
+  url_launcher: 6.0.12
+  equatable: 2.0.3
+  flutter_dotenv: 5.0.2
 
 dev_dependencies:
   flutter_test:
@@ -30,6 +33,8 @@ flutter:
   assets:
     - assets/icon.png
     - assets/foreground.png
+    - assets/github.png
+    - .env
 
 flutter_icons:
   android: "launcher_icon"
