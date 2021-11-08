@@ -33,9 +33,8 @@ class GithubCubit extends HydratedCubit<GithubState> {
     } else {
       notesCubit
           .emit(finalContent != null ? notesCubit.fromJson(finalContent) : []);
+      emit(state.copyWith(loading: false, sha: existingFile.sha));
     }
-
-    emit(state.copyWith(loading: false));
   }
 
   Future<void> setRepoUrl(String ownerRepo, bool keepLocal) async {
@@ -89,6 +88,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
       emit(state.copyWith(sha: newNote.sha));
     } else if (shouldResetIfError) {
       reset();
+      emit(state.copyWith(error: true, ownerRepo: ''));
     } else {
       emit(state.copyWith(error: true, ownerRepo: ''));
     }

@@ -5,6 +5,7 @@ import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
+import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/screens/details_page.dart';
@@ -36,61 +37,73 @@ class NoteList extends StatelessWidget {
       }
     }
 
-    return Column(
-      children: [
-        if (kIsWeb)
-          Container(
-            width: double.infinity,
-            margin: EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: _navigateToDetails,
-              child: Icon(Icons.add),
+    return BlocListener<GithubCubit, GithubState>(
+      listener: (context, state) {
+        if (state.error) {
+          final snackBar = SnackBar(
+            content: Text('Error with Github integration.'),
+            duration: Duration(seconds: 1),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        }
+      },
+      child: Column(
+        children: [
+          if (kIsWeb)
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: _navigateToDetails,
+                child: Icon(Icons.add),
+              ),
+            ),
+          Expanded(
+            child: ListView.separated(
+              itemBuilder: (context, index) {
+                return Dismissible(
+                  key: ValueKey<int>(notes[index].date.millisecondsSinceEpoch),
+                  child: ListTile(
+                    onTap: () => onTap(note: notes[index]),
+                    title: Text(notes[index].title),
+                    subtitle: Text(
+                      notes[index].text,
+                      overflow: TextOverflow.fade,
+                      maxLines: 5,
+                    ),
+                    isThreeLine: true,
+                  ),
+                  onDismissed: (direction) =>
+                      _dismissed(direction, notes[index]),
+                  background: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 24.0),
+                    color: Colors.red,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Icon(
+                          Icons.delete,
+                          color: Colors.white,
+                          size: 30.0,
+                        ),
+                        Icon(
+                          Icons.delete,
+                          color: Colors.white,
+                          size: 30.0,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              separatorBuilder: (context, index) => const Divider(
+                color: Colors.white,
+              ),
+              itemCount: notes.length,
             ),
           ),
-        Expanded(
-          child: ListView.separated(
-            itemBuilder: (context, index) {
-              return Dismissible(
-                key: ValueKey<int>(notes[index].date.millisecondsSinceEpoch),
-                child: ListTile(
-                  onTap: () => onTap(note: notes[index]),
-                  title: Text(notes[index].title),
-                  subtitle: Text(
-                    notes[index].text,
-                    overflow: TextOverflow.fade,
-                    maxLines: 5,
-                  ),
-                  isThreeLine: true,
-                ),
-                onDismissed: (direction) => _dismissed(direction, notes[index]),
-                background: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 24.0),
-                  color: Colors.red,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Icon(
-                        Icons.delete,
-                        color: Colors.white,
-                        size: 30.0,
-                      ),
-                      Icon(
-                        Icons.delete,
-                        color: Colors.white,
-                        size: 30.0,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-            separatorBuilder: (context, index) => const Divider(
-              color: Colors.white,
-            ),
-            itemCount: notes.length,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
