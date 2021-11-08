@@ -47,13 +47,15 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('NotelyTask'),
-        actions: [
-          IconButton(
-            icon: Image.asset('assets/github.png'),
-            tooltip: 'Github Integration',
-            onPressed: _navigateToLogin,
-          ),
-        ],
+        actions: kIsWeb
+            ? null
+            : [
+                IconButton(
+                  icon: Image.asset('assets/github.png'),
+                  tooltip: 'Github Integration',
+                  onPressed: _navigateToLogin,
+                ),
+              ],
         bottom: PreferredSize(
           child: BlocBuilder<GithubCubit, GithubState>(
             builder: (context, state) => state.loading
