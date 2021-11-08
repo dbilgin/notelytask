@@ -15,6 +15,8 @@ jobs:
         # Setup Java environment in order to build the Android app.
       - uses: actions/checkout@v2
 
+      - run: echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
+
       # Setup the flutter environment.
       - uses: subosito/flutter-action@v1
         with:
