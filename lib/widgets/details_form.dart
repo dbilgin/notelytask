@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
+import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -78,41 +79,52 @@ class _DetailsFormState extends State<DetailsForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _titleController,
-              textInputAction: TextInputAction.next,
-              style: Theme.of(context).textTheme.headline4,
-              decoration: InputDecoration(
-                hintText: 'Title',
-                hintStyle: TextStyle(color: Colors.grey),
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-              ),
-            ),
-            Expanded(
-              child: TextFormField(
-                maxLines: null,
-                style: Theme.of(context).textTheme.bodyText1,
+    return BlocListener<GithubCubit, GithubState>(
+      listener: (context, state) {
+        if (state.error) {
+          final snackBar = SnackBar(
+            content: Text('Error with Github integration.'),
+            duration: Duration(seconds: 1),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        }
+      },
+      child: Form(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _titleController,
+                textInputAction: TextInputAction.next,
+                style: Theme.of(context).textTheme.headline4,
                 decoration: InputDecoration(
-                  hintText: 'Description',
+                  hintText: 'Title',
                   hintStyle: TextStyle(color: Colors.grey),
                   border: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,
                 ),
-                keyboardType: TextInputType.multiline,
-                controller: _textController,
-                // expands: true,
               ),
-            ),
-          ],
+              Expanded(
+                child: TextFormField(
+                  maxLines: null,
+                  style: Theme.of(context).textTheme.bodyText1,
+                  decoration: InputDecoration(
+                    hintText: 'Description',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                  ),
+                  keyboardType: TextInputType.multiline,
+                  controller: _textController,
+                  // expands: true,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
