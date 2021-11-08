@@ -20,7 +20,7 @@ void main() async {
         : await getApplicationDocumentsDirectory(),
   );
 
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: "assets/.env");
   await GetStorage.init();
   runApp(App());
 }
