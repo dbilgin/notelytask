@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
@@ -63,10 +64,40 @@ class _GithubPageState extends State<GithubPage> {
               deviceCode != null &&
               userCode != null &&
               verificationUri != null) {
+            void onCopyPressed() {
+              Clipboard.setData(ClipboardData(text: userCode));
+              final snackBar = SnackBar(
+                content: Text('Copied!'),
+                duration: Duration(seconds: 1),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            }
+
             children = [
-              Text('Your access code'),
-              Text(userCode),
-              Text('Activation Link'),
+              Text(
+                'Your access code',
+                style: Theme.of(context).textTheme.bodyText1,
+              ),
+              Row(
+                children: [
+                  SelectableText(
+                    userCode,
+                    style: Theme.of(context).textTheme.bodyText1,
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.copy,
+                      color: const Color(0xff2e8fff),
+                    ),
+                    tooltip: 'Copy Code',
+                    onPressed: onCopyPressed,
+                  ),
+                ],
+              ),
+              Text(
+                'Activation Link',
+                style: Theme.of(context).textTheme.bodyText1,
+              ),
               GestureDetector(
                 child: Text(
                   verificationUri,
@@ -86,31 +117,67 @@ class _GithubPageState extends State<GithubPage> {
             ];
           } else if (state.accessToken != null) {
             children = [
-              Text('Connected to GitHub'),
-              TextField(
-                controller: repoUrlController,
-                onChanged: (value) => setState(() => localRepoUrl = value),
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'owner/repo',
+              Text(
+                'Connected to GitHub',
+                style: Theme.of(context).textTheme.bodyText1,
+              ),
+              SizedBox(
+                height: 50.0,
+                width: MediaQuery.of(context).size.width - 100,
+                child: TextField(
+                  controller: repoUrlController,
+                  onChanged: (value) => setState(() => localRepoUrl = value),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'owner/repo',
+                  ),
                 ),
               ),
               ElevatedButton(
                 onPressed: localRepoUrl == state.ownerRepo
                     ? null
                     : () => saveRepoUrl(repoUrlController.text),
+                style: ElevatedButton.styleFrom(
+                  onSurface: Colors.grey,
+                ),
                 child: Text('Save Repo'),
               ),
             ];
           }
 
-          return Column(children: [
-            ...children,
-            ElevatedButton(
-              onPressed: () => context.read<GithubCubit>().reset(),
-              child: Text('Reset Github Connection'),
+          return BlocListener<GithubCubit, GithubState>(
+            listener: (context, state) {
+              if (state.error && repoUrlController.text.isNotEmpty) {
+                final snackBar = SnackBar(
+                  content: Text('Error integrating repository.'),
+                  duration: Duration(seconds: 1),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                repoUrlController.text = '';
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  runAlignment: WrapAlignment.center,
+                  direction: Axis.vertical,
+                  runSpacing: 24.0,
+                  spacing: 12.0,
+                  children: [
+                    ...children,
+                    ElevatedButton(
+                      onPressed: () => context.read<GithubCubit>().reset(),
+                      child: Text('Reset Github Connection'),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ]);
+          );
         },
       ),
     );

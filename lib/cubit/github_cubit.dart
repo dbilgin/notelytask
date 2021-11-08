@@ -44,19 +44,20 @@ class GithubCubit extends HydratedCubit<GithubState> {
       reset();
       return;
     }
-    emit(state.copyWith(loading: true));
+    emit(state.copyWith(loading: true, error: false));
 
     final existingFile = await githubRepository.getExistingNoteFile(
       ownerRepo,
       accessToken,
     );
+
     emit(state.copyWith(
       ownerRepo: ownerRepo,
       sha: existingFile?.sha,
     ));
 
     if (keepLocal || existingFile?.sha == null) {
-      await createOrUpdateRemoteNotes();
+      await createOrUpdateRemoteNotes(shouldResetIfError: false);
     } else {
       final finalContent = existingFile?.content;
       notesCubit
@@ -66,7 +67,9 @@ class GithubCubit extends HydratedCubit<GithubState> {
     emit(state.copyWith(loading: false));
   }
 
-  Future<void> createOrUpdateRemoteNotes() async {
+  Future<void> createOrUpdateRemoteNotes({
+    bool shouldResetIfError = true,
+  }) async {
     final ownerRepo = state.ownerRepo;
     final sha = state.sha;
     final accessToken = state.accessToken;
@@ -84,8 +87,10 @@ class GithubCubit extends HydratedCubit<GithubState> {
 
     if (newNote != null && newNote.sha != null) {
       emit(state.copyWith(sha: newNote.sha));
-    } else {
+    } else if (shouldResetIfError) {
       reset();
+    } else {
+      emit(state.copyWith(error: true, ownerRepo: ''));
     }
 
     emit(state.copyWith(loading: false));
