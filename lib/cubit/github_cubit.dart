@@ -112,9 +112,9 @@ class GithubCubit extends HydratedCubit<GithubState> {
     );
   }
 
-  Future<void> getAccessToken(String deviceCode) async {
+  Future<void> getAccessToken(String code) async {
     emit(state.copyWith(
-        accessToken: await githubRepository.getAccessToken(deviceCode)));
+        accessToken: await githubRepository.getAccessToken(code)));
   }
 
   @override

@@ -66,14 +66,19 @@ jobs:
         inAppUpdatePriority: 5
         whatsNewDirectory: whatsNewDirectory
 
+    - name: Build Mac Release
+      run: flutter build macos
+
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: dbilgin/notelytask
       with:
         tag_name: ${{ steps.previoustag.outputs.tag }}
         release_name: ${{ steps.previoustag.outputs.tag }}
         body_path: whatsNewDirectory/whatsnew-en-US
         draft: false
-        prerelease: true
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}
+        files: build/macos/Build/Products/Release/NotelyTask.app

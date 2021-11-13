@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
@@ -138,18 +139,29 @@ class GithubRepository {
     }
   }
 
-  Future<String?> getAccessToken(String deviceCode) async {
-    try {
-      final url = Uri.https(
+  Future<String?> getAccessToken(String code) async {
+    Uri? url;
+    if (kIsWeb) {
+      url = Uri.https(
+        'us-central1-notelytask.cloudfunctions.net',
+        '/accessToken',
+        {
+          'client_id': dotenv.env['GITHUB_CLIENT_ID'],
+          'code': code,
+        },
+      );
+    } else {
+      url = Uri.https(
         'github.com',
         '/login/oauth/access_token',
         {
           'client_id': dotenv.env['GITHUB_CLIENT_ID'],
-          'device_code': deviceCode,
+          'device_code': code,
           'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
         },
       );
-
+    }
+    try {
       var response = await post(url, headers: {'Accept': 'application/json'});
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
