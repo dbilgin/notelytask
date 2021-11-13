@@ -84,4 +84,4 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
-        files: build/macos/Build/Products/Release/NotelyTask.app
+        files: build/macos/Build/Products/Release/*.app
