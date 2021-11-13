@@ -8,7 +8,6 @@ import 'package:notelytask/cubit/selected_note_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notelytask/screens/details_page.dart';
 import 'package:notelytask/utils.dart';
 
 class NoteList extends StatelessWidget {
@@ -29,9 +28,13 @@ class NoteList extends StatelessWidget {
 
     void _navigateToDetails({note}) {
       if (isSmallScreen(context)) {
-        context
-            .read<NavigatorCubit>()
-            .push(Scaffold(body: DetailsPage(note: note)));
+        context.read<NavigatorCubit>().pushNamed(
+              '/details',
+              arguments: DetailNavigationParameters(
+                note: note,
+                withAppBar: true,
+              ),
+            );
       } else {
         context.read<SelectedNoteCubit>().setNote(note);
       }

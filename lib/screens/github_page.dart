@@ -1,13 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class GithubPage extends StatefulWidget {
-  const GithubPage({Key? key}) : super(key: key);
+  const GithubPage({Key? key, this.code}) : super(key: key);
+  final String? code;
 
   @override
   _GithubPageState createState() => _GithubPageState();
@@ -19,6 +22,11 @@ class _GithubPageState extends State<GithubPage> {
 
   @override
   void initState() {
+    final ghCode = widget.code;
+    if (ghCode != null) {
+      context.read<GithubCubit>().getAccessToken(ghCode);
+    }
+
     repoUrlController.text = context.read<GithubCubit>().state.ownerRepo ?? '';
     localRepoUrl = repoUrlController.text;
     super.initState();
@@ -39,6 +47,27 @@ class _GithubPageState extends State<GithubPage> {
     );
   }
 
+  Future<void> _startConnectionToGithub() async {
+    if (kIsWeb) {
+      final url = Uri.https(
+        'github.com',
+        '/login/oauth/authorize',
+        {
+          'client_id': dotenv.env['GITHUB_CLIENT_ID'],
+          'scope': 'repo',
+        },
+      );
+      if (await canLaunch(url.toString())) {
+        launch(
+          url.toString(),
+          webOnlyWindowName: '_self',
+        );
+      }
+    } else {
+      await context.read<GithubCubit>().launchLogin();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,8 +84,7 @@ class _GithubPageState extends State<GithubPage> {
           if (state.accessToken == null && deviceCode == null) {
             children = [
               ElevatedButton(
-                onPressed: () async =>
-                    await context.read<GithubCubit>().launchLogin(),
+                onPressed: _startConnectionToGithub,
                 child: Text('Connect to Github'),
               ),
             ];

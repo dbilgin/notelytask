@@ -5,12 +5,16 @@ import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
 import 'package:notelytask/repository/github_repository.dart';
+import 'package:notelytask/screens/details_page.dart';
+import 'package:notelytask/screens/github_page.dart';
 import 'package:notelytask/screens/home_page.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'util/configure_nonweb.dart'
+    if (dart.library.html) 'util/configure_web.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +26,9 @@ void main() async {
 
   await dotenv.load(fileName: "assets/.env");
   await GetStorage.init();
+
+  configureApp();
+
   runApp(App());
 }
 
@@ -92,8 +99,39 @@ class App extends StatelessWidget {
                 caption: TextStyle(color: Colors.white),
               ),
             ),
-            home: HomePage(),
             navigatorKey: _navigatorKey,
+            initialRoute: '/',
+            onGenerateRoute: (RouteSettings settings) {
+              final settingsUri = Uri.parse(settings.name ?? '/');
+              final ghUserCode = settingsUri.queryParameters['code'];
+
+              var routes = <String, WidgetBuilder>{
+                '/': (context) => HomePage(),
+                '/github': (context) => GithubPage(code: ghUserCode),
+                '/details': (context) => Scaffold(
+                      body: DetailsPage(
+                        note: (settings.arguments as DetailNavigationParameters)
+                            .note,
+                        withAppBar:
+                            (settings.arguments as DetailNavigationParameters)
+                                .withAppBar,
+                      ),
+                    ),
+              };
+
+              if (routes[settingsUri.path] == null) {
+                return MaterialPageRoute(
+                  settings: RouteSettings(name: '/'),
+                  builder: (context) => HomePage(),
+                );
+              } else {
+                WidgetBuilder builder = routes[settingsUri.path]!;
+                return MaterialPageRoute(
+                  settings: RouteSettings(name: settingsUri.toString()),
+                  builder: (ctx) => builder(ctx),
+                );
+              }
+            },
           ),
         ),
       ),
