@@ -54,6 +54,9 @@ jobs:
     # Statically analyze the Dart code for any errors.
     - run: flutter analyze .
 
+    - name: Enable Mac Builds
+      run: flutter config --enable-macos-desktop
+
     - name: Build Mac Release
       run: flutter build macos
 
