@@ -60,20 +60,6 @@ jobs:
     - name: Build Mac Release
       run: flutter build macos
 
-    # - name: Create Release New
-    #   id: create_release
-    #   uses: softprops/action-gh-release@v1
-    #   env:
-    #     GITHUB_REPOSITORY: dbilgin/notelytask
-    #   with:
-    #     tag_name: ${{ steps.previoustag.outputs.tag }}
-    #     name: ${{ steps.previoustag.outputs.tag }}
-    #     body_path: whatsNewDirectory/whatsnew-en-US
-    #     draft: false
-    #     prerelease: false
-    #     token: ${{ secrets.GITHUB_TOKEN }}
-    #     files: ./build/macos/Build/Products/Release/NotelyTask.app
-
     # - name: Build Release
     #   run: flutter build appbundle
 
@@ -86,20 +72,33 @@ jobs:
     #     inAppUpdatePriority: 5
     #     whatsNewDirectory: whatsNewDirectory
 
-    - name: Create Release
+    # - name: Create Release
+    #   id: create_release
+    #   uses: actions/create-release@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     tag_name: ${{ steps.previoustag.outputs.tag }}
+    #     release_name: ${{ steps.previoustag.outputs.tag }}
+    #     body_path: whatsNewDirectory/whatsnew-en-US
+    #     draft: false
+    #     prerelease: false
+
+    - uses: papeloto/action-zip@v1
+      with:
+        files: build/macos/Build/Products/Release/NotelyTask.app
+        dest: NotelyTask.app.zip
+
+    - name: Create Release New
       id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: dbilgin/notelytask
       with:
         tag_name: ${{ steps.previoustag.outputs.tag }}
-        release_name: ${{ steps.previoustag.outputs.tag }}
+        name: ${{ steps.previoustag.outputs.tag }}
         body_path: whatsNewDirectory/whatsnew-en-US
         draft: false
         prerelease: false
-
-    - uses: AButler/upload-release-assets@v2.0
-      with:
-        files: 'build/macos/Build/Products/Release/*.app'
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        release-tag: ${{ steps.previoustag.outputs.tag }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        files: build/macos/Build/Products/Release/NotelyTask.app.zip
