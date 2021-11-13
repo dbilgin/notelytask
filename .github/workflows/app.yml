@@ -60,6 +60,8 @@ jobs:
     - name: Build Mac Release
       run: flutter build macos
 
+    - run: cd build/macos/Build/Products/Release && ls -lf
+
     - name: Build Release
       run: flutter build appbundle
 
