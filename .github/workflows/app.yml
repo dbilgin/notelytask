@@ -54,35 +54,11 @@ jobs:
     # Statically analyze the Dart code for any errors.
     - run: flutter analyze .
 
-    - name: Build Release
-      run: flutter build appbundle
-
-    - uses: r0adkll/upload-google-play@v1.0.15
-      with:
-        serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-        packageName: com.omedacore.notelytask
-        releaseFiles: build/app/outputs/bundle/release/app-release.aab
-        track: internal
-        inAppUpdatePriority: 5
-        whatsNewDirectory: whatsNewDirectory
-
     - name: Enable Mac Builds
       run: flutter config --enable-macos-desktop
 
     - name: Build Mac Release
       run: flutter build macos
-
-    # - name: Build Release
-    #   run: flutter build appbundle
-
-    # - uses: r0adkll/upload-google-play@v1.0.15
-    #   with:
-    #     serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-    #     packageName: com.omedacore.notelytask
-    #     releaseFiles: build/app/outputs/bundle/release/app-release.aab
-    #     track: internal
-    #     inAppUpdatePriority: 5
-    #     whatsNewDirectory: whatsNewDirectory
 
     # - name: Create Release New
     #   id: create_release
@@ -97,6 +73,18 @@ jobs:
     #     prerelease: false
     #     token: ${{ secrets.GITHUB_TOKEN }}
     #     files: ./build/macos/Build/Products/Release/NotelyTask.app
+
+    # - name: Build Release
+    #   run: flutter build appbundle
+
+    # - uses: r0adkll/upload-google-play@v1.0.15
+    #   with:
+    #     serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+    #     packageName: com.omedacore.notelytask
+    #     releaseFiles: build/app/outputs/bundle/release/app-release.aab
+    #     track: internal
+    #     inAppUpdatePriority: 5
+    #     whatsNewDirectory: whatsNewDirectory
 
     - name: Create Release
       id: create_release
