@@ -1,4 +1,4 @@
-name: Android CI
+name: Application CI
 
 # This workflow is triggered on pushes to the repository.
 
