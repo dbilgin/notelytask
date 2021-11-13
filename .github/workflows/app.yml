@@ -79,7 +79,7 @@ jobs:
         GITHUB_REPOSITORY: dbilgin/notelytask
       with:
         tag_name: ${{ steps.previoustag.outputs.tag }}
-        release_name: ${{ steps.previoustag.outputs.tag }}
+        name: ${{ steps.previoustag.outputs.tag }}
         body_path: whatsNewDirectory/whatsnew-en-US
         draft: false
         prerelease: false
