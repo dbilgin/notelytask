@@ -96,12 +96,10 @@ jobs:
         release_name: ${{ steps.previoustag.outputs.tag }}
         body_path: whatsNewDirectory/whatsnew-en-US
         draft: false
-        prerelease: true
+        prerelease: false
 
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@v2
+    - uses: AButler/upload-release-assets@v2.0
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: build/macos/Build/Products/Release/NotelyTask.app
-        tag: ${{ steps.previoustag.outputs.tag }}
-        overwrite: true
+        files: 'build/macos/Build/Products/Release/*.app'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        release-tag: ${{ steps.previoustag.outputs.tag }}
