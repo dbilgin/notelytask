@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     # This job will run on ubuntu virtual machine
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
 
     # Setup Java environment in order to build the Android app.
@@ -54,6 +54,18 @@ jobs:
     # Statically analyze the Dart code for any errors.
     - run: flutter analyze .
 
+    - name: Build Release
+      run: flutter build appbundle
+
+    - uses: r0adkll/upload-google-play@v1.0.15
+      with:
+        serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+        packageName: com.omedacore.notelytask
+        releaseFiles: build/app/outputs/bundle/release/app-release.aab
+        track: internal
+        inAppUpdatePriority: 5
+        whatsNewDirectory: whatsNewDirectory
+
     - name: Enable Mac Builds
       run: flutter config --enable-macos-desktop
 
@@ -72,16 +84,36 @@ jobs:
     #     inAppUpdatePriority: 5
     #     whatsNewDirectory: whatsNewDirectory
 
+    # - name: Create Release New
+    #   id: create_release
+    #   uses: softprops/action-gh-release@v1
+    #   env:
+    #     GITHUB_REPOSITORY: dbilgin/notelytask
+    #   with:
+    #     tag_name: ${{ steps.previoustag.outputs.tag }}
+    #     name: ${{ steps.previoustag.outputs.tag }}
+    #     body_path: whatsNewDirectory/whatsnew-en-US
+    #     draft: false
+    #     prerelease: false
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    #     files: ./build/macos/Build/Products/Release/NotelyTask.app
+
     - name: Create Release
       id: create_release
-      uses: softprops/action-gh-release@v1
+      uses: actions/create-release@v1
       env:
-        GITHUB_REPOSITORY: dbilgin/notelytask
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.previoustag.outputs.tag }}
-        name: ${{ steps.previoustag.outputs.tag }}
+        release_name: ${{ steps.previoustag.outputs.tag }}
         body_path: whatsNewDirectory/whatsnew-en-US
         draft: false
-        prerelease: false
-        token: ${{ secrets.GITHUB_TOKEN }}
-        files: ./build/macos/Build/Products/Release/NotelyTask.app
+        prerelease: true
+
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: build/macos/Build/Products/Release/NotelyTask.app
+        tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
