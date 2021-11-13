@@ -54,6 +54,9 @@ jobs:
     # Statically analyze the Dart code for any errors.
     - run: flutter analyze .
 
+    - name: Build Mac Release
+      run: flutter build macos
+
     - name: Build Release
       run: flutter build appbundle
 
@@ -65,9 +68,6 @@ jobs:
         track: internal
         inAppUpdatePriority: 5
         whatsNewDirectory: whatsNewDirectory
-
-    - name: Build Mac Release
-      run: flutter build macos
 
     - name: Create Release
       id: create_release
