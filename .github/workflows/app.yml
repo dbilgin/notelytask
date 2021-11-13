@@ -72,14 +72,13 @@ jobs:
     #     draft: false
     #     prerelease: false
 
+    - name: Setup Files For Zipping
+      run: cd build/macos/Build/Products/Release && mkdir NotelyTask && mv NotelyTask.app NotelyTask
+
     - uses: papeloto/action-zip@v1
       with:
-        files: build/macos/Build/Products/Release/NotelyTask.app
-        dest: NotelyTask.app.zip
-
-    - run: ls -lf
-
-    - run: cd build/macos/Build/Products/Release && ls -lf
+        files: build/macos/Build/Products/Release/NotelyTask
+        dest: NotelyTask.zip
 
     # - name: Build Release
     #   run: flutter build appbundle
