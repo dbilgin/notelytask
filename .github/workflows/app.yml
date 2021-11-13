@@ -104,4 +104,4 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
-        files: NotelyTask.app.zip
+        files: NotelyTask.zip
