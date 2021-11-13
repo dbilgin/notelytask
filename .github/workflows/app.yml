@@ -11,8 +11,8 @@ on:
 
 jobs:
   build:
-    # This job will run on ubuntu virtual machine
-    runs-on: ubuntu-latest
+    # This job will run on macos virtual machine
+    runs-on: macos-latest
     steps:
 
     # Setup Java environment in order to build the Android app.
