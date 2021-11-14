@@ -14,8 +14,6 @@ jobs:
     # This job will run on macos virtual machine
     runs-on: macos-latest
     steps:
-    - run: sudo chmod
-
     # Setup Java environment in order to build the Android app.
     - uses: actions/checkout@v1
     - run: echo "${{ secrets.ENV_FILE }}" | base64 --decode > assets/.env
