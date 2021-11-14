@@ -110,11 +110,13 @@ class App extends StatelessWidget {
                 '/github': (context) => GithubPage(code: ghUserCode),
                 '/details': (context) => Scaffold(
                       body: DetailsPage(
-                        note: (settings.arguments as DetailNavigationParameters)
-                            .note,
+                        note:
+                            (settings.arguments as DetailNavigationParameters?)
+                                ?.note,
                         withAppBar:
-                            (settings.arguments as DetailNavigationParameters)
-                                .withAppBar,
+                            (settings.arguments as DetailNavigationParameters?)
+                                    ?.withAppBar ??
+                                true,
                       ),
                     ),
               };

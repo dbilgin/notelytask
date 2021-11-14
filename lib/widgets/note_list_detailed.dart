@@ -14,23 +14,24 @@ class NoteListDetailed extends StatefulWidget {
 }
 
 class _NoteListDetailedState extends State<NoteListDetailed> {
-  _tap({Note? note}) {
-    context.read<SelectedNoteCubit>().setNote(note);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: NoteList(notes: widget.notes, onTap: _tap),
+          child: NoteList(notes: widget.notes),
           flex: 1,
         ),
         BlocBuilder<SelectedNoteCubit, Note?>(
-          builder: (context, Note? state) => Expanded(
-            child: DetailsPage(note: state),
-            flex: 3,
-          ),
+          builder: (context, Note? state) {
+            return Expanded(
+              child: DetailsPage(
+                note: state,
+                withAppBar: false,
+              ),
+              flex: 3,
+            );
+          },
         ),
       ],
     );

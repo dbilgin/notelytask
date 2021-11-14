@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/utils.dart';
@@ -14,16 +13,6 @@ class NoteListLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void _navigateToDetails({note}) {
-      context.read<NavigatorCubit>().pushNamed(
-            '/details',
-            arguments: DetailNavigationParameters(
-              note: note,
-              withAppBar: true,
-            ),
-          );
-    }
-
     return BlocBuilder<NotesCubit, List<Note>>(
       builder: (context, List<Note> state) {
         var filteredNotes =
@@ -32,7 +21,6 @@ class NoteListLayout extends StatelessWidget {
         if (isSmallScreen(context)) {
           return NoteList(
             notes: filteredNotes,
-            onTap: _navigateToDetails,
           );
         } else {
           return NoteListDetailed(notes: filteredNotes);
