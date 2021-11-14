@@ -15,8 +15,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool smallScreen = false;
+
   @override
   void initState() {
+    smallScreen = isSmallScreen(context);
     context.read<GithubCubit>().getAndUpdateNotes();
     super.initState();
   }
@@ -41,6 +44,12 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var smallScreenCheck = isSmallScreen(context);
+    if (smallScreenCheck != smallScreen) {
+      setState(() => smallScreen = smallScreenCheck);
+      context.read<GithubCubit>().getAndUpdateNotes();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('NotelyTask'),
