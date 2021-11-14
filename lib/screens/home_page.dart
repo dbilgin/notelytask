@@ -15,14 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool smallScreen = false;
-
-  @override
-  void initState() {
-    smallScreen = isSmallScreen(context);
-    context.read<GithubCubit>().getAndUpdateNotes();
-    super.initState();
-  }
+  bool? smallScreen;
 
   void _navigateToDetails({note}) {
     if (isSmallScreen(context)) {
@@ -45,7 +38,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     var smallScreenCheck = isSmallScreen(context);
-    if (smallScreenCheck != smallScreen) {
+    if (smallScreen == null || smallScreenCheck != smallScreen) {
       setState(() => smallScreen = smallScreenCheck);
       context.read<GithubCubit>().getAndUpdateNotes();
     }
