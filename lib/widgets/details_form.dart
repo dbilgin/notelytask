@@ -40,16 +40,16 @@ class _DetailsFormState extends State<DetailsForm> {
     context.read<NotesCubit>().setNote(note);
     context.read<SelectedNoteCubit>().setNote(note);
 
-    _titleController.addListener(_submit);
-    _textController.addListener(_submit);
+    // _titleController.addListener(_submit);
+    // _textController.addListener(_submit);
     super.initState();
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
-    _titleController.dispose();
-    _textController.dispose();
+    // _titleController.dispose();
+    // _textController.dispose();
     super.dispose();
   }
 
@@ -96,6 +96,7 @@ class _DetailsFormState extends State<DetailsForm> {
           child: Column(
             children: [
               TextFormField(
+                onChanged: (text) => _submit(),
                 controller: _titleController,
                 textInputAction: TextInputAction.next,
                 style: Theme.of(context).textTheme.headline4,
@@ -109,6 +110,7 @@ class _DetailsFormState extends State<DetailsForm> {
               ),
               Expanded(
                 child: TextFormField(
+                  onChanged: (text) => _submit(),
                   maxLines: null,
                   style: Theme.of(context).textTheme.bodyText1,
                   decoration: InputDecoration(

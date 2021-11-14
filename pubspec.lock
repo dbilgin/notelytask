@@ -229,7 +229,7 @@ packages:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "7.0.0"
+    version: "7.3.3"
   flutter_dotenv:
     dependency: "direct main"
     description:
@@ -316,7 +316,7 @@ packages:
       name: hydrated_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "7.0.0"
+    version: "7.1.0"
   image:
     dependency: transitive
     description:
@@ -484,7 +484,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.0"
+    version: "6.0.1"
   pub_semver:
     dependency: transitive
     description:
