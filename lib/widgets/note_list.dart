@@ -12,8 +12,7 @@ import 'package:notelytask/utils.dart';
 
 class NoteList extends StatelessWidget {
   final List<Note> notes;
-  final Function({Note note}) onTap;
-  NoteList({required this.notes, required this.onTap});
+  NoteList({required this.notes});
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +34,9 @@ class NoteList extends StatelessWidget {
                 withAppBar: true,
               ),
             );
-      } else {
-        context.read<SelectedNoteCubit>().setNote(note);
       }
+
+      context.read<SelectedNoteCubit>().setNote(note);
     }
 
     return BlocListener<GithubCubit, GithubState>(
@@ -67,7 +66,7 @@ class NoteList extends StatelessWidget {
                 return Dismissible(
                   key: ValueKey<int>(notes[index].date.millisecondsSinceEpoch),
                   child: ListTile(
-                    onTap: () => onTap(note: notes[index]),
+                    onTap: () => _navigateToDetails(note: notes[index]),
                     title: Text(notes[index].title),
                     subtitle: Text(
                       notes[index].text,

@@ -5,8 +5,8 @@ import 'package:notelytask/widgets/details_form.dart';
 
 class DetailsPage extends StatefulWidget {
   final Note? note;
-  final bool? withAppBar;
-  DetailsPage({this.note, this.withAppBar});
+  final bool withAppBar;
+  DetailsPage({this.note, required this.withAppBar});
 
   @override
   _DetailsPageState createState() => _DetailsPageState();
@@ -19,7 +19,7 @@ class _DetailsPageState extends State<DetailsPage> {
       child: DetailsForm(key: Key(widget.note?.id ?? 'new'), note: widget.note),
     );
 
-    if (widget.withAppBar ?? false) {
+    if (widget.withAppBar) {
       return Scaffold(
         appBar: AppBar(),
         body: layout,
