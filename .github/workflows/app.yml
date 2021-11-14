@@ -73,7 +73,11 @@ jobs:
     #     prerelease: false
 
     - name: Setup Files For Zipping
-      run: cd build/macos/Build/Products/Release && mkdir NotelyTask && mv NotelyTask.app NotelyTask
+      run:  |
+        cd build/macos/Build/Products/Release
+        sudo chmod -R 755 NotelyTask.app
+        mkdir NotelyTask
+        mv NotelyTask.app NotelyTask
 
     - uses: papeloto/action-zip@v1
       with:
