@@ -19,9 +19,7 @@ class NoteListLayout extends StatelessWidget {
             state.where((element) => element.isDeleted == deletedList).toList();
 
         if (isSmallScreen(context)) {
-          return NoteList(
-            notes: filteredNotes,
-          );
+          return NoteList(notes: filteredNotes);
         } else {
           return NoteListDetailed(notes: filteredNotes);
         }
