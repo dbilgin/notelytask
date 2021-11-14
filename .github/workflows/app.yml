@@ -59,22 +59,9 @@ jobs:
     - name: Build Mac Release
       run: flutter build macos
 
-    # - name: Create Release
-    #   id: create_release
-    #   uses: actions/create-release@v1
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     tag_name: ${{ steps.previoustag.outputs.tag }}
-    #     release_name: ${{ steps.previoustag.outputs.tag }}
-    #     body_path: whatsNewDirectory/whatsnew-en-US
-    #     draft: false
-    #     prerelease: false
-
     - name: Setup Files For Zipping
       run:  |
         cd build/macos/Build/Products/Release
-        sudo chmod -R 755 NotelyTask.app
         mkdir NotelyTask
         mv NotelyTask.app NotelyTask
 
@@ -83,17 +70,17 @@ jobs:
         files: build/macos/Build/Products/Release/NotelyTask
         dest: NotelyTask.zip
 
-    # - name: Build Release
-    #   run: flutter build appbundle
+    - name: Build Release
+      run: flutter build appbundle
 
-    # - uses: r0adkll/upload-google-play@v1.0.15
-    #   with:
-    #     serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-    #     packageName: com.omedacore.notelytask
-    #     releaseFiles: build/app/outputs/bundle/release/app-release.aab
-    #     track: internal
-    #     inAppUpdatePriority: 5
-    #     whatsNewDirectory: whatsNewDirectory
+    - uses: r0adkll/upload-google-play@v1.0.15
+      with:
+        serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+        packageName: com.omedacore.notelytask
+        releaseFiles: build/app/outputs/bundle/release/app-release.aab
+        track: internal
+        inAppUpdatePriority: 5
+        whatsNewDirectory: whatsNewDirectory
 
     - name: Create Release New
       id: create_release
