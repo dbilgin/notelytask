@@ -5,8 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
-import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/utils.dart';
+import 'package:notelytask/widgets/github_loader.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
 
 class HomePage extends StatefulWidget {
@@ -54,11 +54,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         bottom: PreferredSize(
-          child: BlocBuilder<GithubCubit, GithubState>(
-            builder: (context, state) => state.loading
-                ? LinearProgressIndicator(minHeight: 1)
-                : Container(),
-          ),
+          child: GithubLoader(),
           preferredSize: Size(double.infinity, 0),
         ),
       ),
