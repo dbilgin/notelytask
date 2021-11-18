@@ -7,7 +7,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NoteListDetailed extends StatefulWidget {
   final List<Note> notes;
-  NoteListDetailed({required this.notes});
+  final bool isDeletedList;
+  NoteListDetailed({
+    required this.notes,
+    required this.isDeletedList,
+  });
 
   @override
   _NoteListDetailedState createState() => _NoteListDetailedState();
@@ -19,7 +23,10 @@ class _NoteListDetailedState extends State<NoteListDetailed> {
     return Row(
       children: [
         Expanded(
-          child: NoteList(notes: widget.notes),
+          child: NoteList(
+            notes: widget.notes,
+            isDeletedList: widget.isDeletedList,
+          ),
           flex: 1,
         ),
         BlocBuilder<SelectedNoteCubit, Note?>(
@@ -28,6 +35,7 @@ class _NoteListDetailedState extends State<NoteListDetailed> {
               child: DetailsPage(
                 note: state,
                 withAppBar: false,
+                isDeletedList: widget.isDeletedList,
               ),
               flex: 3,
             );

@@ -19,5 +19,6 @@ class NavigatorCubit extends Cubit<dynamic> {
 class DetailNavigationParameters {
   final Note? note;
   final bool? withAppBar;
-  DetailNavigationParameters({this.note, this.withAppBar});
+  final bool? isDeletedList;
+  DetailNavigationParameters({this.note, this.withAppBar, this.isDeletedList});
 }

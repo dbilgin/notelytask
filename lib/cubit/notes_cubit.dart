@@ -35,6 +35,14 @@ class NotesCubit extends HydratedCubit<List<Note>> {
     emit([...state]);
   }
 
+  void restoreNote(Note note) {
+    var index = state.indexWhere((element) => element.id == note.id);
+    note.isDeleted = false;
+    state[index] = note;
+
+    emit([...state]);
+  }
+
   @override
   List<Note> fromJson(Map<String, dynamic> json) {
     return List<Note>.from(

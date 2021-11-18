@@ -7,7 +7,12 @@ import 'package:notelytask/widgets/github_loader.dart';
 class DetailsPage extends StatefulWidget {
   final Note? note;
   final bool withAppBar;
-  DetailsPage({this.note, required this.withAppBar});
+  final bool isDeletedList;
+  DetailsPage({
+    this.note,
+    required this.withAppBar,
+    required this.isDeletedList,
+  });
 
   @override
   _DetailsPageState createState() => _DetailsPageState();
@@ -17,7 +22,11 @@ class _DetailsPageState extends State<DetailsPage> {
   @override
   Widget build(BuildContext context) {
     var layout = SafeArea(
-      child: DetailsForm(key: Key(widget.note?.id ?? 'new'), note: widget.note),
+      child: DetailsForm(
+        key: Key((widget.note?.id ?? 'new')),
+        note: widget.note,
+        isDeletedList: widget.isDeletedList,
+      ),
     );
 
     if (widget.withAppBar) {
