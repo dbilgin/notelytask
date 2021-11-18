@@ -17,22 +17,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool? smallScreen;
 
-  void _navigateToDetails({note}) {
-    if (isSmallScreen(context)) {
-      context.read<NavigatorCubit>().pushNamed(
-            '/details',
-            arguments: DetailNavigationParameters(
-              note: note,
-              withAppBar: true,
-            ),
-          );
-    } else {
-      context.read<SelectedNoteCubit>().setNote(note);
-    }
-  }
-
   void _navigateToLogin() {
     context.read<NavigatorCubit>().pushNamed('/github');
+  }
+
+  void _navigateToDeletedList() {
+    context.read<SelectedNoteCubit>().setNote(null);
+    context.read<NavigatorCubit>().pushNamed('/deleted_list');
   }
 
   @override
@@ -40,6 +31,7 @@ class _HomePageState extends State<HomePage> {
     var smallScreenCheck = isSmallScreen(context);
     if (smallScreen == null || smallScreenCheck != smallScreen) {
       setState(() => smallScreen = smallScreenCheck);
+      context.read<SelectedNoteCubit>().setNote(null);
       context.read<GithubCubit>().getAndUpdateNotes();
     }
 
@@ -47,6 +39,11 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text('NotelyTask'),
         actions: [
+          IconButton(
+            icon: Icon(Icons.delete_rounded),
+            tooltip: 'Deleted Notes',
+            onPressed: _navigateToDeletedList,
+          ),
           IconButton(
             icon: Image.asset('assets/github.png'),
             tooltip: 'Github Integration',
@@ -61,7 +58,10 @@ class _HomePageState extends State<HomePage> {
       body: NoteListLayout(),
       floatingActionButton: !kIsWeb
           ? FloatingActionButton(
-              onPressed: _navigateToDetails,
+              onPressed: () => navigateToDetails(
+                context: context,
+                isDeletedList: false,
+              ),
               tooltip: 'Add New Note',
               child: Icon(Icons.add),
             )

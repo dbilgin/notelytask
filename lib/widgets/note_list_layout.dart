@@ -8,20 +8,34 @@ import 'package:notelytask/widgets/note_list_detailed.dart';
 import 'package:notelytask/widgets/note_list.dart';
 
 class NoteListLayout extends StatelessWidget {
-  final bool deletedList;
-  NoteListLayout({this.deletedList = false});
+  final bool isDeletedList;
+  NoteListLayout({this.isDeletedList = false});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NotesCubit, List<Note>>(
       builder: (context, List<Note> state) {
-        var filteredNotes =
-            state.where((element) => element.isDeleted == deletedList).toList();
+        var filteredNotes = state
+            .where((element) => element.isDeleted == isDeletedList)
+            .toList();
 
-        if (isSmallScreen(context)) {
-          return NoteList(notes: filteredNotes);
+        if (isDeletedList && filteredNotes.length == 0) {
+          return Center(
+            child: Text(
+              'Nothing to see here',
+              style: Theme.of(context).textTheme.headline6,
+            ),
+          );
+        } else if (isSmallScreen(context)) {
+          return NoteList(
+            notes: filteredNotes,
+            isDeletedList: isDeletedList,
+          );
         } else {
-          return NoteListDetailed(notes: filteredNotes);
+          return NoteListDetailed(
+            notes: filteredNotes,
+            isDeletedList: isDeletedList,
+          );
         }
       },
     );

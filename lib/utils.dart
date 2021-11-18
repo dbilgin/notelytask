@@ -3,9 +3,30 @@ import 'package:flutter/widgets.dart';
 import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'cubit/selected_note_cubit.dart';
+import 'models/note.dart';
+
 bool isSmallScreen(BuildContext context) {
   MediaQueryData queryData = MediaQuery.of(context);
   return queryData.size.width <= 500;
+}
+
+void navigateToDetails({
+  required BuildContext context,
+  required bool isDeletedList,
+  Note? note,
+}) {
+  if (isSmallScreen(context)) {
+    context.read<NavigatorCubit>().pushNamed(
+          '/details',
+          arguments: DetailNavigationParameters(
+            note: note,
+            withAppBar: true,
+            isDeletedList: isDeletedList,
+          ),
+        );
+  }
+  context.read<SelectedNoteCubit>().setNote(note);
 }
 
 void saveToRepoAlert({

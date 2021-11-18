@@ -13,6 +13,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'screens/deleted_list_page.dart';
 import 'util/configure_nonweb.dart'
     if (dart.library.html) 'util/configure_web.dart';
 
@@ -107,6 +108,7 @@ class App extends StatelessWidget {
 
               var routes = <String, WidgetBuilder>{
                 '/': (context) => HomePage(),
+                '/deleted_list': (context) => DeletedListPage(),
                 '/github': (context) => GithubPage(code: ghUserCode),
                 '/details': (context) => Scaffold(
                       body: DetailsPage(
@@ -116,6 +118,10 @@ class App extends StatelessWidget {
                         withAppBar:
                             (settings.arguments as DetailNavigationParameters?)
                                     ?.withAppBar ??
+                                true,
+                        isDeletedList:
+                            (settings.arguments as DetailNavigationParameters?)
+                                    ?.isDeletedList ??
                                 true,
                       ),
                     ),
