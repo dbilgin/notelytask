@@ -1,0 +1,13 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1f303d">
+
+    <ListView
+        android:id="@+id/notes_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="@drawable/widget_list_divider"
+        android:dividerHeight="1dp" />
+
+</FrameLayout>

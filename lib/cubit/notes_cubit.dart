@@ -1,8 +1,17 @@
+import 'dart:convert';
+
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:notelytask/models/note.dart';
+import 'package:notelytask/util/update_widget.dart';
 
 class NotesCubit extends HydratedCubit<List<Note>> {
   NotesCubit() : super([]);
+
+  @override
+  void onChange(Change<List<Note>> change) {
+    updateWidget(json.encode(toJson(change.nextState)));
+    super.onChange(change);
+  }
 
   void setNote(Note note) {
     var index = state.indexWhere((element) => element.id == note.id);
