@@ -59,6 +59,7 @@ class _DetailsFormState extends State<DetailsForm> {
 
   void _debouncedSubmit(Note note) {
     context.read<NotesCubit>().setNote(note);
+    context.read<SelectedNoteCubit>().setNote(note);
     context.read<GithubCubit>().createOrUpdateRemoteNotes();
   }
 
