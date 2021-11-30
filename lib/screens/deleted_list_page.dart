@@ -20,7 +20,7 @@ class _DeletedListPageState extends State<DeletedListPage> {
     var smallScreenCheck = isSmallScreen(context);
     if (smallScreen == null || smallScreenCheck != smallScreen) {
       setState(() => smallScreen = smallScreenCheck);
-      context.read<GithubCubit>().getAndUpdateNotes();
+      context.read<GithubCubit>().getAndUpdateNotes(context: context);
     }
 
     return Scaffold(

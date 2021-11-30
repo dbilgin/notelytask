@@ -3,7 +3,7 @@ description: A simple notes application.
 
 publish_to: 'none'
 
-version: 2.0.7+67
+version: 2.0.8+68
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -23,6 +23,7 @@ dependencies:
   equatable: 2.0.3
   flutter_dotenv: 5.0.2
   home_widget: 0.1.4
+  get_it: 7.1.3
 
   flutter_web_plugins:
     sdk: flutter

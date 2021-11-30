@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:notelytask/service/navigation_service.dart';
 
 import 'cubit/selected_note_cubit.dart';
 import 'models/note.dart';
+
+GetIt getIt = GetIt.instance;
 
 bool isSmallScreen(BuildContext context) {
   MediaQueryData queryData = MediaQuery.of(context);
@@ -17,14 +20,14 @@ void navigateToDetails({
   Note? note,
 }) {
   if (isSmallScreen(context)) {
-    context.read<NavigatorCubit>().pushNamed(
-          '/details',
-          arguments: DetailNavigationParameters(
-            note: note,
-            withAppBar: true,
-            isDeletedList: isDeletedList,
-          ),
-        );
+    getIt<NavigationService>().pushNamed(
+      '/details',
+      arguments: DetailNavigationParameters(
+        note: note,
+        withAppBar: true,
+        isDeletedList: isDeletedList,
+      ),
+    );
   }
   context.read<SelectedNoteCubit>().setNote(note);
 }
@@ -49,7 +52,7 @@ void saveToRepoAlert({
               style: Theme.of(context).textTheme.caption,
             ),
             onPressed: () {
-              context.read<NavigatorCubit>().pop();
+              getIt<NavigationService>().pop();
               onPressed(true);
             },
           ),
@@ -59,7 +62,7 @@ void saveToRepoAlert({
               style: Theme.of(context).textTheme.caption,
             ),
             onPressed: () {
-              context.read<NavigatorCubit>().pop();
+              getIt<NavigationService>().pop();
               onPressed(false);
             },
           ),
@@ -68,7 +71,7 @@ void saveToRepoAlert({
               'Cancel',
               style: Theme.of(context).textTheme.caption,
             ),
-            onPressed: () => context.read<NavigatorCubit>().pop(),
+            onPressed: () => getIt<NavigationService>().pop(),
           ),
         ],
       );

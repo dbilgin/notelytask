@@ -32,10 +32,11 @@ class WidgetRemoteViewsFactory(applicationContext: Context, intent: Intent) :
             val note = notesData.getJSONObject(i)
             if (note["isDeleted"] == true) continue
 
+            val id = note["id"].toString()
             val title = note["title"].toString()
             val text = note["text"].toString()
 
-            notesList.add(mapOf("title" to title, "text" to text))
+            notesList.add(mapOf("id" to id, "title" to title, "text" to text))
         }
     }
 
@@ -51,6 +52,7 @@ class WidgetRemoteViewsFactory(applicationContext: Context, intent: Intent) :
             return null
         }
 
+        val id = notesList[position]["id"].toString()
         val title = notesList[position]["title"].toString()
         val text = notesList[position]["text"].toString()
         val remoteNote =
@@ -59,6 +61,7 @@ class WidgetRemoteViewsFactory(applicationContext: Context, intent: Intent) :
         remoteNote.setTextViewText(R.id.text, text)
 
         val fillInIntent = Intent()
+        fillInIntent.putExtra("note_id", id)
         remoteNote.setOnClickFillInIntent(R.id.linear_single_note, fillInIntent)
 
         return remoteNote

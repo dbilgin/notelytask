@@ -1,6 +1,8 @@
+import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/repository/github_repository.dart';
+import 'package:notelytask/utils.dart';
 
 import 'notes_cubit.dart';
 
@@ -12,28 +14,39 @@ class GithubCubit extends HydratedCubit<GithubState> {
   final NotesCubit notesCubit;
   final GithubRepository githubRepository;
 
-  Future<void> getAndUpdateNotes() async {
+  Future<void> getAndUpdateNotes({
+    required BuildContext context,
+    String? redirectNoteId,
+  }) async {
     final accessToken = state.accessToken;
     final ownerRepo = state.ownerRepo;
-    if (accessToken == null || ownerRepo == null) {
-      return;
+
+    if (accessToken != null && ownerRepo != null) {
+      emit(state.copyWith(loading: true));
+
+      final existingFile = await githubRepository.getExistingNoteFile(
+        ownerRepo,
+        accessToken,
+      );
+
+      final finalContent = existingFile?.content;
+      if (existingFile == null) {
+        reset();
+        notesCubit.emit([]);
+      } else {
+        notesCubit.emit(
+            finalContent != null ? notesCubit.fromJson(finalContent) : []);
+        emit(state.copyWith(loading: false, sha: existingFile.sha));
+      }
     }
 
-    emit(state.copyWith(loading: true));
-
-    final existingFile = await githubRepository.getExistingNoteFile(
-      ownerRepo,
-      accessToken,
-    );
-
-    final finalContent = existingFile?.content;
-    if (existingFile == null) {
-      reset();
-      notesCubit.emit([]);
-    } else {
-      notesCubit
-          .emit(finalContent != null ? notesCubit.fromJson(finalContent) : []);
-      emit(state.copyWith(loading: false, sha: existingFile.sha));
+    if (redirectNoteId != null) {
+      var note = notesCubit.state.firstWhere((n) => n.id == redirectNoteId);
+      navigateToDetails(
+        context: context,
+        isDeletedList: false,
+        note: note,
+      );
     }
   }
 
