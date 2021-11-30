@@ -68,39 +68,39 @@ class App extends StatelessWidget {
                 secondary: Color(0xff2e8fff),
               ),
               textSelectionTheme: TextSelectionThemeData(
-                cursorColor: Colors.white,
+                cursorColor: Color(0xffdce3e8),
                 selectionColor: Color(0xff2e8fff),
                 selectionHandleColor: Color(0xff2e8fff),
               ),
-              hintColor: Colors.white,
+              hintColor: Color(0xffdce3e8),
               inputDecorationTheme: InputDecorationTheme(
-                labelStyle: TextStyle(color: Colors.white),
+                labelStyle: TextStyle(color: Color(0xffdce3e8)),
                 enabledBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white),
+                  borderSide: const BorderSide(color: Color(0xffdce3e8)),
                 ),
                 focusedBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white),
+                  borderSide: const BorderSide(color: Color(0xffdce3e8)),
                 ),
               ),
               scaffoldBackgroundColor: const Color(0xff1f1f24),
               textTheme: TextTheme(
                 headline6: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xffdce3e8),
                   fontWeight: FontWeight.bold,
                 ),
                 headline4: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xffdce3e8),
                   fontWeight: FontWeight.bold,
                 ),
                 subtitle1: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xffdce3e8),
                   fontWeight: FontWeight.bold,
                 ),
                 bodyText1: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xffdce3e8),
                   fontSize: 16.0,
                 ),
-                caption: TextStyle(color: Colors.white),
+                caption: TextStyle(color: Color(0xffdce3e8)),
               ),
             ),
             navigatorKey: getIt<NavigationService>().navigatorKey,
