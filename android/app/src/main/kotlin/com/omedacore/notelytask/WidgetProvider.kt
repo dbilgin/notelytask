@@ -21,6 +21,7 @@ class AppWidgetProvider : HomeWidgetProvider() {
                     if (notes.isNullOrEmpty()) return
                     Utility.writeNotesToPreferences(context, notes)
 
+                    setEmptyView(R.id.notes_layout, R.id.empty_text)
                     val intent = Intent(context, WidgetRemoteViewsService::class.java)
                     setRemoteAdapter(R.id.notes_layout, intent);
                 } catch (e: Exception) {

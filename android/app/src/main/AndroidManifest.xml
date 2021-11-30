@@ -10,11 +10,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <application
+        android:exported="false"
         android:icon="@mipmap/launcher_icon"
         android:label="NotelyTask">
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:exported="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
