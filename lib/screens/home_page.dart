@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
-import 'package:notelytask/cubit/navigator_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
+import 'package:notelytask/service/native_service.dart';
+import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/utils.dart';
 import 'package:notelytask/widgets/github_loader.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
@@ -17,13 +18,20 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool? smallScreen;
 
+  @override
+  void initState() {
+    NativeService.initialiseWidgetListener(context);
+    NativeService.getNativeArgs(context);
+    super.initState();
+  }
+
   void _navigateToLogin() {
-    context.read<NavigatorCubit>().pushNamed('/github');
+    getIt<NavigationService>().pushNamed('/github');
   }
 
   void _navigateToDeletedList() {
     context.read<SelectedNoteCubit>().setNote(null);
-    context.read<NavigatorCubit>().pushNamed('/deleted_list');
+    getIt<NavigationService>().pushNamed('/deleted_list');
   }
 
   @override
@@ -32,7 +40,7 @@ class _HomePageState extends State<HomePage> {
     if (smallScreen == null || smallScreenCheck != smallScreen) {
       setState(() => smallScreen = smallScreenCheck);
       context.read<SelectedNoteCubit>().setNote(null);
-      context.read<GithubCubit>().getAndUpdateNotes();
+      context.read<GithubCubit>().getAndUpdateNotes(context: context);
     }
 
     return Scaffold(
