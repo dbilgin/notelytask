@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
@@ -10,7 +11,7 @@ class NativeService {
       const MethodChannel('com.omedacore.notelytask/widget');
 
   static void initialiseWidgetListener(BuildContext context) {
-    if (!Platform.isAndroid) {
+    if (kIsWeb || !Platform.isAndroid) {
       return;
     }
 
@@ -29,7 +30,7 @@ class NativeService {
   }
 
   static void getNativeArgs(BuildContext context) async {
-    if (!Platform.isAndroid) {
+    if (kIsWeb || !Platform.isAndroid) {
       return;
     }
 
