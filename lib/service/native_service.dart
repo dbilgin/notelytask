@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
@@ -8,6 +10,10 @@ class NativeService {
       const MethodChannel('com.omedacore.notelytask/widget');
 
   static void initialiseWidgetListener(BuildContext context) {
+    if (!Platform.isAndroid) {
+      return;
+    }
+
     widgetChannel.setMethodCallHandler((MethodCall call) async {
       try {
         if (call.method == 'widgetClicked' &&
@@ -23,6 +29,10 @@ class NativeService {
   }
 
   static void getNativeArgs(BuildContext context) async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+
     try {
       dynamic arguments = await widgetChannel.invokeMethod('getIntentArgs');
       if (arguments['note_id'] != null) {
