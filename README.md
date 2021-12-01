@@ -21,8 +21,8 @@ Once the user logs in with their Github account and enters a repository, NotelyT
 
 ## How does it look?
 <div>
-  <img src="https://user-images.githubusercontent.com/15243788/144157310-82e89cae-a18d-422c-8432-6d58a2830c4f.png" width="225" />
-  <img src="https://user-images.githubusercontent.com/15243788/144157320-3546d9cd-86f1-463b-a051-8dedc457cf40.png" width="225" />
-  <img src="https://user-images.githubusercontent.com/15243788/144157324-36481f03-9ab3-4223-ae93-319645de3f9b.png" width="225" />
-  <img src="https://user-images.githubusercontent.com/15243788/144158100-e252e60a-2906-4e81-ab5e-537e79cee8cb.png" width="225" />
+  <img src="https://user-images.githubusercontent.com/15243788/144157310-82e89cae-a18d-422c-8432-6d58a2830c4f.png" width="300" />
+  <img src="https://user-images.githubusercontent.com/15243788/144157320-3546d9cd-86f1-463b-a051-8dedc457cf40.png" width="300" />
+  <img src="https://user-images.githubusercontent.com/15243788/144157324-36481f03-9ab3-4223-ae93-319645de3f9b.png" width="300" />
+  <img src="https://user-images.githubusercontent.com/15243788/144158100-e252e60a-2906-4e81-ab5e-537e79cee8cb.png" width="300" />
 </div>
