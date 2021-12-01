@@ -6,7 +6,7 @@ NotelyTask is a very easy to use note-taking application, you can just open it a
 
 | Web | Mac | Android |
 | --- | --- | --- |
-| https://www.notelytask.com/ | https://github.com/dbilgin/notelytask/releases | <a href="https://play.google.com/store/apps/details?id=com.omedacore.notelytask" target="_blank"><img src="https://user-images.githubusercontent.com/15243788/144152573-56ecee58-8f9d-4227-bf65-5ece270ce376.png" height="65" /></a> |
+| https://www.notelytask.com/ | https://github.com/dbilgin/notelytask/releases | <a href="https://play.google.com/store/apps/details?id=com.omedacore.notelytask" target="_blank"><img src="https://user-images.githubusercontent.com/15243788/144152573-56ecee58-8f9d-4227-bf65-5ece270ce376.png" width="175" /></a> |
 
 
 :radioactive: &nbsp;**If you want to use the Mac application**, there may be permission issues with the new MacOS releases. If you want to use it, don't forget to unzip and then run `sudo chmod -R 755 NotelyTask.app/` on the terminal after downloading the zip.
