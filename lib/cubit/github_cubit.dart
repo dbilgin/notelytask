@@ -41,7 +41,9 @@ class GithubCubit extends HydratedCubit<GithubState> {
     }
 
     if (redirectNoteId != null) {
-      var note = notesCubit.state.where((n) => n.id == redirectNoteId).toList();
+      var note = notesCubit.state
+          .where((n) => n.id == redirectNoteId && !n.isDeleted)
+          .toList();
       if (note.length > 0) {
         navigateToDetails(
           context: context,
