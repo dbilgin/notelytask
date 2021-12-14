@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/widgets/details_form.dart';
 import 'package:notelytask/widgets/github_loader.dart';
