@@ -1,6 +1,6 @@
 import 'package:get_storage/get_storage.dart';
 
-enum StorageKeys { GoogleAuthHeaders, DriveUploadEnabled }
+enum StorageKeys { googleAuthHeaders, driveUploadEnabled }
 
 class Storage {
   final box = GetStorage();

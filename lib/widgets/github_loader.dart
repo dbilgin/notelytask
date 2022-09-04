@@ -11,8 +11,9 @@ class GithubLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<GithubCubit, GithubState>(
-      builder: (context, state) =>
-          state.loading ? LinearProgressIndicator(minHeight: 1) : Container(),
+      builder: (context, state) => state.loading
+          ? const LinearProgressIndicator(minHeight: 1)
+          : Container(),
     );
   }
 }

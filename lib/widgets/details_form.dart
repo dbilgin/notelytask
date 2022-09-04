@@ -11,14 +11,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class DetailsForm extends StatefulWidget {
   final Note? note;
   final bool isDeletedList;
-  DetailsForm({
+  const DetailsForm({
     Key? key,
     this.note,
     required this.isDeletedList,
   }) : super(key: key);
 
   @override
-  _DetailsFormState createState() => _DetailsFormState();
+  State<DetailsForm> createState() => _DetailsFormState();
 }
 
 class _DetailsFormState extends State<DetailsForm> {
@@ -91,7 +91,7 @@ class _DetailsFormState extends State<DetailsForm> {
     return BlocListener<GithubCubit, GithubState>(
       listener: (context, state) {
         if (state.error) {
-          final snackBar = SnackBar(
+          const snackBar = SnackBar(
             content: Text('Error with Github integration.'),
             duration: Duration(seconds: 1),
           );
@@ -111,7 +111,7 @@ class _DetailsFormState extends State<DetailsForm> {
                       controller: _titleController,
                       textInputAction: TextInputAction.next,
                       style: Theme.of(context).textTheme.headline4,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Title',
                         hintStyle: TextStyle(color: Colors.grey),
                         border: InputBorder.none,
@@ -124,7 +124,7 @@ class _DetailsFormState extends State<DetailsForm> {
                         onChanged: (text) => _submit(),
                         maxLines: null,
                         style: Theme.of(context).textTheme.bodyText1,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: 'Description',
                           hintStyle: TextStyle(color: Colors.grey),
                           border: InputBorder.none,

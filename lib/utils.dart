@@ -39,9 +39,9 @@ void saveToRepoAlert({
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: Color(0xff2a2a31),
-        title: Text('Github Connection'),
-        content: Text(
+        backgroundColor: const Color(0xff2a2a31),
+        title: const Text('Github Connection'),
+        content: const Text(
           'Would you like to keep your local data and overwrite your repo?',
         ),
         actions: [

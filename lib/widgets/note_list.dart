@@ -11,10 +11,11 @@ import 'package:notelytask/utils.dart';
 class NoteList extends StatefulWidget {
   final List<Note> notes;
   final bool isDeletedList;
-  NoteList({
+  const NoteList({
+    Key? key,
     required this.notes,
     required this.isDeletedList,
-  });
+  }) : super(key: key);
 
   @override
   State<NoteList> createState() => _NoteListState();
@@ -44,7 +45,7 @@ class _NoteListState extends State<NoteList> {
     return BlocListener<GithubCubit, GithubState>(
       listener: (context, state) {
         if (state.error) {
-          final snackBar = SnackBar(
+          const snackBar = SnackBar(
             content: Text('Error with Github integration.'),
             duration: Duration(seconds: 1),
           );
@@ -56,13 +57,13 @@ class _NoteListState extends State<NoteList> {
           if (kIsWeb)
             Container(
               width: double.infinity,
-              margin: EdgeInsets.all(8.0),
+              margin: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 onPressed: () => navigateToDetails(
                   context: context,
                   isDeletedList: widget.isDeletedList,
                 ),
-                child: Icon(Icons.add),
+                child: const Icon(Icons.add),
               ),
             ),
           Expanded(
@@ -71,6 +72,27 @@ class _NoteListState extends State<NoteList> {
                 return Dismissible(
                   key: ValueKey<int>(
                       widget.notes[index].date.millisecondsSinceEpoch),
+                  onDismissed: (direction) =>
+                      _dismissed(direction, widget.notes[index]),
+                  background: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    color: Colors.red,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Icon(
+                          widget.isDeletedList ? Icons.restore : Icons.delete,
+                          color: Colors.white,
+                          size: 30.0,
+                        ),
+                        const Icon(
+                          Icons.delete,
+                          color: Colors.white,
+                          size: 30.0,
+                        ),
+                      ],
+                    ),
+                  ),
                   child: ListTile(
                     onTap: () => navigateToDetails(
                       context: context,
@@ -84,27 +106,6 @@ class _NoteListState extends State<NoteList> {
                       maxLines: 5,
                     ),
                     isThreeLine: true,
-                  ),
-                  onDismissed: (direction) =>
-                      _dismissed(direction, widget.notes[index]),
-                  background: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 24.0),
-                    color: Colors.red,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Icon(
-                          widget.isDeletedList ? Icons.restore : Icons.delete,
-                          color: Colors.white,
-                          size: 30.0,
-                        ),
-                        Icon(
-                          Icons.delete,
-                          color: Colors.white,
-                          size: 30.0,
-                        ),
-                      ],
-                    ),
                   ),
                 );
               },

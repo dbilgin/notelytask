@@ -13,7 +13,7 @@ class GithubState extends Equatable {
   final String? verificationUri;
   final int? expiresIn;
 
-  GithubState({
+  const GithubState({
     this.loading = false,
     this.error = false,
     this.ownerRepo,

@@ -10,8 +10,10 @@ import 'package:notelytask/widgets/github_loader.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -20,8 +22,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     NativeService.initialiseWidgetListener(context);
-    NativeService.getNativeArgs(context);
     super.initState();
+  }
+
+  Future<void> setAndUpdate() async {
+    final args = await NativeService.getNativeArgs(context);
+    if (!mounted || args == null) return;
+    NativeService.updateNotes(context, args);
   }
 
   void _navigateToLogin() {
@@ -44,10 +51,10 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('NotelyTask'),
+        title: const Text('NotelyTask'),
         actions: [
           IconButton(
-            icon: Icon(Icons.delete_rounded),
+            icon: const Icon(Icons.delete_rounded),
             tooltip: 'Deleted Notes',
             onPressed: _navigateToDeletedList,
           ),
@@ -57,12 +64,12 @@ class _HomePageState extends State<HomePage> {
             onPressed: _navigateToLogin,
           ),
         ],
-        bottom: PreferredSize(
-          child: GithubLoader(),
+        bottom: const PreferredSize(
           preferredSize: Size(double.infinity, 0),
+          child: GithubLoader(),
         ),
       ),
-      body: NoteListLayout(),
+      body: const NoteListLayout(),
       floatingActionButton: !kIsWeb
           ? FloatingActionButton(
               onPressed: () => navigateToDetails(
@@ -70,7 +77,7 @@ class _HomePageState extends State<HomePage> {
                 isDeletedList: false,
               ),
               tooltip: 'Add New Note',
-              child: Icon(Icons.add),
+              child: const Icon(Icons.add),
             )
           : null,
     );

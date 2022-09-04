@@ -35,12 +35,14 @@ void main() async {
         : await getApplicationDocumentsDirectory(),
   );
   HydratedBlocOverrides.runZoned(
-    () => runApp(App()),
+    () => runApp(const App()),
     storage: storage,
   );
 }
 
 class App extends StatelessWidget {
+  const App({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
@@ -63,27 +65,27 @@ class App extends StatelessWidget {
             title: 'NotelyTask',
             theme: ThemeData(
               primarySwatch: Colors.blue,
-              colorScheme: ColorScheme.light(
+              colorScheme: const ColorScheme.light(
                 primary: Color(0xff17181c),
                 secondary: Color(0xff2e8fff),
               ),
-              textSelectionTheme: TextSelectionThemeData(
+              textSelectionTheme: const TextSelectionThemeData(
                 cursorColor: Color(0xffdce3e8),
                 selectionColor: Color(0xff2e8fff),
                 selectionHandleColor: Color(0xff2e8fff),
               ),
-              hintColor: Color(0xffdce3e8),
-              inputDecorationTheme: InputDecorationTheme(
+              hintColor: const Color(0xffdce3e8),
+              inputDecorationTheme: const InputDecorationTheme(
                 labelStyle: TextStyle(color: Color(0xffdce3e8)),
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xffdce3e8)),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xffdce3e8)),
                 ),
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xffdce3e8)),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xffdce3e8)),
                 ),
               ),
               scaffoldBackgroundColor: const Color(0xff1f1f24),
-              textTheme: TextTheme(
+              textTheme: const TextTheme(
                 headline6: TextStyle(
                   color: Color(0xffdce3e8),
                   fontWeight: FontWeight.bold,
@@ -110,8 +112,8 @@ class App extends StatelessWidget {
               final ghUserCode = settingsUri.queryParameters['code'];
 
               var routes = <String, WidgetBuilder>{
-                '/': (context) => HomePage(),
-                '/deleted_list': (context) => DeletedListPage(),
+                '/': (context) => const HomePage(),
+                '/deleted_list': (context) => const DeletedListPage(),
                 '/github': (context) => GithubPage(code: ghUserCode),
                 '/details': (context) => Scaffold(
                       body: DetailsPage(
@@ -132,8 +134,8 @@ class App extends StatelessWidget {
 
               if (routes[settingsUri.path] == null) {
                 return MaterialPageRoute(
-                  settings: RouteSettings(name: '/'),
-                  builder: (context) => HomePage(),
+                  settings: const RouteSettings(name: '/'),
+                  builder: (context) => const HomePage(),
                 );
               } else {
                 WidgetBuilder builder = routes[settingsUri.path]!;

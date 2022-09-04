@@ -8,7 +8,10 @@ import 'package:notelytask/widgets/note_list.dart';
 
 class NoteListLayout extends StatelessWidget {
   final bool isDeletedList;
-  NoteListLayout({this.isDeletedList = false});
+  const NoteListLayout({
+    Key? key,
+    this.isDeletedList = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +21,7 @@ class NoteListLayout extends StatelessWidget {
             .where((element) => element.isDeleted == isDeletedList)
             .toList();
 
-        if (isDeletedList && filteredNotes.length == 0) {
+        if (isDeletedList && filteredNotes.isEmpty) {
           return Center(
             child: Text(
               'Nothing to see here',
