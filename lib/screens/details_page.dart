@@ -7,14 +7,15 @@ class DetailsPage extends StatefulWidget {
   final Note? note;
   final bool withAppBar;
   final bool isDeletedList;
-  DetailsPage({
+  const DetailsPage({
+    Key? key,
     this.note,
     required this.withAppBar,
     required this.isDeletedList,
-  });
+  }) : super(key: key);
 
   @override
-  _DetailsPageState createState() => _DetailsPageState();
+  State<DetailsPage> createState() => _DetailsPageState();
 }
 
 class _DetailsPageState extends State<DetailsPage> {
@@ -31,9 +32,9 @@ class _DetailsPageState extends State<DetailsPage> {
     if (widget.withAppBar) {
       return Scaffold(
         appBar: AppBar(
-          bottom: PreferredSize(
-            child: GithubLoader(),
+          bottom: const PreferredSize(
             preferredSize: Size(double.infinity, 0),
+            child: GithubLoader(),
           ),
         ),
         body: layout,

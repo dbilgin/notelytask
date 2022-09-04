@@ -13,7 +13,7 @@ class GithubPage extends StatefulWidget {
   final String? code;
 
   @override
-  _GithubPageState createState() => _GithubPageState();
+  State<GithubPage> createState() => _GithubPageState();
 }
 
 class _GithubPageState extends State<GithubPage> {
@@ -72,7 +72,7 @@ class _GithubPageState extends State<GithubPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Github'),
+        title: const Text('Github'),
       ),
       body: BlocBuilder<GithubCubit, GithubState>(
         builder: (context, state) {
@@ -85,7 +85,7 @@ class _GithubPageState extends State<GithubPage> {
             children = [
               ElevatedButton(
                 onPressed: _startConnectionToGithub,
-                child: Text('Connect to Github'),
+                child: const Text('Connect to Github'),
               ),
             ];
           } else if (state.accessToken == null &&
@@ -94,7 +94,7 @@ class _GithubPageState extends State<GithubPage> {
               verificationUri != null) {
             void onCopyPressed() {
               Clipboard.setData(ClipboardData(text: userCode));
-              final snackBar = SnackBar(
+              const snackBar = SnackBar(
                 content: Text('Copied!'),
                 duration: Duration(seconds: 1),
               );
@@ -115,7 +115,7 @@ class _GithubPageState extends State<GithubPage> {
                   IconButton(
                     icon: const Icon(
                       Icons.copy,
-                      color: const Color(0xff2e8fff),
+                      color: Color(0xff2e8fff),
                     ),
                     tooltip: 'Copy Code',
                     onPressed: onCopyPressed,
@@ -129,7 +129,7 @@ class _GithubPageState extends State<GithubPage> {
               GestureDetector(
                 child: Text(
                   verificationUri,
-                  style: TextStyle(
+                  style: const TextStyle(
                     decoration: TextDecoration.underline,
                     color: Colors.blue,
                   ),
@@ -140,7 +140,7 @@ class _GithubPageState extends State<GithubPage> {
                 onPressed: () async => await context
                     .read<GithubCubit>()
                     .getAccessToken(deviceCode),
-                child: Text('I activated my account'),
+                child: const Text('I activated my account'),
               ),
             ];
           } else if (state.accessToken != null) {
@@ -155,7 +155,7 @@ class _GithubPageState extends State<GithubPage> {
                 child: TextField(
                   controller: repoUrlController,
                   onChanged: (value) => setState(() => localRepoUrl = value),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'owner/repo',
                   ),
@@ -166,9 +166,10 @@ class _GithubPageState extends State<GithubPage> {
                     ? null
                     : () => saveRepoUrl(repoUrlController.text),
                 style: ElevatedButton.styleFrom(
-                  onSurface: Colors.grey,
+                  disabledForegroundColor: Colors.grey.withOpacity(0.38),
+                  disabledBackgroundColor: Colors.grey.withOpacity(0.12),
                 ),
-                child: Text('Save Repo'),
+                child: const Text('Save Repo'),
               ),
             ];
           }
@@ -176,7 +177,7 @@ class _GithubPageState extends State<GithubPage> {
           return BlocListener<GithubCubit, GithubState>(
             listener: (context, state) {
               if (state.error && repoUrlController.text.isNotEmpty) {
-                final snackBar = SnackBar(
+                const snackBar = SnackBar(
                   content: Text('Error integrating repository.'),
                   duration: Duration(seconds: 1),
                 );
@@ -199,7 +200,7 @@ class _GithubPageState extends State<GithubPage> {
                     ...children,
                     ElevatedButton(
                       onPressed: () => context.read<GithubCubit>().reset(),
-                      child: Text('Reset Github Connection'),
+                      child: const Text('Reset Github Connection'),
                     ),
                   ],
                 ),

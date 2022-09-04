@@ -25,24 +25,33 @@ class NativeService {
                 redirectNoteId: noteId,
               );
         }
-      } catch (e) {}
+      } catch (e) {
+        return;
+      }
     });
   }
 
-  static void getNativeArgs(BuildContext context) async {
+  static Future<String?> getNativeArgs(BuildContext context) async {
     if (kIsWeb || !Platform.isAndroid) {
-      return;
+      return null;
     }
 
     try {
       dynamic arguments = await widgetChannel.invokeMethod('getIntentArgs');
       if (arguments['note_id'] != null) {
         var noteId = arguments['note_id'].toString();
-        context.read<GithubCubit>().getAndUpdateNotes(
-              context: context,
-              redirectNoteId: noteId,
-            );
+        return noteId;
       }
-    } catch (e) {}
+    } catch (e) {
+      return null;
+    }
+    return null;
+  }
+
+  static Future<void> updateNotes(BuildContext context, String noteId) async {
+    await context.read<GithubCubit>().getAndUpdateNotes(
+          context: context,
+          redirectNoteId: noteId,
+        );
   }
 }

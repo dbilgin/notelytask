@@ -7,8 +7,10 @@ import 'package:notelytask/widgets/github_loader.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
 
 class DeletedListPage extends StatefulWidget {
+  const DeletedListPage({Key? key}) : super(key: key);
+
   @override
-  _DeletedListPageState createState() => _DeletedListPageState();
+  State<DeletedListPage> createState() => _DeletedListPageState();
 }
 
 class _DeletedListPageState extends State<DeletedListPage> {
@@ -24,10 +26,10 @@ class _DeletedListPageState extends State<DeletedListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Deleted List'),
-        bottom: PreferredSize(
-          child: GithubLoader(),
+        title: const Text('Deleted List'),
+        bottom: const PreferredSize(
           preferredSize: Size(double.infinity, 0),
+          child: GithubLoader(),
         ),
       ),
       body: WillPopScope(
@@ -35,7 +37,7 @@ class _DeletedListPageState extends State<DeletedListPage> {
           context.read<SelectedNoteCubit>().setNote(null);
           return true;
         },
-        child: NoteListLayout(isDeletedList: true),
+        child: const NoteListLayout(isDeletedList: true),
       ),
     );
   }

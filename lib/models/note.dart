@@ -15,7 +15,7 @@ class Note {
     required this.title,
     required this.text,
     required this.date,
-    this.isDeleted: false,
+    this.isDeleted = false,
   });
 
   factory Note.fromJson(Map<String, dynamic> json) => _$NoteFromJson(json);

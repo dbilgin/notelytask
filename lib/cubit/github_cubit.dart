@@ -10,7 +10,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
   GithubCubit({
     required this.notesCubit,
     required this.githubRepository,
-  }) : super(GithubState());
+  }) : super(const GithubState());
   final NotesCubit notesCubit;
   final GithubRepository githubRepository;
 
@@ -44,7 +44,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
       var note = notesCubit.state
           .where((n) => n.id == redirectNoteId && !n.isDeleted)
           .toList();
-      if (note.length > 0) {
+      if (note.isNotEmpty) {
         navigateToDetails(
           context: context,
           isDeletedList: false,
@@ -114,7 +114,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
   }
 
   void reset() {
-    emit(GithubState());
+    emit(const GithubState());
   }
 
   Future<void> launchLogin() async {

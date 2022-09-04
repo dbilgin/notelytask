@@ -122,7 +122,7 @@ class GithubRepository {
           expiresIn: expiresIn,
         );
       } else {
-        return GithubState(
+        return const GithubState(
           deviceCode: null,
           userCode: null,
           verificationUri: null,
@@ -130,7 +130,7 @@ class GithubRepository {
         );
       }
     } catch (e) {
-      return GithubState(
+      return const GithubState(
         deviceCode: null,
         userCode: null,
         verificationUri: null,
