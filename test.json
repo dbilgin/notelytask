@@ -1,0 +1,287 @@
+{
+  "title": "Personio Tech Radar",
+  "quadrants": ["Languages / Frameworks", "Tools / Dependencies", "Platforms", "Quad4"],
+  "rings": ["adopt", "trial", "assess", "hold"],
+  "blips": [
+  {
+    "name": "Typescript",
+    "ring": "Adopt",
+    "quadrant": "Languages / Frameworks",
+    "isNew": "FALSE",
+    "description": "<p>using latest (4.4.4) https://www.typescriptlang.org/</p>"
+  },
+  {
+    "name": "Redux Toolkit",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>this will be our primary state management tool https://redux-toolkit.js.org/</p>"
+  },
+  {
+    "name": "React Native",
+    "ring": "Adopt",
+    "quadrant": "Languages / Frameworks",
+    "isNew": "FALSE",
+    "description": "<p>using new architecture, targeting 0.70.0 when it's stable https://reactnative.dev/</p>"
+  },
+  {
+    "name": "Javascript",
+    "ring": "Adopt",
+    "quadrant": "Languages / Frameworks",
+    "isNew": "FALSE",
+    "description": "<p>https://www.javascript.com/</p>"
+  },
+  {
+    "name": "VSCode",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://code.visualstudio.com/</p>"
+  },
+  {
+    "name": "React Navigation",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://reactnavigation.org/</p>"
+  },
+  {
+    "name": "CircleCI",
+    "ring": "Assess",
+    "quadrant": "Platforms",
+    "isNew": "FALSE",
+    "description": "<p>https://circleci.com/</p>"
+  },
+  {
+    "name": "react-native-biometrics",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://github.com/SelfLender/react-native-biometrics</p>"
+  },
+  {
+    "name": "Gitlab CI",
+    "ring": "Adopt",
+    "quadrant": "Platforms",
+    "isNew": "FALSE",
+    "description": "<p>https://about.gitlab.com/</p>"
+  },
+  {
+    "name": "Flipper",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://fbflipper.com/</p>"
+  },
+  {
+    "name": "Jest",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://jestjs.io/</p>"
+  },
+  {
+    "name": "Detox",
+    "ring": "Trial",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://github.com/wix/Detox</p>"
+  },
+  {
+    "name": "Appium",
+    "ring": "Trial",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://appium.io/</p>"
+  },
+  {
+    "name": "shopify/flash-list",
+    "ring": "Trial",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://github.com/Shopify/flash-list</p>"
+  },
+  {
+    "name": "Phrase",
+    "ring": "Adopt",
+    "quadrant": "Platforms",
+    "isNew": "FALSE",
+    "description": "<p>https://phrase.com/</p>"
+  },
+  {
+    "name": "Firebase Performance Monitoring",
+    "ring": "Trial",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://firebase.google.com/docs/perf-mon</p>"
+  },
+  {
+    "name": "Firebase Crashlytics",
+    "ring": "Assess",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://firebase.google.com/docs/crashlytics</p>"
+  },
+  {
+    "name": "Pendo",
+    "ring": "Assess",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://www.pendo.io/</p>"
+  },
+  {
+    "name": "Firebase Analytics",
+    "ring": "Assess",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://firebase.google.com/docs/analytics</p>"
+  },
+  {
+    "name": "Firebase App Distribution",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://firebase.google.com/docs/app-distribution</p>"
+  },
+  {
+    "name": "iOS",
+    "ring": "Adopt",
+    "quadrant": "Platforms",
+    "isNew": "FALSE",
+    "description": "<p></p>"
+  },
+  {
+    "name": "Android",
+    "ring": "Adopt",
+    "quadrant": "Platforms",
+    "isNew": "FALSE",
+    "description": "<p></p>"
+  },
+  {
+    "name": "Fastlane",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>used for iOS deployment builds https://fastlane.tools/</p>"
+  },
+  {
+    "name": "Gradle",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://gradle.org/</p>"
+  },
+  {
+    "name": "Sentry",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://sentry.io/welcome/</p>"
+  },
+  {
+    "name": "xcodebuild",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://developer.apple.com/documentation/xcode/build-system</p>"
+  },
+  {
+    "name": "react-native-bootsplash",
+    "ring": "Trial",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://github.com/zoontek/react-native-bootsplash</p>"
+  },
+  {
+    "name": "react-native-vector-icons",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://github.com/oblador/react-native-vector-icons</p>"
+  },
+  {
+    "name": "Objective-C",
+    "ring": "Adopt",
+    "quadrant": "Languages / Frameworks",
+    "isNew": "FALSE",
+    "description": "<p>https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/Introduction/Introduction.html</p>"
+  },
+  {
+    "name": "OpenJDK 11",
+    "ring": "Adopt",
+    "quadrant": "Languages / Frameworks",
+    "isNew": "FALSE",
+    "description": "<p>https://openjdk.org/projects/jdk/11/</p>"
+  },
+  {
+    "name": "StyleSheet",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://reactnative.dev/docs/stylesheet</p>"
+  },
+  {
+    "name": "Bitrise CI",
+    "ring": "Assess",
+    "quadrant": "Platforms",
+    "isNew": "FALSE",
+    "description": "<p>https://www.bitrise.io/</p>"
+  },
+  {
+    "name": "wix/react-native-calendars",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://github.com/wix/react-native-calendars</p>"
+  },
+  {
+    "name": "i18next",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://react.i18next.com/</p>"
+  },
+  {
+    "name": "redux-flipper",
+    "ring": "Assess",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://github.com/jk-gan/redux-flipper</p>"
+  },
+  {
+    "name": "react-native-permissions",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://www.npmjs.com/package/react-native-permissions</p>"
+  },
+  {
+    "name": "styled-components",
+    "ring": "Hold",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p> No longer using this because we should be closer to RN standards. styled-components mimics web styling https://styled-components.com/</p>"
+  },
+  {
+    "name": "expo",
+    "ring": "Hold",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>This is a good dependency for creating prototype applications, but in the long run we cannot support an app with this as it doesn't have the necessary support for the things a full-fetched app needs https://expo.dev/</p>"
+  },
+  {
+    "name": "Prettier",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://prettier.io/</p>"
+  },
+  {
+    "name": "eslint",
+    "ring": "Adopt",
+    "quadrant": "Tools / Dependencies",
+    "isNew": "FALSE",
+    "description": "<p>https://eslint.org/</p>"
+  }
+]
+}
