@@ -40,15 +40,19 @@ void saveToRepoAlert({
     builder: (BuildContext context) {
       return AlertDialog(
         backgroundColor: const Color(0xff2a2a31),
-        title: const Text('Github Connection'),
-        content: const Text(
+        title: Text(
+          'Github Connection',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        content: Text(
           'Would you like to keep your local data and overwrite your repo?',
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
         actions: [
           TextButton(
             child: Text(
               'Yes',
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             onPressed: () {
               getIt<NavigationService>().pop();
@@ -58,7 +62,7 @@ void saveToRepoAlert({
           TextButton(
             child: Text(
               'No',
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             onPressed: () {
               getIt<NavigationService>().pop();
@@ -68,7 +72,7 @@ void saveToRepoAlert({
           TextButton(
             child: Text(
               'Cancel',
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             onPressed: () => getIt<NavigationService>().pop(),
           ),

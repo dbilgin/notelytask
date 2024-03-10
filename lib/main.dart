@@ -29,15 +29,12 @@ void main() async {
   configureApp();
   getIt.registerLazySingleton(() => NavigationService());
 
-  final storage = await HydratedStorage.build(
+  HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: kIsWeb
         ? HydratedStorage.webStorageDirectory
         : await getApplicationDocumentsDirectory(),
   );
-  HydratedBlocOverrides.runZoned(
-    () => runApp(const App()),
-    storage: storage,
-  );
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
@@ -86,23 +83,23 @@ class App extends StatelessWidget {
               ),
               scaffoldBackgroundColor: const Color(0xff1f1f24),
               textTheme: const TextTheme(
-                headline6: TextStyle(
+                titleLarge: TextStyle(
                   color: Color(0xffdce3e8),
                   fontWeight: FontWeight.bold,
                 ),
-                headline4: TextStyle(
+                headlineMedium: TextStyle(
                   color: Color(0xffdce3e8),
                   fontWeight: FontWeight.bold,
                 ),
-                subtitle1: TextStyle(
+                titleMedium: TextStyle(
                   color: Color(0xffdce3e8),
                   fontWeight: FontWeight.bold,
                 ),
-                bodyText1: TextStyle(
+                bodyLarge: TextStyle(
                   color: Color(0xffdce3e8),
                   fontSize: 16.0,
                 ),
-                caption: TextStyle(color: Color(0xffdce3e8)),
+                bodySmall: TextStyle(color: Color(0xffdce3e8)),
               ),
             ),
             navigatorKey: getIt<NavigationService>().navigatorKey,

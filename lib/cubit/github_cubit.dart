@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:notelytask/models/github_state.dart';
@@ -45,6 +46,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
           .where((n) => n.id == redirectNoteId && !n.isDeleted)
           .toList();
       if (note.isNotEmpty) {
+        if (!context.mounted) return;
         navigateToDetails(
           context: context,
           isDeletedList: false,
