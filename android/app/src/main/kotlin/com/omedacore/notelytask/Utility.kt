@@ -28,10 +28,15 @@ class Utility {
         fun setTemplateClickListener(context: Context, views: RemoteViews) {
             val intent = Intent(context, MainActivity::class.java)
             val flags =
-                if (Build.VERSION.SDK_INT > 23)
+                if (Build.VERSION.SDK_INT > 30)
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                 else PendingIntent.FLAG_UPDATE_CURRENT
-            val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+
+            val flag =
+                if (Build.VERSION.SDK_INT > 30) PendingIntent.FLAG_MUTABLE
+                else 0
+
+            val pendingIntent = PendingIntent.getActivity(context, 0, intent, flag)
             views.setPendingIntentTemplate(R.id.notes_layout, pendingIntent)
         }
     }

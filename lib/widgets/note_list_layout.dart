@@ -25,7 +25,7 @@ class NoteListLayout extends StatelessWidget {
           return Center(
             child: Text(
               'Nothing to see here',
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           );
         } else if (isSmallScreen(context)) {

@@ -110,7 +110,7 @@ class _DetailsFormState extends State<DetailsForm> {
                       onChanged: (text) => _submit(),
                       controller: _titleController,
                       textInputAction: TextInputAction.next,
-                      style: Theme.of(context).textTheme.headline4,
+                      style: Theme.of(context).textTheme.headlineMedium,
                       decoration: const InputDecoration(
                         hintText: 'Title',
                         hintStyle: TextStyle(color: Colors.grey),
@@ -123,7 +123,7 @@ class _DetailsFormState extends State<DetailsForm> {
                       child: TextFormField(
                         onChanged: (text) => _submit(),
                         maxLines: null,
-                        style: Theme.of(context).textTheme.bodyText1,
+                        style: Theme.of(context).textTheme.bodyLarge,
                         decoration: const InputDecoration(
                           hintText: 'Description',
                           hintStyle: TextStyle(color: Colors.grey),

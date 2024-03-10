@@ -26,16 +26,23 @@ class _DeletedListPageState extends State<DeletedListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Deleted List'),
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
+        title: const Text(
+          'Deleted List',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         bottom: const PreferredSize(
           preferredSize: Size(double.infinity, 0),
           child: GithubLoader(),
         ),
       ),
-      body: WillPopScope(
-        onWillPop: () async {
+      body: PopScope(
+        canPop: true,
+        onPopInvoked: (didPop) {
           context.read<SelectedNoteCubit>().setNote(null);
-          return true;
         },
         child: const NoteListLayout(isDeletedList: true),
       ),

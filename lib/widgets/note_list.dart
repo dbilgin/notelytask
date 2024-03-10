@@ -99,10 +99,14 @@ class _NoteListState extends State<NoteList> {
                       note: widget.notes[index],
                       isDeletedList: widget.isDeletedList,
                     ),
-                    title: Text(widget.notes[index].title),
+                    title: Text(
+                      widget.notes[index].title,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     subtitle: Text(
                       widget.notes[index].text,
                       overflow: TextOverflow.fade,
+                      style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 5,
                     ),
                     isThreeLine: true,

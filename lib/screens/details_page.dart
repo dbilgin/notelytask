@@ -32,6 +32,10 @@ class _DetailsPageState extends State<DetailsPage> {
     if (widget.withAppBar) {
       return Scaffold(
         appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          iconTheme: const IconThemeData(
+            color: Colors.white,
+          ),
           bottom: const PreferredSize(
             preferredSize: Size(double.infinity, 0),
             child: GithubLoader(),

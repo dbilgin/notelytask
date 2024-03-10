@@ -51,12 +51,17 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('NotelyTask'),
+        title: const Text(
+          'NotelyTask',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_rounded),
             tooltip: 'Deleted Notes',
             onPressed: _navigateToDeletedList,
+            color: Colors.white,
           ),
           IconButton(
             icon: Image.asset('assets/github.png'),

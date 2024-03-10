@@ -11,4 +11,4 @@ PRODUCT_NAME = notelytask
 PRODUCT_BUNDLE_IDENTIFIER = com.omedacore.notelytask
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2021 com.omedacore. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2024 com.omedacore. All rights reserved.

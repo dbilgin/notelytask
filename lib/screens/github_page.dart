@@ -57,9 +57,9 @@ class _GithubPageState extends State<GithubPage> {
           'scope': 'repo',
         },
       );
-      if (await canLaunch(url.toString())) {
-        launch(
-          url.toString(),
+      if (await canLaunchUrl(url)) {
+        launchUrl(
+          url,
           webOnlyWindowName: '_self',
         );
       }
@@ -72,7 +72,14 @@ class _GithubPageState extends State<GithubPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Github'),
+        title: const Text(
+          'Github',
+          style: TextStyle(color: Colors.white),
+        ),
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: BlocBuilder<GithubCubit, GithubState>(
         builder: (context, state) {
@@ -104,13 +111,13 @@ class _GithubPageState extends State<GithubPage> {
             children = [
               Text(
                 'Your access code',
-                style: Theme.of(context).textTheme.bodyText1,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               Row(
                 children: [
                   SelectableText(
                     userCode,
-                    style: Theme.of(context).textTheme.bodyText1,
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   IconButton(
                     icon: const Icon(
@@ -124,7 +131,7 @@ class _GithubPageState extends State<GithubPage> {
               ),
               Text(
                 'Activation Link',
-                style: Theme.of(context).textTheme.bodyText1,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               GestureDetector(
                 child: Text(
@@ -134,7 +141,7 @@ class _GithubPageState extends State<GithubPage> {
                     color: Colors.blue,
                   ),
                 ),
-                onTap: () => launch(verificationUri),
+                onTap: () => launchUrl(Uri.parse(verificationUri)),
               ),
               ElevatedButton(
                 onPressed: () async => await context
@@ -147,7 +154,7 @@ class _GithubPageState extends State<GithubPage> {
             children = [
               Text(
                 'Connected to GitHub',
-                style: Theme.of(context).textTheme.bodyText1,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               SizedBox(
                 height: 50.0,

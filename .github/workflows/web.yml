@@ -4,7 +4,7 @@
 name: Deploy to Firebase
 
 on:
-  create:
+  push:
     tags:
       - v*
 
