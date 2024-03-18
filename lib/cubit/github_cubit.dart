@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/repository/github_repository.dart';
 import 'package:notelytask/utils.dart';
@@ -14,6 +16,26 @@ class GithubCubit extends HydratedCubit<GithubState> {
   }) : super(const GithubState());
   final NotesCubit notesCubit;
   final GithubRepository githubRepository;
+
+  Future<String?> getFileLocalPath(String fileName) async {
+    final accessToken = state.accessToken;
+    final ownerRepo = state.ownerRepo;
+
+    if (accessToken != null && ownerRepo != null) {
+      emit(state.copyWith(loading: true));
+
+      final file = await githubRepository.getFile(
+        ownerRepo,
+        accessToken,
+        fileName,
+      );
+
+      emit(state.copyWith(loading: false));
+      return file?.path;
+    }
+    emit(state.copyWith(loading: false));
+    return null;
+  }
 
   Future<void> getAndUpdateNotes({
     required BuildContext context,
@@ -85,21 +107,78 @@ class GithubCubit extends HydratedCubit<GithubState> {
     emit(state.copyWith(loading: false));
   }
 
+  bool isLoggedIn() {
+    final ownerRepo = state.ownerRepo;
+    final accessToken = state.accessToken;
+    return ownerRepo != null && accessToken != null;
+  }
+
+  Future<FileData?> uploadNewFile(
+    String fileName,
+    Uint8List data,
+  ) async {
+    final ownerRepo = state.ownerRepo;
+    final accessToken = state.accessToken;
+    if (ownerRepo == null || accessToken == null) {
+      return null;
+    }
+    emit(state.copyWith(loading: true));
+
+    final safeFileName = notesCubit.nonExistentFileName(fileName: fileName);
+
+    var newFile = await githubRepository.createNewFile(
+      ownerRepo,
+      accessToken,
+      data,
+      safeFileName,
+    );
+    final sha = newFile?.sha;
+
+    if (newFile == null || sha == null) {
+      emit(state.copyWith(error: true, loading: false));
+      return null;
+    }
+
+    emit(state.copyWith(loading: false));
+    return FileData(name: safeFileName, sha: sha);
+  }
+
+  Future<bool> deleteFile(FileData fileData) async {
+    final ownerRepo = state.ownerRepo;
+    final accessToken = state.accessToken;
+    if (ownerRepo == null || accessToken == null) {
+      return false;
+    }
+    emit(state.copyWith(loading: true));
+
+    bool isDeleted = await githubRepository.deleteFile(
+      ownerRepo,
+      accessToken,
+      fileData.sha,
+      fileData.name,
+    );
+
+    emit(state.copyWith(loading: false));
+    return isDeleted;
+  }
+
   Future<void> createOrUpdateRemoteNotes({
     bool shouldResetIfError = true,
   }) async {
     final ownerRepo = state.ownerRepo;
     final sha = state.sha;
     final accessToken = state.accessToken;
-    if (ownerRepo == null || accessToken == null) {
+    if (!isLoggedIn() || ownerRepo == null || accessToken == null) {
       return;
     }
     emit(state.copyWith(loading: true));
 
-    var newNote = await githubRepository.createOrUpdateFile(
+    final json = notesCubit.toJson(notesCubit.state);
+
+    var newNote = await githubRepository.createOrUpdateNotesFile(
       ownerRepo,
       accessToken,
-      notesCubit.toJson(notesCubit.state),
+      json,
       sha,
     );
 

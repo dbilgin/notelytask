@@ -101,11 +101,7 @@ class _GithubPageState extends State<GithubPage> {
               verificationUri != null) {
             void onCopyPressed() {
               Clipboard.setData(ClipboardData(text: userCode));
-              const snackBar = SnackBar(
-                content: Text('Copied!'),
-                duration: Duration(seconds: 1),
-              );
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              showSnackBar(context, 'Copied!');
             }
 
             children = [
@@ -184,11 +180,7 @@ class _GithubPageState extends State<GithubPage> {
           return BlocListener<GithubCubit, GithubState>(
             listener: (context, state) {
               if (state.error && repoUrlController.text.isNotEmpty) {
-                const snackBar = SnackBar(
-                  content: Text('Error integrating repository.'),
-                  duration: Duration(seconds: 1),
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                showSnackBar(context, 'Error integrating repository.');
 
                 repoUrlController.text = '';
               }

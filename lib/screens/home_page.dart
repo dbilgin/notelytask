@@ -21,8 +21,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    NativeService.initialiseWidgetListener(context);
     super.initState();
+    NativeService.initialiseWidgetListener(context);
+    context.read<SelectedNoteCubit>().setNoteId(null);
+    context.read<GithubCubit>().getAndUpdateNotes(context: context);
   }
 
   Future<void> setAndUpdate() async {
@@ -36,19 +38,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _navigateToDeletedList() {
-    context.read<SelectedNoteCubit>().setNote(null);
+    context.read<SelectedNoteCubit>().setNoteId(null);
     getIt<NavigationService>().pushNamed('/deleted_list');
   }
 
   @override
   Widget build(BuildContext context) {
-    var smallScreenCheck = isSmallScreen(context);
-    if (smallScreen == null || smallScreenCheck != smallScreen) {
-      setState(() => smallScreen = smallScreenCheck);
-      context.read<SelectedNoteCubit>().setNote(null);
-      context.read<GithubCubit>().getAndUpdateNotes(context: context);
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
