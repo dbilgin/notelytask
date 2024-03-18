@@ -38,9 +38,8 @@ jobs:
       - name: Build Release
         run: flutter build web
 
+      - name: Install Firebase
+        run: curl -sL https://firebase.tools | bash
+
       - name: Deploy to Firebase
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only hosting
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase deploy --only hosting --token ${{secrets.FIREBASE_TOKEN}}
