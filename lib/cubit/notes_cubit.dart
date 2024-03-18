@@ -53,15 +53,19 @@ class NotesCubit extends HydratedCubit<List<Note>> {
     required String fileName,
     required String fileSha,
   }) {
-    var noteIndex = state.indexWhere((element) => element.id == noteId);
+    final newFileData = FileData(name: fileName, sha: fileSha);
+    final noteIndex = state.indexWhere((element) => element.id == noteId);
     if (noteIndex == -1) {
-      return;
+      final newNote = Note.generateNew();
+      newNote.fileDataList = [newFileData];
+      state.add(newNote);
+    } else {
+      state[noteIndex].fileDataList = [
+        ...state[noteIndex].fileDataList,
+        newFileData,
+      ];
     }
 
-    state[noteIndex].fileDataList = [
-      ...state[noteIndex].fileDataList,
-      FileData(name: fileName, sha: fileSha)
-    ];
     emit([...state]);
   }
 

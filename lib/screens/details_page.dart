@@ -27,14 +27,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   void initState() {
-    note = Note(
-      id: widget.note?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      title: widget.note?.title ?? '',
-      text: widget.note?.text ?? '',
-      date: DateTime.now(),
-      isDeleted: widget.note?.isDeleted ?? false,
-      fileDataList: widget.note?.fileDataList ?? [],
-    );
+    note = Note.generateNew(note: widget.note);
 
     context.read<NotesCubit>().setNote(note);
     context.read<SelectedNoteCubit>().setNoteId(note.id);
