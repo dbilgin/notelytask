@@ -254,8 +254,7 @@ Future<void> uploadFile(BuildContext context, String noteId) async {
   }
 
   FilePickerResult? result = await FilePicker.platform.pickFiles();
-  final path = result?.files.single.path;
-  if (result == null || path == null) return;
+  if (result == null) return;
 
   Uint8List? imageBytes;
   String fileName;
@@ -263,6 +262,9 @@ Future<void> uploadFile(BuildContext context, String noteId) async {
     imageBytes = result.files.single.bytes;
     fileName = result.files.single.name;
   } else {
+    final path = result.files.single.path;
+    if (path == null) return;
+
     File file = File(path);
     imageBytes = await file.readAsBytes();
     fileName = file.uri.pathSegments.last;
