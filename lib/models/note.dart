@@ -23,6 +23,15 @@ class Note {
     this.isDeleted = false,
   });
 
+  factory Note.generateNew({Note? note}) => Note(
+        id: note?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        title: note?.title ?? '',
+        text: note?.text ?? '',
+        date: DateTime.now(),
+        isDeleted: note?.isDeleted ?? false,
+        fileDataList: note?.fileDataList ?? [],
+      );
+
   factory Note.fromJson(Map<String, dynamic> json) => _$NoteFromJson(json);
   Map<String, dynamic> toJson() => _$NoteToJson(this);
 }

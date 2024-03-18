@@ -246,7 +246,7 @@ Future<void> _openLink(BuildContext context, FileData file) async {
   }
 }
 
-Future<void> uploadFile(BuildContext context, String noteId) async {
+Future<void> uploadFile(BuildContext context, Note note) async {
   final isLoggedIn = context.read<GithubCubit>().isLoggedIn();
   if (!isLoggedIn) {
     showSnackBar(context, 'Please log in to upload files.');
@@ -276,8 +276,9 @@ Future<void> uploadFile(BuildContext context, String noteId) async {
       await context.read<GithubCubit>().uploadNewFile(fileName, imageBytes);
 
   if (!context.mounted || fileData == null) return;
+
   context.read<NotesCubit>().addNoteFileData(
-        noteId: noteId,
+        noteId: note.id,
         fileName: fileData.name,
         fileSha: fileData.sha,
       );

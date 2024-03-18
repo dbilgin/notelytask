@@ -133,7 +133,7 @@ class _DetailsFormState extends State<DetailsForm> {
                     IconButton(
                       icon: const Icon(Icons.file_upload),
                       tooltip: 'Upload File',
-                      onPressed: () => uploadFile(context, widget.note.id),
+                      onPressed: () => uploadFile(context, widget.note),
                       color: Colors.white,
                     ),
                     FileList(
