@@ -1,20 +1,23 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
-import 'package:notelytask/cubit/notes_cubit.dart';
-import 'package:notelytask/cubit/selected_note_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/utils.dart';
+import 'package:notelytask/widgets/file_list.dart';
 
 class DetailsForm extends StatefulWidget {
-  final Note? note;
+  final Note note;
   final bool isDeletedList;
+  final Function(Note note) submit;
   const DetailsForm({
     Key? key,
-    this.note,
+    required this.note,
     required this.isDeletedList,
+    required this.submit,
   }) : super(key: key);
 
   @override
@@ -26,26 +29,11 @@ class _DetailsFormState extends State<DetailsForm> {
   final _titleController = TextEditingController();
   final _textController = TextEditingController();
   Timer? _debounce;
-  String? _id;
-  bool _isDeleted = false;
 
   @override
   void initState() {
-    _titleController.text = widget.note?.title ?? '';
-    _textController.text = widget.note?.text ?? '';
-    _id = widget.note?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
-    _isDeleted = widget.note?.isDeleted ?? false;
-
-    var note = Note(
-      id: _id!,
-      title: _titleController.text,
-      text: _textController.text,
-      date: DateTime.now(),
-      isDeleted: _isDeleted,
-    );
-
-    context.read<NotesCubit>().setNote(note);
-    context.read<SelectedNoteCubit>().setNote(note);
+    _titleController.text = widget.note.title;
+    _textController.text = widget.note.text;
 
     super.initState();
   }
@@ -56,12 +44,6 @@ class _DetailsFormState extends State<DetailsForm> {
     super.dispose();
   }
 
-  void _debouncedSubmit(Note note) {
-    context.read<NotesCubit>().setNote(note);
-    context.read<SelectedNoteCubit>().setNote(note);
-    context.read<GithubCubit>().createOrUpdateRemoteNotes();
-  }
-
   void _submit() {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -70,15 +52,16 @@ class _DetailsFormState extends State<DetailsForm> {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
 
     var note = Note(
-      id: _id!,
+      id: widget.note.id,
       title: _titleController.text,
       text: _textController.text,
       date: DateTime.now(),
-      isDeleted: _isDeleted,
+      isDeleted: widget.note.isDeleted,
+      fileDataList: widget.note.fileDataList,
     );
     _debounce = Timer(
       const Duration(milliseconds: 1000),
-      () => _debouncedSubmit(note),
+      () => widget.submit(note),
     );
   }
 
@@ -91,54 +74,77 @@ class _DetailsFormState extends State<DetailsForm> {
     return BlocListener<GithubCubit, GithubState>(
       listener: (context, state) {
         if (state.error) {
-          const snackBar = SnackBar(
-            content: Text('Error with Github integration.'),
-            duration: Duration(seconds: 1),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          showSnackBar(context, 'Error with Github integration.');
         }
       },
-      child: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Column(
-            children: shouldHideForm
-                ? [Container()]
-                : [
-                    TextFormField(
-                      onChanged: (text) => _submit(),
-                      controller: _titleController,
-                      textInputAction: TextInputAction.next,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                      decoration: const InputDecoration(
-                        hintText: 'Title',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                      ),
+      child: Column(
+        children: [
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Column(
+                  children: shouldHideForm
+                      ? [Container()]
+                      : [
+                          TextFormField(
+                            onChanged: (text) => _submit(),
+                            controller: _titleController,
+                            textInputAction: TextInputAction.next,
+                            style: Theme.of(context).textTheme.headlineMedium,
+                            decoration: const InputDecoration(
+                              hintText: 'Title',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                            ),
+                          ),
+                          Expanded(
+                            child: TextFormField(
+                              onChanged: (text) => _submit(),
+                              maxLines: null,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              decoration: const InputDecoration(
+                                hintText: 'Description',
+                                hintStyle: TextStyle(color: Colors.grey),
+                                border: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                              ),
+                              keyboardType: TextInputType.multiline,
+                              controller: _textController,
+                              // expands: true,
+                            ),
+                          ),
+                        ],
+                ),
+              ),
+            ),
+          ),
+          KeyboardVisibilityBuilder(
+            builder: (context, isKeyboardVisible) {
+              return Visibility(
+                visible: !isKeyboardVisible,
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.file_upload),
+                      tooltip: 'Upload File',
+                      onPressed: () => uploadFile(context, widget.note.id),
+                      color: Colors.white,
                     ),
-                    Expanded(
-                      child: TextFormField(
-                        onChanged: (text) => _submit(),
-                        maxLines: null,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        decoration: const InputDecoration(
-                          hintText: 'Description',
-                          hintStyle: TextStyle(color: Colors.grey),
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                        ),
-                        keyboardType: TextInputType.multiline,
-                        controller: _textController,
-                        // expands: true,
-                      ),
+                    FileList(
+                      noteId: widget.note.id,
                     ),
                   ],
+                ),
+              );
+            },
           ),
-        ),
+        ],
       ),
     );
   }

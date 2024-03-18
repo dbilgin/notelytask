@@ -1,17 +1,93 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'dart:convert';
 import 'package:notelytask/models/github_state.dart';
+import 'package:path_provider/path_provider.dart';
 
-class GithubNote {
-  GithubNote({this.sha, this.content});
+class GithubFile {
+  GithubFile({this.sha, this.content});
   final String? sha;
   final Map<String, dynamic>? content;
 }
 
 class GithubRepository {
-  Future<GithubNote?> createOrUpdateFile(
+  Future<GithubFile?> createNewFile(
+    String ownerRepo,
+    String accessToken,
+    Uint8List content,
+    String fileName,
+  ) async {
+    try {
+      final encodedContent = base64.encode(content);
+
+      final url = Uri.https(
+        'api.github.com',
+        '/repos/$ownerRepo/contents/$fileName',
+      );
+      final body = {
+        'message': '$fileName uploaded',
+        'content': encodedContent,
+      };
+      var response = await put(
+        url,
+        headers: {'Authorization': 'bearer $accessToken'},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
+
+        var content = jsonResponse['content'];
+        var sha = content['sha'];
+
+        return GithubFile(
+          sha: sha,
+        );
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<bool> deleteFile(
+    String ownerRepo,
+    String accessToken,
+    String sha,
+    String fileName,
+  ) async {
+    try {
+      final url = Uri.https(
+        'api.github.com',
+        '/repos/$ownerRepo/contents/$fileName',
+      );
+      final body = {
+        'message': '$fileName deleted',
+        'sha': sha,
+      };
+      var response = await delete(
+        url,
+        headers: {'Authorization': 'bearer $accessToken'},
+        body: jsonEncode(body),
+      );
+
+      if ((response.statusCode >= 200 && response.statusCode < 300) ||
+          response.statusCode == 404) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<GithubFile?> createOrUpdateNotesFile(
     String ownerRepo,
     String accessToken,
     Map<String, dynamic> content,
@@ -47,7 +123,7 @@ class GithubRepository {
         var content = jsonResponse['content'];
         var sha = content['sha'];
 
-        return GithubNote(
+        return GithubFile(
           sha: sha,
         );
       } else {
@@ -58,7 +134,47 @@ class GithubRepository {
     }
   }
 
-  Future<GithubNote?> getExistingNoteFile(
+  Future<File?> getFile(
+    String ownerRepo,
+    String accessToken,
+    String fileName,
+  ) async {
+    try {
+      final url = Uri.https(
+        'api.github.com',
+        '/repos/$ownerRepo/contents/$fileName',
+      );
+      var response = await get(
+        url,
+        headers: {
+          'Authorization': 'bearer $accessToken',
+          'accept': 'application/vnd.github.raw+json',
+        },
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        Directory dir = kIsWeb
+            ? HydratedStorage.webStorageDirectory
+            : await getTemporaryDirectory();
+
+        final path = '${dir.path}/$fileName';
+
+        final file = File(path);
+        await file.writeAsBytes(
+          response.bodyBytes,
+          mode: FileMode.write,
+        );
+
+        return file;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<GithubFile?> getExistingNoteFile(
     String ownerRepo,
     String accessToken,
   ) async {
@@ -82,7 +198,7 @@ class GithubRepository {
         final utfDecoded = utf8.decode(base64Decoded);
         final content = json.decode(utfDecoded);
 
-        return GithubNote(
+        return GithubFile(
           sha: sha,
           content: content,
         );

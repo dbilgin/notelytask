@@ -1,21 +1,20 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:notelytask/models/note.dart';
 
-class SelectedNoteCubit extends HydratedCubit<Note?> {
+class SelectedNoteCubit extends HydratedCubit<String?> {
   SelectedNoteCubit() : super(null);
 
-  void setNote(Note? note) {
-    emit(note);
+  void setNoteId(String? noteId) {
+    emit(noteId);
   }
 
   @override
-  Note? fromJson(Map<String, dynamic>? json) {
-    var note = json != null ? Note.fromJson(json) : null;
+  String? fromJson(Map<String, dynamic>? json) {
+    var note = json != null ? json['note'] : null;
     return note;
   }
 
   @override
-  Map<String, dynamic>? toJson(Note? state) {
-    return state?.toJson();
+  Map<String, dynamic>? toJson(String? state) {
+    return {'note': state};
   }
 }
