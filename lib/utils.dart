@@ -257,11 +257,16 @@ Future<void> uploadFile(BuildContext context, String noteId) async {
   final path = result?.files.single.path;
   if (result == null || path == null) return;
 
-  File file = File(path);
-  Uint8List? imageBytes =
-      !kIsWeb ? await file.readAsBytes() : result.files.single.bytes;
-  String fileName =
-      !kIsWeb ? file.uri.pathSegments.last : result.files.single.name;
+  Uint8List? imageBytes;
+  String fileName;
+  if (kIsWeb) {
+    imageBytes = result.files.single.bytes;
+    fileName = result.files.single.name;
+  } else {
+    File file = File(path);
+    imageBytes = await file.readAsBytes();
+    fileName = file.uri.pathSegments.last;
+  }
 
   if (!context.mounted || imageBytes == null) return;
 
