@@ -71,6 +71,13 @@ class App extends StatelessWidget {
                   ),
                 ),
               ),
+              textButtonTheme: TextButtonThemeData(
+                style: ButtonStyle(
+                  foregroundColor: MaterialStateProperty.all(
+                    const Color(0xffdce3e8),
+                  ),
+                ),
+              ),
               floatingActionButtonTheme: const FloatingActionButtonThemeData(
                 foregroundColor: Color(0xffdce3e8),
               ),
