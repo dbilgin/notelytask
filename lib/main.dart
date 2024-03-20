@@ -61,8 +61,22 @@ class App extends StatelessWidget {
           child: MaterialApp(
             title: 'NotelyTask',
             theme: ThemeData(
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                    const Color(0xff17181c),
+                  ),
+                  foregroundColor: MaterialStateProperty.all(
+                    const Color(0xffdce3e8),
+                  ),
+                ),
+              ),
+              floatingActionButtonTheme: const FloatingActionButtonThemeData(
+                foregroundColor: Color(0xffdce3e8),
+              ),
+              brightness: Brightness.dark,
               primarySwatch: Colors.blue,
-              colorScheme: const ColorScheme.light(
+              colorScheme: const ColorScheme.dark(
                 primary: Color(0xff17181c),
                 secondary: Color(0xff2e8fff),
               ),
