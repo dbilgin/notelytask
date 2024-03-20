@@ -78,6 +78,12 @@ class App extends StatelessWidget {
                   ),
                 ),
               ),
+              snackBarTheme: const SnackBarThemeData(
+                contentTextStyle: TextStyle(
+                  color: Color(0xffdce3e8),
+                ),
+                backgroundColor: Color(0xff17181c),
+              ),
               floatingActionButtonTheme: const FloatingActionButtonThemeData(
                 foregroundColor: Color(0xffdce3e8),
               ),
