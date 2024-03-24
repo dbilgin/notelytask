@@ -10,7 +10,7 @@ import 'package:notelytask/screens/home_page.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:notelytask/service/navigation_service.dart';
-import 'package:notelytask/utils.dart';
+import 'package:notelytask/theme.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
