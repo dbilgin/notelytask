@@ -6,6 +6,7 @@ import 'package:http/http.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'dart:convert';
 import 'package:notelytask/models/github_state.dart';
+import 'package:notelytask/utils.dart';
 import 'package:path_provider/path_provider.dart';
 
 class GithubFile {
@@ -176,6 +177,7 @@ class GithubRepository {
   Future<GithubFile?> getExistingNoteFile(
     String ownerRepo,
     String accessToken,
+    String? pin,
   ) async {
     try {
       final url = Uri.https(
@@ -195,12 +197,19 @@ class GithubRepository {
         final cleanedJson = jsonResponse['content'].replaceAll('\n', '').trim();
         final base64Decoded = base64.decode(cleanedJson);
         final utfDecoded = utf8.decode(base64Decoded);
-        final content = json.decode(utfDecoded);
 
-        return GithubFile(
-          sha: sha,
-          content: content,
-        );
+        if (pin == null) {
+          return GithubFile(
+            sha: sha,
+            content: json.decode(utfDecoded),
+          );
+        } else {
+          final decrypted = decrypt(utfDecoded, pin);
+          return GithubFile(
+            sha: sha,
+            content: json.decode(decrypted),
+          );
+        }
       } else {
         return null;
       }

@@ -42,7 +42,9 @@ class _GithubPageState extends State<GithubPage> {
     saveToRepoAlert(
       context: context,
       onPressed: (bool keepLocal) async {
-        await context.read<GithubCubit>().setRepoUrl(repoUrl, keepLocal);
+        await enterEncryptionKeyDialog(context, (key) async {
+          await context.read<GithubCubit>().setRepoUrl(repoUrl, keepLocal, key);
+        });
       },
     );
   }
@@ -173,6 +175,12 @@ class _GithubPageState extends State<GithubPage> {
                   disabledBackgroundColor: Colors.grey.withOpacity(0.12),
                 ),
                 child: const Text('Save Repo'),
+              ),
+              ElevatedButton(
+                onPressed: state.ownerRepo != null
+                    ? () => encryptNotesDialog(context)
+                    : null,
+                child: const Text('Encrypt Notes'),
               ),
             ];
           }
