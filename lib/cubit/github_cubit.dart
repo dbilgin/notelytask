@@ -44,6 +44,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     required BuildContext context,
     String? redirectNoteId,
   }) async {
+    final encryptionKey = notesCubit.state.encryptionKey;
     final accessToken = state.accessToken;
     final ownerRepo = state.ownerRepo;
 
@@ -53,6 +54,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
       final existingFile = await githubRepository.getExistingNoteFile(
         ownerRepo,
         accessToken,
+        encryptionKey,
       );
 
       final finalContent = existingFile?.content;
@@ -81,23 +83,27 @@ class GithubCubit extends HydratedCubit<GithubState> {
     }
   }
 
-  Future<void> setRepoUrl(String ownerRepo, bool keepLocal) async {
+  Future<void> setRepoUrl(String ownerRepo, bool keepLocal, String? pin) async {
     final accessToken = state.accessToken;
     if (accessToken == null) {
       reset();
       return;
     }
     emit(state.copyWith(loading: true, error: false));
+    notesCubit.emit(notesCubit.state.copyWith(encryptionKey: pin));
 
     final existingFile = await githubRepository.getExistingNoteFile(
       ownerRepo,
       accessToken,
+      pin,
     );
 
-    emit(state.copyWith(
-      ownerRepo: ownerRepo,
-      sha: existingFile?.sha,
-    ));
+    emit(
+      state.copyWith(
+        ownerRepo: ownerRepo,
+        sha: existingFile?.sha,
+      ),
+    );
 
     if (keepLocal || existingFile?.sha == null) {
       await createOrUpdateRemoteNotes(shouldResetIfError: false);
@@ -169,6 +175,8 @@ class GithubCubit extends HydratedCubit<GithubState> {
   Future<void> createOrUpdateRemoteNotes({
     bool shouldResetIfError = true,
   }) async {
+    final encryptionKey = notesCubit.state.encryptionKey;
+
     final ownerRepo = state.ownerRepo;
     final sha = state.sha;
     final accessToken = state.accessToken;
@@ -177,13 +185,16 @@ class GithubCubit extends HydratedCubit<GithubState> {
     }
     emit(state.copyWith(loading: true));
 
-    final jsonMap = notesCubit.toJson(notesCubit.state);
+    final jsonMap = notesCubit.state.toJson();
     final stringifiedContent = json.encode(jsonMap);
+    final finalizedStringContent = encryptionKey == null
+        ? stringifiedContent
+        : encrypt(stringifiedContent, encryptionKey);
 
     var newNote = await githubRepository.createOrUpdateNotesFile(
       ownerRepo,
       accessToken,
-      stringifiedContent,
+      finalizedStringContent,
       sha,
     );
 

@@ -15,6 +15,10 @@ class NotesCubit extends HydratedCubit<NotesState> {
     super.onChange(change);
   }
 
+  void setEncryptionKey(String key) {
+    emit(state.copyWith(encryptionKey: key));
+  }
+
   String nonExistentFileName({required String fileName}) {
     var files = state.notes.expand((e) => e.fileDataList);
     var fileNames = files.map((e) => e.name);
