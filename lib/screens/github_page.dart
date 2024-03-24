@@ -7,7 +7,6 @@ import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:encrypt/encrypt.dart' as e;
 
 class GithubPage extends StatefulWidget {
   const GithubPage({Key? key, this.code}) : super(key: key);
