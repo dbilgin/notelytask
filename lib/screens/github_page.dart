@@ -7,6 +7,7 @@ import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:encrypt/encrypt.dart' as e;
 
 class GithubPage extends StatefulWidget {
   const GithubPage({Key? key, this.code}) : super(key: key);
@@ -42,7 +43,9 @@ class _GithubPageState extends State<GithubPage> {
     saveToRepoAlert(
       context: context,
       onPressed: (bool keepLocal) async {
-        await context.read<GithubCubit>().setRepoUrl(repoUrl, keepLocal);
+        await enterEncryptionKeyDialog(context, (key) async {
+          await context.read<GithubCubit>().setRepoUrl(repoUrl, keepLocal, key);
+        });
       },
     );
   }
@@ -173,6 +176,12 @@ class _GithubPageState extends State<GithubPage> {
                   disabledBackgroundColor: Colors.grey.withOpacity(0.12),
                 ),
                 child: const Text('Save Repo'),
+              ),
+              ElevatedButton(
+                onPressed: state.ownerRepo != null
+                    ? () => encryptNotesDialog(context)
+                    : null,
+                child: const Text('Encrypt Notes'),
               ),
             ];
           }
