@@ -12,7 +12,10 @@ class GithubLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<GithubCubit, GithubState>(
       builder: (context, state) => state.loading
-          ? const LinearProgressIndicator(minHeight: 1)
+          ? const LinearProgressIndicator(
+              minHeight: 1,
+              color: Color(0xffdce3e8),
+            )
           : Container(),
     );
   }
