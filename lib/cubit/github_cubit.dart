@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/github_state.dart';
+import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/repository/github_repository.dart';
 import 'package:notelytask/utils.dart';
 
@@ -53,18 +54,18 @@ class GithubCubit extends HydratedCubit<GithubState> {
       );
 
       final finalContent = existingFile?.content;
-      if (existingFile == null) {
+      if (existingFile == null || finalContent == null) {
         reset();
-        notesCubit.emit([]);
+        notesCubit.emit(const NotesState());
       } else {
-        notesCubit.emit(
-            finalContent != null ? notesCubit.fromJson(finalContent) : []);
+        final list = notesCubit.fromJson(finalContent);
+        notesCubit.emit(list);
         emit(state.copyWith(loading: false, sha: existingFile.sha));
       }
     }
 
     if (redirectNoteId != null) {
-      var note = notesCubit.state
+      var note = notesCubit.state.notes
           .where((n) => n.id == redirectNoteId && !n.isDeleted)
           .toList();
       if (note.isNotEmpty) {
@@ -100,8 +101,9 @@ class GithubCubit extends HydratedCubit<GithubState> {
       await createOrUpdateRemoteNotes(shouldResetIfError: false);
     } else {
       final finalContent = existingFile?.content;
-      notesCubit
-          .emit(finalContent != null ? notesCubit.fromJson(finalContent) : []);
+      notesCubit.emit(finalContent != null
+          ? notesCubit.fromJson(finalContent)
+          : const NotesState());
     }
 
     emit(state.copyWith(loading: false));
