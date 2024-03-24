@@ -39,6 +39,7 @@ class _NoteListDetailedState extends State<NoteListDetailed> {
                 ? context
                     .read<NotesCubit>()
                     .state
+                    .notes
                     .firstWhereOrNull((n) => n.id == selectedNoteId)
                 : null;
 

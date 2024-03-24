@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
-import 'package:notelytask/models/note.dart';
+import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/utils.dart';
 import 'package:notelytask/widgets/note_list_detailed.dart';
 import 'package:notelytask/widgets/note_list.dart';
@@ -15,9 +15,9 @@ class NoteListLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<NotesCubit, List<Note>>(
-      builder: (context, List<Note> state) {
-        var filteredNotes = state
+    return BlocBuilder<NotesCubit, NotesState>(
+      builder: (context, NotesState state) {
+        var filteredNotes = state.notes
             .where((element) => element.isDeleted == isDeletedList)
             .toList();
 

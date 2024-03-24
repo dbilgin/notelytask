@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
-import 'package:notelytask/models/note.dart';
+import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/utils.dart';
 
 class FileList extends StatelessWidget {
@@ -16,9 +16,9 @@ class FileList extends StatelessWidget {
   Widget build(BuildContext context) {
     final scrollController = ScrollController();
 
-    return BlocBuilder<NotesCubit, List<Note>>(
+    return BlocBuilder<NotesCubit, NotesState>(
       builder: (context, state) {
-        final fileDataList = state
+        final fileDataList = state.notes
             .firstWhereOrNull((element) => element.id == noteId)
             ?.fileDataList;
 
