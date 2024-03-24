@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -65,7 +67,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     }
 
     if (redirectNoteId != null) {
-      var note = notesCubit.state.notes
+      final note = notesCubit.state.notes
           .where((n) => n.id == redirectNoteId && !n.isDeleted)
           .toList();
       if (note.isNotEmpty) {
@@ -175,12 +177,13 @@ class GithubCubit extends HydratedCubit<GithubState> {
     }
     emit(state.copyWith(loading: true));
 
-    final json = notesCubit.toJson(notesCubit.state);
+    final jsonMap = notesCubit.toJson(notesCubit.state);
+    final stringifiedContent = json.encode(jsonMap);
 
     var newNote = await githubRepository.createOrUpdateNotesFile(
       ownerRepo,
       accessToken,
-      json,
+      stringifiedContent,
       sha,
     );
 
@@ -213,8 +216,9 @@ class GithubCubit extends HydratedCubit<GithubState> {
   }
 
   Future<void> getAccessToken(String code) async {
-    emit(state.copyWith(
-        accessToken: await githubRepository.getAccessToken(code)));
+    emit(
+      state.copyWith(accessToken: await githubRepository.getAccessToken(code)),
+    );
   }
 
   @override

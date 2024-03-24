@@ -17,7 +17,7 @@ class NoteListLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<NotesCubit, NotesState>(
       builder: (context, NotesState state) {
-        var filteredNotes = state.notes
+        final filteredNotes = state.notes
             .where((element) => element.isDeleted == isDeletedList)
             .toList();
 
