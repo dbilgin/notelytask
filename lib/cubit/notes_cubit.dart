@@ -34,19 +34,24 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   void setNote(Note note) {
-    var index = state.notes.indexWhere((element) => element.id == note.id);
+    final index = state.notes.indexWhere((element) => element.id == note.id);
+    List<Note> updatedNotes = List<Note>.from(state.notes);
+
     if (note.title.isEmpty && note.text.isEmpty && note.fileDataList.isEmpty) {
-      if (index != -1) deleteNotePermanently(note.id);
+      if (index != -1) {
+        updatedNotes.removeAt(index);
+        emit(state.copyWith(notes: updatedNotes));
+      }
       return;
     }
 
     if (index == -1) {
-      state.notes.add(note);
+      updatedNotes.add(note);
     } else {
-      state.notes[index] = note;
+      updatedNotes[index] = note;
     }
 
-    emit(state.copyWith());
+    emit(state.copyWith(notes: updatedNotes));
   }
 
   void addNoteFileData({
@@ -54,56 +59,80 @@ class NotesCubit extends HydratedCubit<NotesState> {
     required String fileName,
     required String fileSha,
   }) {
-    final newFileData = FileData(name: fileName, sha: fileSha);
     final noteIndex = state.notes.indexWhere((element) => element.id == noteId);
+    List<Note> updatedNotes = List<Note>.from(state.notes);
+
     if (noteIndex == -1) {
-      final newNote = Note.generateNew();
-      newNote.fileDataList = [newFileData];
-      state.notes.add(newNote);
+      final newNote = Note.generateNew()
+          .copyWith(fileDataList: [FileData(name: fileName, sha: fileSha)]);
+      updatedNotes.add(newNote);
     } else {
-      state.notes[noteIndex].fileDataList = [
-        ...state.notes[noteIndex].fileDataList,
-        newFileData,
-      ];
+      List<FileData> updatedFileDataList =
+          List<FileData>.from(state.notes[noteIndex].fileDataList)
+            ..add(FileData(name: fileName, sha: fileSha));
+      updatedNotes[noteIndex] =
+          state.notes[noteIndex].copyWith(fileDataList: updatedFileDataList);
     }
 
-    emit(state.copyWith());
+    emit(state.copyWith(notes: updatedNotes));
   }
 
   void deleteNoteFileData(String noteId, String fileName) {
-    final index = state.notes.indexWhere((element) => element.id == noteId);
-    if (index == -1) {
+    final noteIndex = state.notes.indexWhere((element) => element.id == noteId);
+    if (noteIndex == -1) {
       return;
     }
 
-    final fileIndex = state.notes[index].fileDataList
-        .indexWhere((element) => element.name == fileName);
-    state.notes[index].fileDataList.removeAt(fileIndex);
+    List<Note> updatedNotes = List<Note>.from(state.notes);
+    List<FileData> updatedFileDataList =
+        List<FileData>.from(updatedNotes[noteIndex].fileDataList);
+    final fileIndex =
+        updatedFileDataList.indexWhere((element) => element.name == fileName);
 
-    emit(state.copyWith());
+    if (fileIndex != -1) {
+      updatedFileDataList.removeAt(fileIndex);
+      updatedNotes[noteIndex] =
+          updatedNotes[noteIndex].copyWith(fileDataList: updatedFileDataList);
+      emit(state.copyWith(notes: updatedNotes));
+    }
   }
 
   void deleteNotePermanently(String noteId) {
-    var index = state.notes.indexWhere((element) => element.id == noteId);
-    state.notes.removeAt(index);
+    final noteIndex = state.notes.indexWhere((element) => element.id == noteId);
+    if (noteIndex == -1) {
+      return;
+    }
 
-    emit(state.copyWith());
+    List<Note> updatedNotes = List<Note>.from(state.notes);
+    updatedNotes.removeAt(noteIndex);
+
+    emit(state.copyWith(notes: updatedNotes));
   }
 
   void deleteNote(Note note) {
-    var index = state.notes.indexWhere((element) => element.id == note.id);
-    note.isDeleted = true;
-    state.notes[index] = note;
+    final noteIndex =
+        state.notes.indexWhere((element) => element.id == note.id);
+    if (noteIndex == -1) {
+      return;
+    }
 
-    emit(state.copyWith());
+    List<Note> updatedNotes = List<Note>.from(state.notes);
+    updatedNotes[noteIndex] = note.copyWith(isDeleted: true);
+
+    emit(state.copyWith(notes: updatedNotes));
   }
 
   void restoreNote(Note note) {
-    var index = state.notes.indexWhere((element) => element.id == note.id);
-    note.isDeleted = false;
-    state.notes[index] = note;
+    final noteIndex =
+        state.notes.indexWhere((element) => element.id == note.id);
+    if (noteIndex == -1) {
+      return;
+    }
 
-    emit(state.copyWith());
+    List<Note> updatedNotes = List<Note>.from(state.notes);
+    updatedNotes[noteIndex] = note.copyWith(isDeleted: false);
+
+    emit(state.copyWith(notes: updatedNotes));
   }
 
   @override

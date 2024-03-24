@@ -90,11 +90,10 @@ class GithubRepository {
   Future<GithubFile?> createOrUpdateNotesFile(
     String ownerRepo,
     String accessToken,
-    Map<String, dynamic> content,
+    String stringifiedContent,
     String? sha,
   ) async {
     try {
-      final stringifiedContent = json.encode(content);
       final encodedContent = base64.encode(utf8.encode(stringifiedContent));
 
       final url = Uri.https(
