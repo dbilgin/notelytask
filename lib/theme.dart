@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:pinput/pinput.dart';
 
 final themeData = ThemeData(
+  disabledColor: Colors.red,
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ButtonStyle(
-      backgroundColor: MaterialStateProperty.all(
-        const Color(0xff17181c),
-      ),
-      foregroundColor: MaterialStateProperty.all(
-        const Color(0xffdce3e8),
-      ),
+      textStyle: MaterialStateProperty.resolveWith((states) {
+        return const TextStyle(
+          color: Color(0xffdce3e8),
+          fontWeight: FontWeight.bold,
+        );
+      }),
+      backgroundColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.disabled)) {
+          return Colors.grey.withOpacity(0.12);
+        }
+        return const Color(0xff17181c);
+      }),
+      foregroundColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.disabled)) {
+          return Colors.grey.withOpacity(0.38);
+        }
+        return const Color(0xffdce3e8);
+      }),
     ),
   ),
   textButtonTheme: TextButtonThemeData(
@@ -67,5 +81,29 @@ final themeData = ThemeData(
       fontSize: 16.0,
     ),
     bodySmall: TextStyle(color: Color(0xffdce3e8)),
+  ),
+);
+
+final defaultPinTheme = PinTheme(
+  width: 56,
+  height: 56,
+  textStyle: const TextStyle(
+      fontSize: 20,
+      color: Color.fromRGBO(30, 60, 87, 1),
+      fontWeight: FontWeight.w600),
+  decoration: BoxDecoration(
+    border: Border.all(color: const Color.fromRGBO(234, 239, 243, 1)),
+    borderRadius: BorderRadius.circular(20),
+  ),
+);
+
+final focusedPinTheme = defaultPinTheme.copyDecorationWith(
+  border: Border.all(color: const Color.fromRGBO(114, 178, 238, 1)),
+  borderRadius: BorderRadius.circular(8),
+);
+
+final submittedPinTheme = defaultPinTheme.copyWith(
+  decoration: defaultPinTheme.decoration?.copyWith(
+    color: const Color.fromRGBO(234, 239, 243, 1),
   ),
 );

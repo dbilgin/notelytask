@@ -54,6 +54,7 @@ class _NoteListState extends State<NoteList> {
       listener: (context, state) {
         if (state.error) {
           showSnackBar(context, 'Error with Github integration.');
+          context.read<GithubCubit>().invalidateError();
         }
       },
       child: Column(

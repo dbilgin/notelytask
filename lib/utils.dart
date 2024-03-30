@@ -4,15 +4,19 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/service/navigation_service.dart';
+import 'package:notelytask/theme.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pinput/pinput.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:encrypt/encrypt.dart' as e;
 
 import 'cubit/selected_note_cubit.dart';
 import 'models/note.dart';
@@ -283,4 +287,123 @@ Future<void> uploadFile(BuildContext context, Note note) async {
         fileSha: fileData.sha,
       );
   context.read<GithubCubit>().createOrUpdateRemoteNotes();
+}
+
+Future<String?> encryptionKeyDialog({
+  required BuildContext context,
+  required String title,
+  required String text,
+  bool isKeyRequired = false,
+  Function(String)? onSubmit,
+}) async {
+  return showDialog<String?>(
+    context: context,
+    barrierDismissible: !isKeyRequired,
+    builder: (BuildContext context) {
+      String? encryptionKey;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(title),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Text(
+                    text,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                SizedBox(
+                  height: 100,
+                  child: Pinput(
+                    defaultPinTheme: defaultPinTheme,
+                    focusedPinTheme: focusedPinTheme,
+                    submittedPinTheme: submittedPinTheme,
+                    length: 4,
+                    pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
+                    showCursor: true,
+                    onChanged: (pin) => setState(() => (pin.length < 4)
+                        ? encryptionKey = null
+                        : encryptionKey = pin),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              if (!isKeyRequired)
+                TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              Opacity(
+                opacity: encryptionKey == null ? 0.5 : 1.0,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  onPressed: encryptionKey == null
+                      ? null
+                      : () {
+                          if (onSubmit != null) {
+                            onSubmit(encryptionKey!);
+                          }
+                          Navigator.of(context).pop(encryptionKey);
+                        },
+                  child: const Text('Set'),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+String encrypt(String text, String pin) {
+  final notelyKey = dotenv.env['NOTELY_KEY'] ?? '';
+  final key = e.Key.fromUtf8(notelyKey);
+  e.Key.fromLength(32);
+  final iv = e.IV.fromUtf8(pin);
+
+  final encrypter = e.Encrypter(e.AES(key));
+
+  final encrypted = encrypter.encrypt(text, iv: iv);
+  return encrypted.base64;
+}
+
+String? decrypt(String encryptedText, String pin) {
+  try {
+    final notelyKey = dotenv.env['NOTELY_KEY'] ?? '';
+
+    final key = e.Key.fromUtf8(notelyKey);
+    e.Key.fromLength(32);
+    final iv = e.IV.fromUtf8(pin);
+
+    final encrypter = e.Encrypter(e.AES(key));
+
+    final encrypted = e.Encrypted.fromBase64(encryptedText);
+    final decrypted = encrypter.decrypt(encrypted, iv: iv);
+
+    return decrypted;
+  } catch (e) {
+    return null;
+  }
+}
+
+bool isEncrypted(String input) {
+  if (input.isEmpty) {
+    return false;
+  }
+
+  final firstChar = input[0];
+  return firstChar != '{';
 }

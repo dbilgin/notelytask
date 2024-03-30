@@ -4,7 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
+import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -42,7 +44,17 @@ class _GithubPageState extends State<GithubPage> {
     saveToRepoAlert(
       context: context,
       onPressed: (bool keepLocal) async {
-        await context.read<GithubCubit>().setRepoUrl(repoUrl, keepLocal);
+        await context.read<GithubCubit>().setRepoUrl(
+              repoUrl,
+              keepLocal,
+              () => encryptionKeyDialog(
+                context: context,
+                title: 'Enter Your Encryption Pin',
+                text:
+                    'This will be used to decrypt your notes.\nLeave blank if you do not have a key.',
+                isKeyRequired: true,
+              ),
+            );
       },
     );
   }
@@ -66,6 +78,32 @@ class _GithubPageState extends State<GithubPage> {
     } else {
       await context.read<GithubCubit>().launchLogin();
     }
+  }
+
+  Future<void> _onSubmitEncryption(String key) async {
+    context.read<NotesCubit>().setEncryptionKey(key);
+    await context.read<GithubCubit>().createOrUpdateRemoteNotes();
+
+    if (!mounted) return;
+    await context.read<GithubCubit>().getAndUpdateNotes(context: context);
+    if (!mounted) return;
+    showSnackBar(context, 'Encryption successful.');
+  }
+
+  Future<void> _onSubmitDecryption(String key) async {
+    final existingKey = context.read<NotesCubit>().state.encryptionKey;
+    if (key != existingKey) {
+      showSnackBar(context, 'Wrong pin, decryption failed.');
+      return;
+    }
+
+    context.read<NotesCubit>().setEncryptionKey(null);
+    await context.read<GithubCubit>().createOrUpdateRemoteNotes();
+
+    if (!mounted) return;
+    await context.read<GithubCubit>().getAndUpdateNotes(context: context);
+    if (!mounted) return;
+    showSnackBar(context, 'Decryption successful.');
   }
 
   @override
@@ -133,7 +171,6 @@ class _GithubPageState extends State<GithubPage> {
                 child: Text(
                   verificationUri,
                   style: const TextStyle(
-                    decoration: TextDecoration.underline,
                     color: Colors.blue,
                   ),
                 ),
@@ -168,12 +205,37 @@ class _GithubPageState extends State<GithubPage> {
                 onPressed: localRepoUrl == state.ownerRepo
                     ? null
                     : () => saveRepoUrl(repoUrlController.text),
-                style: ElevatedButton.styleFrom(
-                  disabledForegroundColor: Colors.grey.withOpacity(0.38),
-                  disabledBackgroundColor: Colors.grey.withOpacity(0.12),
-                ),
                 child: const Text('Save Repo'),
               ),
+              BlocBuilder<NotesCubit, NotesState>(builder: (
+                notesContext,
+                notesState,
+              ) {
+                if (state.ownerRepo != null &&
+                    notesState.encryptionKey == null) {
+                  return ElevatedButton(
+                    onPressed: () => encryptionKeyDialog(
+                      context: context,
+                      isKeyRequired: false,
+                      title: 'Enter Your Encryption Pin',
+                      text: 'Do not lose this!\nThis will encrypt your notes.',
+                      onSubmit: _onSubmitEncryption,
+                    ),
+                    child: const Text('Encrypt Notes'),
+                  );
+                } else {
+                  return ElevatedButton(
+                    onPressed: () => encryptionKeyDialog(
+                      context: context,
+                      isKeyRequired: false,
+                      title: 'Enter Your Encryption Pin',
+                      text: 'Decryption will fail if wrong key is entered.',
+                      onSubmit: _onSubmitDecryption,
+                    ),
+                    child: const Text('Decrypt Notes'),
+                  );
+                }
+              }),
             ];
           }
 
@@ -181,6 +243,7 @@ class _GithubPageState extends State<GithubPage> {
             listener: (context, state) {
               if (state.error && repoUrlController.text.isNotEmpty) {
                 showSnackBar(context, 'Error integrating repository.');
+                context.read<GithubCubit>().invalidateError();
 
                 repoUrlController.text = '';
               }
