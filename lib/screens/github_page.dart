@@ -171,7 +171,6 @@ class _GithubPageState extends State<GithubPage> {
                 child: Text(
                   verificationUri,
                   style: const TextStyle(
-                    decoration: TextDecoration.underline,
                     color: Colors.blue,
                   ),
                 ),
