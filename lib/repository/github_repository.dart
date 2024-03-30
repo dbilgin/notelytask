@@ -11,7 +11,7 @@ import 'package:path_provider/path_provider.dart';
 class GithubFile {
   GithubFile({this.sha, this.content});
   final String? sha;
-  final Map<String, dynamic>? content;
+  final String? content;
 }
 
 class GithubRepository {
@@ -195,11 +195,10 @@ class GithubRepository {
         final cleanedJson = jsonResponse['content'].replaceAll('\n', '').trim();
         final base64Decoded = base64.decode(cleanedJson);
         final utfDecoded = utf8.decode(base64Decoded);
-        final content = json.decode(utfDecoded);
 
         return GithubFile(
           sha: sha,
-          content: content,
+          content: utfDecoded,
         );
       } else {
         return null;

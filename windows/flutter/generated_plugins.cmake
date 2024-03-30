@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   share_plus
+  smart_auth
   url_launcher_windows
 )
 
