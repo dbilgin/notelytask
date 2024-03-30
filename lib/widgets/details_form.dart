@@ -75,6 +75,7 @@ class _DetailsFormState extends State<DetailsForm> {
       listener: (context, state) {
         if (state.error) {
           showSnackBar(context, 'Error with Github integration.');
+          context.read<GithubCubit>().invalidateError();
         }
       },
       child: Column(
