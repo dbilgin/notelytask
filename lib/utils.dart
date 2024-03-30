@@ -289,100 +289,30 @@ Future<void> uploadFile(BuildContext context, Note note) async {
   context.read<GithubCubit>().createOrUpdateRemoteNotes();
 }
 
-Future<void> encryptNotesDialog(BuildContext context) async => showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        String? encryptionKey;
-
-        Future<void> setEncryptionKey() async {
-          final key = encryptionKey;
-          if (key == null) return;
-
-          context.read<NotesCubit>().setEncryptionKey(key);
-          await context.read<GithubCubit>().createOrUpdateRemoteNotes();
-
-          if (!context.mounted) return;
-          await context.read<GithubCubit>().getAndUpdateNotes(context: context);
-
-          if (!context.mounted) return;
-          Navigator.of(context).pop();
-        }
-
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Enter Your Encryption Pin'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 16.0),
-                    child: Text(
-                      'Do not lose this!\nThis will encrypt your notes.',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 100,
-                    child: Pinput(
-                      defaultPinTheme: defaultPinTheme,
-                      focusedPinTheme: focusedPinTheme,
-                      submittedPinTheme: submittedPinTheme,
-                      length: 4,
-                      pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
-                      showCursor: true,
-                      onCompleted: (pin) => setState(() => encryptionKey = pin),
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  style: TextButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                Opacity(
-                  opacity: encryptionKey == null ? 0.5 : 1.0,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    onPressed: encryptionKey == null ? null : setEncryptionKey,
-                    child: const Text('Set'),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-Future<void> enterEncryptionKeyDialog(
-  BuildContext context,
-  Function(String?) onKeySet,
-) async {
-  return showDialog(
+Future<String?> encryptionKeyDialog({
+  required BuildContext context,
+  required String title,
+  required String text,
+  bool isKeyRequired = false,
+  Function(String)? onSubmit,
+}) async {
+  return showDialog<String?>(
     context: context,
+    barrierDismissible: !isKeyRequired,
     builder: (BuildContext context) {
       String? encryptionKey;
 
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Enter Your Encryption Pin'),
+            title: Text(title),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 16.0),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
                   child: Text(
-                    'This will be used to decrypt your notes.\nLeave blank if you do not have a key.',
+                    text,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -393,26 +323,42 @@ Future<void> enterEncryptionKeyDialog(
                     focusedPinTheme: focusedPinTheme,
                     submittedPinTheme: submittedPinTheme,
                     length: 4,
-                    // validator: (s) {
-                    //   return s == '2222' ? null : 'Pin is incorrect';
-                    // },
                     pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
                     showCursor: true,
-                    onCompleted: (pin) => setState(() => encryptionKey = pin),
+                    onChanged: (pin) => setState(() => (pin.length < 4)
+                        ? encryptionKey = null
+                        : encryptionKey = pin),
                   ),
                 ),
               ],
             ),
             actions: [
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
+              if (!isKeyRequired)
+                TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                 ),
-                onPressed: () {
-                  onKeySet(encryptionKey);
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Set'),
+              Opacity(
+                opacity: encryptionKey == null ? 0.5 : 1.0,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  onPressed: encryptionKey == null
+                      ? null
+                      : () {
+                          if (onSubmit != null) {
+                            onSubmit(encryptionKey!);
+                          }
+                          Navigator.of(context).pop(encryptionKey);
+                        },
+                  child: const Text('Set'),
+                ),
               ),
             ],
           );
@@ -434,17 +380,30 @@ String encrypt(String text, String pin) {
   return encrypted.base64;
 }
 
-String decrypt(String encryptedText, String pin) {
-  final notelyKey = dotenv.env['NOTELY_KEY'] ?? '';
+String? decrypt(String encryptedText, String pin) {
+  try {
+    final notelyKey = dotenv.env['NOTELY_KEY'] ?? '';
 
-  final key = e.Key.fromUtf8(notelyKey);
-  e.Key.fromLength(32);
-  final iv = e.IV.fromUtf8(pin);
+    final key = e.Key.fromUtf8(notelyKey);
+    e.Key.fromLength(32);
+    final iv = e.IV.fromUtf8(pin);
 
-  final encrypter = e.Encrypter(e.AES(key));
+    final encrypter = e.Encrypter(e.AES(key));
 
-  final encrypted = e.Encrypted.fromBase64(encryptedText);
-  final decrypted = encrypter.decrypt(encrypted, iv: iv);
+    final encrypted = e.Encrypted.fromBase64(encryptedText);
+    final decrypted = encrypter.decrypt(encrypted, iv: iv);
 
-  return decrypted;
+    return decrypted;
+  } catch (e) {
+    return null;
+  }
+}
+
+bool isEncrypted(String input) {
+  if (input.isEmpty) {
+    return false;
+  }
+
+  final firstChar = input[0];
+  return firstChar != '{';
 }

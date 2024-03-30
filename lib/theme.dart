@@ -2,14 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 
 final themeData = ThemeData(
+  disabledColor: Colors.red,
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ButtonStyle(
-      backgroundColor: MaterialStateProperty.all(
-        const Color(0xff17181c),
-      ),
-      foregroundColor: MaterialStateProperty.all(
-        const Color(0xffdce3e8),
-      ),
+      textStyle: MaterialStateProperty.resolveWith((states) {
+        return const TextStyle(
+          color: Color(0xffdce3e8),
+          fontWeight: FontWeight.bold,
+        );
+      }),
+      backgroundColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.disabled)) {
+          return Colors.grey.withOpacity(0.12);
+        }
+        return const Color(0xff17181c);
+      }),
+      foregroundColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.disabled)) {
+          return Colors.grey.withOpacity(0.38);
+        }
+        return const Color(0xffdce3e8);
+      }),
     ),
   ),
   textButtonTheme: TextButtonThemeData(
