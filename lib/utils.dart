@@ -187,17 +187,10 @@ Future<void> _deleteFile(
   FileData file,
   String noteId,
 ) async {
-  final fileDeleteResult = await context.read<NotesCubit>().deleteFile(file);
+  final fileDeleteResult =
+      await context.read<NotesCubit>().deleteFileAndUpdate(noteId, file);
   if (!fileDeleteResult) {
     if (context.mounted) showSnackBar(context, 'File could not be deleted.');
-  }
-
-  if (context.mounted) {
-    context.read<NotesCubit>().deleteNoteFileData(
-          noteId,
-          file.name,
-        );
-    context.read<NotesCubit>().createOrUpdateRemoteNotes();
   }
 }
 
@@ -400,4 +393,26 @@ bool isEncrypted(String input) {
 
   final firstChar = input[0];
   return firstChar != '{';
+}
+
+String nonExistentFileName({
+  required String fileName,
+  required List<Note> notes,
+}) {
+  var files = notes.expand((e) => e.fileDataList);
+  var fileNames = files.map((e) => e.name);
+  var exists = fileNames.contains(fileName);
+
+  if (!exists) {
+    return fileName;
+  } else {
+    int index = fileName.lastIndexOf('.');
+    String withoutExtension = fileName.substring(0, index);
+    String extension = fileName.substring(index);
+
+    return nonExistentFileName(
+      fileName: '${withoutExtension}_$extension',
+      notes: notes,
+    );
+  }
 }

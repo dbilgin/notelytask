@@ -37,6 +37,17 @@ class NotesCubit extends HydratedCubit<NotesState> {
     );
   }
 
+  Future<bool> deleteFileAndUpdate(String noteId, FileData fileData) async {
+    final remoteDeleteResult = await githubCubit.deleteFile(fileData);
+    if (!remoteDeleteResult) return false;
+    _deleteNoteFileData(
+      noteId,
+      fileData.name,
+    );
+    createOrUpdateRemoteNotes();
+    return true;
+  }
+
   Future<bool> deleteFile(FileData fileData) async {
     return await githubCubit.deleteFile(fileData);
   }
@@ -46,13 +57,17 @@ class NotesCubit extends HydratedCubit<NotesState> {
     String fileName,
     Uint8List data,
   ) async {
+    final safeFileName = nonExistentFileName(
+      fileName: fileName,
+      notes: state.notes,
+    );
     final fileData = await githubCubit.uploadNewFile(
-      nonExistentFileName(fileName: fileName),
+      safeFileName,
       data,
     );
 
     if (fileData == null) return;
-    addNoteFileData(
+    _addNoteFileData(
       noteId: noteId,
       fileName: fileData.name,
       fileSha: fileData.sha,
@@ -134,24 +149,6 @@ class NotesCubit extends HydratedCubit<NotesState> {
     emit(newState);
   }
 
-  String nonExistentFileName({required String fileName}) {
-    var files = state.notes.expand((e) => e.fileDataList);
-    var fileNames = files.map((e) => e.name);
-    var exists = fileNames.contains(fileName);
-
-    if (!exists) {
-      return fileName;
-    } else {
-      int index = fileName.lastIndexOf('.');
-      String withoutExtension = fileName.substring(0, index);
-      String extension = fileName.substring(index);
-
-      return nonExistentFileName(
-        fileName: '${withoutExtension}_$extension',
-      );
-    }
-  }
-
   void setNote(Note note) {
     final index = state.notes.indexWhere((element) => element.id == note.id);
     List<Note> updatedNotes = List<Note>.from(state.notes);
@@ -171,49 +168,6 @@ class NotesCubit extends HydratedCubit<NotesState> {
     }
 
     emit(state.copyWith(notes: updatedNotes));
-  }
-
-  void addNoteFileData({
-    required String noteId,
-    required String fileName,
-    required String fileSha,
-  }) {
-    final noteIndex = state.notes.indexWhere((element) => element.id == noteId);
-    List<Note> updatedNotes = List<Note>.from(state.notes);
-
-    if (noteIndex == -1) {
-      final newNote = Note.generateNew()
-          .copyWith(fileDataList: [FileData(name: fileName, sha: fileSha)]);
-      updatedNotes.add(newNote);
-    } else {
-      List<FileData> updatedFileDataList =
-          List<FileData>.from(state.notes[noteIndex].fileDataList)
-            ..add(FileData(name: fileName, sha: fileSha));
-      updatedNotes[noteIndex] =
-          state.notes[noteIndex].copyWith(fileDataList: updatedFileDataList);
-    }
-
-    emit(state.copyWith(notes: updatedNotes));
-  }
-
-  void deleteNoteFileData(String noteId, String fileName) {
-    final noteIndex = state.notes.indexWhere((element) => element.id == noteId);
-    if (noteIndex == -1) {
-      return;
-    }
-
-    List<Note> updatedNotes = List<Note>.from(state.notes);
-    List<FileData> updatedFileDataList =
-        List<FileData>.from(updatedNotes[noteIndex].fileDataList);
-    final fileIndex =
-        updatedFileDataList.indexWhere((element) => element.name == fileName);
-
-    if (fileIndex != -1) {
-      updatedFileDataList.removeAt(fileIndex);
-      updatedNotes[noteIndex] =
-          updatedNotes[noteIndex].copyWith(fileDataList: updatedFileDataList);
-      emit(state.copyWith(notes: updatedNotes));
-    }
   }
 
   void deleteNotePermanently(String noteId) {
@@ -252,6 +206,49 @@ class NotesCubit extends HydratedCubit<NotesState> {
     updatedNotes[noteIndex] = note.copyWith(isDeleted: false);
 
     emit(state.copyWith(notes: updatedNotes));
+  }
+
+  void _addNoteFileData({
+    required String noteId,
+    required String fileName,
+    required String fileSha,
+  }) {
+    final noteIndex = state.notes.indexWhere((element) => element.id == noteId);
+    List<Note> updatedNotes = List<Note>.from(state.notes);
+
+    if (noteIndex == -1) {
+      final newNote = Note.generateNew()
+          .copyWith(fileDataList: [FileData(name: fileName, sha: fileSha)]);
+      updatedNotes.add(newNote);
+    } else {
+      List<FileData> updatedFileDataList =
+          List<FileData>.from(state.notes[noteIndex].fileDataList)
+            ..add(FileData(name: fileName, sha: fileSha));
+      updatedNotes[noteIndex] =
+          state.notes[noteIndex].copyWith(fileDataList: updatedFileDataList);
+    }
+
+    emit(state.copyWith(notes: updatedNotes));
+  }
+
+  void _deleteNoteFileData(String noteId, String fileName) {
+    final noteIndex = state.notes.indexWhere((element) => element.id == noteId);
+    if (noteIndex == -1) {
+      return;
+    }
+
+    List<Note> updatedNotes = List<Note>.from(state.notes);
+    List<FileData> updatedFileDataList =
+        List<FileData>.from(updatedNotes[noteIndex].fileDataList);
+    final fileIndex =
+        updatedFileDataList.indexWhere((element) => element.name == fileName);
+
+    if (fileIndex != -1) {
+      updatedFileDataList.removeAt(fileIndex);
+      updatedNotes[noteIndex] =
+          updatedNotes[noteIndex].copyWith(fileDataList: updatedFileDataList);
+      emit(state.copyWith(notes: updatedNotes));
+    }
   }
 
   @override
