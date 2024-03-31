@@ -9,9 +9,9 @@ import 'package:notelytask/widgets/note_list.dart';
 class NoteListLayout extends StatelessWidget {
   final bool isDeletedList;
   const NoteListLayout({
-    Key? key,
+    super.key,
     this.isDeletedList = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

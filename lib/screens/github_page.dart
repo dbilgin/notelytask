@@ -11,7 +11,7 @@ import 'package:notelytask/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class GithubPage extends StatefulWidget {
-  const GithubPage({Key? key, this.code}) : super(key: key);
+  const GithubPage({super.key, this.code});
   final String? code;
 
   @override

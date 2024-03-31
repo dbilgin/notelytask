@@ -7,9 +7,9 @@ import 'package:notelytask/utils.dart';
 
 class FileList extends StatelessWidget {
   const FileList({
-    Key? key,
+    super.key,
     required this.noteId,
-  }) : super(key: key);
+  });
   final String noteId;
 
   @override

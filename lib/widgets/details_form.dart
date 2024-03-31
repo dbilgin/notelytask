@@ -15,11 +15,11 @@ class DetailsForm extends StatefulWidget {
   final bool isDeletedList;
   final Function(Note note) submit;
   const DetailsForm({
-    Key? key,
+    super.key,
     required this.note,
     required this.isDeletedList,
     required this.submit,
-  }) : super(key: key);
+  });
 
   @override
   State<DetailsForm> createState() => _DetailsFormState();

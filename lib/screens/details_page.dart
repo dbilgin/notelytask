@@ -11,11 +11,11 @@ class DetailsPage extends StatefulWidget {
   final bool withAppBar;
   final bool isDeletedList;
   const DetailsPage({
-    Key? key,
+    super.key,
     this.note,
     required this.withAppBar,
     required this.isDeletedList,
-  }) : super(key: key);
+  });
 
   @override
   State<DetailsPage> createState() => _DetailsPageState();

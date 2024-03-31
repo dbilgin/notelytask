@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class NoteListRowFiles extends StatelessWidget {
   const NoteListRowFiles({
-    Key? key,
+    super.key,
     required this.fileNames,
-  }) : super(key: key);
+  });
   final Iterable<String> fileNames;
 
   @override

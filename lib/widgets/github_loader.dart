@@ -5,8 +5,8 @@ import 'package:notelytask/models/github_state.dart';
 
 class GithubLoader extends StatelessWidget {
   const GithubLoader({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
