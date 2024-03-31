@@ -52,7 +52,7 @@ class _GithubPageState extends State<GithubPage> {
                 title: 'Enter Your Encryption Pin',
                 text:
                     'This will be used to decrypt your notes.\nLeave blank if you do not have a key.',
-                isKeyRequired: true,
+                isPinRequired: true,
               ),
             );
       },
@@ -85,7 +85,7 @@ class _GithubPageState extends State<GithubPage> {
     await context.read<NotesCubit>().createOrUpdateRemoteNotes();
 
     if (!mounted) return;
-    await context.read<NotesCubit>().getAndUpdateNotes(context: context);
+    await context.read<NotesCubit>().getAndUpdateLocalNotes(context: context);
     if (!mounted) return;
     showSnackBar(context, 'Encryption successful.');
   }
@@ -101,7 +101,7 @@ class _GithubPageState extends State<GithubPage> {
     await context.read<NotesCubit>().createOrUpdateRemoteNotes();
 
     if (!mounted) return;
-    await context.read<NotesCubit>().getAndUpdateNotes(context: context);
+    await context.read<NotesCubit>().getAndUpdateLocalNotes(context: context);
     if (!mounted) return;
     showSnackBar(context, 'Decryption successful.');
   }
@@ -211,35 +211,37 @@ class _GithubPageState extends State<GithubPage> {
                 notesContext,
                 notesState,
               ) {
-                if (state.accessToken != null &&
-                    state.ownerRepo != null &&
-                    notesState.encryptionKey == null) {
-                  return ElevatedButton(
-                    onPressed: () => encryptionKeyDialog(
-                      context: context,
-                      isKeyRequired: false,
-                      title: 'Enter Your Encryption Pin',
-                      text: 'Do not lose this!\nThis will encrypt your notes.',
-                      onSubmit: _onSubmitEncryption,
-                    ),
-                    child: const Text('Encrypt Notes'),
-                  );
-                } else if (state.accessToken != null &&
-                    state.ownerRepo != null &&
-                    notesState.encryptionKey != null) {
-                  return ElevatedButton(
-                    onPressed: () => encryptionKeyDialog(
-                      context: context,
-                      isKeyRequired: false,
-                      title: 'Enter Your Encryption Pin',
-                      text: 'Decryption will fail if wrong key is entered.',
-                      onSubmit: _onSubmitDecryption,
-                    ),
-                    child: const Text('Decrypt Notes'),
-                  );
-                } else {
-                  return Container();
-                }
+                return Wrap(
+                  children: [
+                    if (state.accessToken != null &&
+                        state.ownerRepo != null &&
+                        notesState.encryptionKey == null)
+                      ElevatedButton(
+                        onPressed: () => encryptionKeyDialog(
+                          context: context,
+                          isPinRequired: false,
+                          title: 'Enter Your Encryption Pin',
+                          text:
+                              'Do not lose this!\nThis will encrypt your notes.',
+                          onSubmit: _onSubmitEncryption,
+                        ),
+                        child: const Text('Encrypt Notes'),
+                      ),
+                    if (state.accessToken != null &&
+                        state.ownerRepo != null &&
+                        notesState.encryptionKey != null)
+                      ElevatedButton(
+                        onPressed: () => encryptionKeyDialog(
+                          context: context,
+                          isPinRequired: false,
+                          title: 'Enter Your Encryption Pin',
+                          text: 'Decryption will fail if wrong key is entered.',
+                          onSubmit: _onSubmitDecryption,
+                        ),
+                        child: const Text('Decrypt Notes'),
+                      ),
+                  ],
+                );
               }),
             ];
           }
@@ -267,7 +269,7 @@ class _GithubPageState extends State<GithubPage> {
                     ...children,
                     ElevatedButton(
                       onPressed: () {
-                        context.read<GithubCubit>().reset();
+                        context.read<NotesCubit>().reset();
                         repoUrlController.text = '';
                         localRepoUrl = '';
                       },

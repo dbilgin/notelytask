@@ -20,7 +20,7 @@ class NativeService {
         if (call.method == 'widgetClicked' &&
             call.arguments['note_id'] != null) {
           var noteId = call.arguments['note_id'].toString();
-          context.read<NotesCubit>().getAndUpdateNotes(
+          context.read<NotesCubit>().getAndUpdateLocalNotes(
                 context: context,
                 redirectNoteId: noteId,
               );
@@ -49,7 +49,7 @@ class NativeService {
   }
 
   static Future<void> updateNotes(BuildContext context, String noteId) async {
-    await context.read<NotesCubit>().getAndUpdateNotes(
+    await context.read<NotesCubit>().getAndUpdateLocalNotes(
           context: context,
           redirectNoteId: noteId,
         );

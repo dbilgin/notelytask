@@ -280,12 +280,12 @@ Future<String?> encryptionKeyDialog({
   required BuildContext context,
   required String title,
   required String text,
-  bool isKeyRequired = false,
+  bool isPinRequired = false,
   Function(String)? onSubmit,
 }) async {
   return showDialog<String?>(
     context: context,
-    barrierDismissible: !isKeyRequired,
+    barrierDismissible: !isPinRequired,
     builder: (BuildContext context) {
       String? encryptionKey;
 
@@ -320,7 +320,7 @@ Future<String?> encryptionKeyDialog({
               ],
             ),
             actions: [
-              if (!isKeyRequired)
+              if (!isPinRequired)
                 TextButton(
                   style: TextButton.styleFrom(
                     textStyle: Theme.of(context).textTheme.labelLarge,
