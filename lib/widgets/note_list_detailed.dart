@@ -11,10 +11,10 @@ class NoteListDetailed extends StatefulWidget {
   final List<Note> notes;
   final bool isDeletedList;
   const NoteListDetailed({
-    Key? key,
+    super.key,
     required this.notes,
     required this.isDeletedList,
-  }) : super(key: key);
+  });
 
   @override
   State<NoteListDetailed> createState() => _NoteListDetailedState();

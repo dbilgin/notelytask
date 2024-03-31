@@ -6,7 +6,7 @@ import 'package:notelytask/widgets/github_loader.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
 
 class DeletedListPage extends StatefulWidget {
-  const DeletedListPage({Key? key}) : super(key: key);
+  const DeletedListPage({super.key});
 
   @override
   State<DeletedListPage> createState() => _DeletedListPageState();
