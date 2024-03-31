@@ -3,10 +3,11 @@
 
 name: Deploy to Firebase
 
-on:
-  push:
-    tags:
-      - v*
+on: workflow_dispatch
+# on:
+#   push:
+#     tags:
+#       - v*
 
 jobs:
   build_and_preview:
