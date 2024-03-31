@@ -1,18 +1,129 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/util/update_widget.dart';
+import 'package:notelytask/utils.dart';
 
 class NotesCubit extends HydratedCubit<NotesState> {
-  NotesCubit() : super(const NotesState());
+  NotesCubit({
+    required this.githubCubit,
+  }) : super(const NotesState());
+  final GithubCubit githubCubit;
 
   @override
   void onChange(Change<NotesState> change) {
     updateWidget(json.encode(toJson(change.nextState)));
     super.onChange(change);
+  }
+
+  void invalidateError() {
+    githubCubit.invalidateError();
+  }
+
+  Future<void> createOrUpdateRemoteNotes({
+    bool shouldResetIfError = true,
+  }) async {
+    final jsonMap = state.toJson();
+    return await githubCubit.createOrUpdateRemoteNotes(
+      shouldResetIfError: shouldResetIfError,
+      encryptionKey: state.encryptionKey,
+      notesJSONMap: jsonMap,
+    );
+  }
+
+  Future<bool> deleteFile(FileData fileData) async {
+    return await githubCubit.deleteFile(fileData);
+  }
+
+  Future<void> uploadNewFileAndNotes(
+    String noteId,
+    String fileName,
+    Uint8List data,
+  ) async {
+    final fileData = await githubCubit.uploadNewFile(
+      nonExistentFileName(fileName: fileName),
+      data,
+    );
+
+    if (fileData == null) return;
+    addNoteFileData(
+      noteId: noteId,
+      fileName: fileData.name,
+      fileSha: fileData.sha,
+    );
+
+    await createOrUpdateRemoteNotes();
+  }
+
+  bool isLoggedIn() {
+    return githubCubit.isLoggedIn();
+  }
+
+  Future<void> setRemoteConnection(
+    String ownerRepo,
+    bool keepLocal,
+    Future<String?> Function() enterEncryptionKeyDialog,
+  ) async {
+    final connectionResult = await githubCubit.setRepoUrl(
+      ownerRepo,
+      keepLocal,
+      enterEncryptionKeyDialog,
+    );
+
+    if (connectionResult.shouldCreateRemote) {
+      await createOrUpdateRemoteNotes(shouldResetIfError: false);
+      return;
+    }
+
+    final content = connectionResult.content;
+
+    if (content != null) {
+      final finalContent = json.decode(content);
+      final notes = fromJson(finalContent);
+      emit(notes);
+    }
+  }
+
+  Future<void> getAndUpdateNotes({
+    required BuildContext context,
+    String? redirectNoteId,
+  }) async {
+    final result = await githubCubit.getAndUpdateNotes(
+      context: context,
+      encryptionKey: state.encryptionKey,
+      redirectNoteId: redirectNoteId,
+    );
+    if (result == null) {
+      emit(const NotesState());
+    } else {
+      final finalContent = json.decode(result);
+      final list = fromJson(finalContent);
+      emit(list);
+    }
+
+    if (redirectNoteId != null) {
+      final note = state.notes
+          .where((n) => n.id == redirectNoteId && !n.isDeleted)
+          .toList();
+      if (note.isNotEmpty) {
+        if (!context.mounted) return;
+        navigateToDetails(
+          context: context,
+          isDeletedList: false,
+          note: note[0],
+        );
+      }
+    }
+  }
+
+  Future<String?> getFileLocalPath(String fileName) async {
+    return await githubCubit.getFileLocalPath(fileName);
   }
 
   void setEncryptionKey(String? key) {

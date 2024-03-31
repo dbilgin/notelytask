@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
-import 'package:notelytask/utils.dart';
 import 'package:notelytask/widgets/github_loader.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
 
@@ -14,16 +13,14 @@ class DeletedListPage extends StatefulWidget {
 }
 
 class _DeletedListPageState extends State<DeletedListPage> {
-  bool? smallScreen;
+  @override
+  void initState() {
+    context.read<NotesCubit>().getAndUpdateNotes(context: context);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    var smallScreenCheck = isSmallScreen(context);
-    if (smallScreen == null || smallScreenCheck != smallScreen) {
-      setState(() => smallScreen = smallScreenCheck);
-      context.read<GithubCubit>().getAndUpdateNotes(context: context);
-    }
-
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(

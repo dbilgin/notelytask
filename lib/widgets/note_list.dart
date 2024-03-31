@@ -30,7 +30,7 @@ class _NoteListState extends State<NoteList> {
     } else {
       if (direction.index == 2) {
         for (var fileData in note.fileDataList) {
-          await context.read<GithubCubit>().deleteFile(fileData);
+          await context.read<NotesCubit>().deleteFile(fileData);
         }
         if (mounted) {
           context.read<NotesCubit>().deleteNotePermanently(note.id);
@@ -45,7 +45,7 @@ class _NoteListState extends State<NoteList> {
     if (context.read<SelectedNoteCubit>().state == note.id) {
       context.read<SelectedNoteCubit>().setNoteId(null);
     }
-    context.read<GithubCubit>().createOrUpdateRemoteNotes();
+    context.read<NotesCubit>().createOrUpdateRemoteNotes();
   }
 
   @override
@@ -54,7 +54,7 @@ class _NoteListState extends State<NoteList> {
       listener: (context, state) {
         if (state.error) {
           showSnackBar(context, 'Error with Github integration.');
-          context.read<GithubCubit>().invalidateError();
+          context.read<NotesCubit>().invalidateError();
         }
       },
       child: Column(

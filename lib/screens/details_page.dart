@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
 import 'package:notelytask/models/note.dart';
@@ -37,7 +36,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
   void _submit(Note note) {
     context.read<NotesCubit>().setNote(note);
-    context.read<GithubCubit>().createOrUpdateRemoteNotes();
+    context.read<NotesCubit>().createOrUpdateRemoteNotes();
   }
 
   @override

@@ -44,7 +44,7 @@ class _GithubPageState extends State<GithubPage> {
     saveToRepoAlert(
       context: context,
       onPressed: (bool keepLocal) async {
-        await context.read<GithubCubit>().setRepoUrl(
+        await context.read<NotesCubit>().setRemoteConnection(
               repoUrl,
               keepLocal,
               () => encryptionKeyDialog(
@@ -82,10 +82,10 @@ class _GithubPageState extends State<GithubPage> {
 
   Future<void> _onSubmitEncryption(String key) async {
     context.read<NotesCubit>().setEncryptionKey(key);
-    await context.read<GithubCubit>().createOrUpdateRemoteNotes();
+    await context.read<NotesCubit>().createOrUpdateRemoteNotes();
 
     if (!mounted) return;
-    await context.read<GithubCubit>().getAndUpdateNotes(context: context);
+    await context.read<NotesCubit>().getAndUpdateNotes(context: context);
     if (!mounted) return;
     showSnackBar(context, 'Encryption successful.');
   }
@@ -98,10 +98,10 @@ class _GithubPageState extends State<GithubPage> {
     }
 
     context.read<NotesCubit>().setEncryptionKey(null);
-    await context.read<GithubCubit>().createOrUpdateRemoteNotes();
+    await context.read<NotesCubit>().createOrUpdateRemoteNotes();
 
     if (!mounted) return;
-    await context.read<GithubCubit>().getAndUpdateNotes(context: context);
+    await context.read<NotesCubit>().getAndUpdateNotes(context: context);
     if (!mounted) return;
     showSnackBar(context, 'Decryption successful.');
   }
@@ -211,7 +211,8 @@ class _GithubPageState extends State<GithubPage> {
                 notesContext,
                 notesState,
               ) {
-                if (state.ownerRepo != null &&
+                if (state.accessToken != null &&
+                    state.ownerRepo != null &&
                     notesState.encryptionKey == null) {
                   return ElevatedButton(
                     onPressed: () => encryptionKeyDialog(
@@ -223,7 +224,9 @@ class _GithubPageState extends State<GithubPage> {
                     ),
                     child: const Text('Encrypt Notes'),
                   );
-                } else {
+                } else if (state.accessToken != null &&
+                    state.ownerRepo != null &&
+                    notesState.encryptionKey != null) {
                   return ElevatedButton(
                     onPressed: () => encryptionKeyDialog(
                       context: context,
@@ -234,6 +237,8 @@ class _GithubPageState extends State<GithubPage> {
                     ),
                     child: const Text('Decrypt Notes'),
                   );
+                } else {
+                  return Container();
                 }
               }),
             ];
@@ -243,7 +248,7 @@ class _GithubPageState extends State<GithubPage> {
             listener: (context, state) {
               if (state.error && repoUrlController.text.isNotEmpty) {
                 showSnackBar(context, 'Error integrating repository.');
-                context.read<GithubCubit>().invalidateError();
+                context.read<NotesCubit>().invalidateError();
 
                 repoUrlController.text = '';
               }
@@ -261,7 +266,11 @@ class _GithubPageState extends State<GithubPage> {
                   children: [
                     ...children,
                     ElevatedButton(
-                      onPressed: () => context.read<GithubCubit>().reset(),
+                      onPressed: () {
+                        context.read<GithubCubit>().reset();
+                        repoUrlController.text = '';
+                        localRepoUrl = '';
+                      },
                       child: const Text('Reset Github Connection'),
                     ),
                   ],

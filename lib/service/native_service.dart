@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/cubit/notes_cubit.dart';
 
 class NativeService {
   static MethodChannel widgetChannel =
@@ -20,7 +20,7 @@ class NativeService {
         if (call.method == 'widgetClicked' &&
             call.arguments['note_id'] != null) {
           var noteId = call.arguments['note_id'].toString();
-          context.read<GithubCubit>().getAndUpdateNotes(
+          context.read<NotesCubit>().getAndUpdateNotes(
                 context: context,
                 redirectNoteId: noteId,
               );
@@ -49,7 +49,7 @@ class NativeService {
   }
 
   static Future<void> updateNotes(BuildContext context, String noteId) async {
-    await context.read<GithubCubit>().getAndUpdateNotes(
+    await context.read<NotesCubit>().getAndUpdateNotes(
           context: context,
           redirectNoteId: noteId,
         );
