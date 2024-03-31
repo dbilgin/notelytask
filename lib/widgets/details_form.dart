@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -75,7 +76,7 @@ class _DetailsFormState extends State<DetailsForm> {
       listener: (context, state) {
         if (state.error) {
           showSnackBar(context, 'Error with Github integration.');
-          context.read<GithubCubit>().invalidateError();
+          context.read<NotesCubit>().invalidateError();
         }
       },
       child: Column(

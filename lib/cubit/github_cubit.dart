@@ -6,18 +6,14 @@ import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/github_state.dart';
-import 'package:notelytask/models/notes_state.dart';
+import 'package:notelytask/models/remote_connection_result.dart';
 import 'package:notelytask/repository/github_repository.dart';
 import 'package:notelytask/utils.dart';
 
-import 'notes_cubit.dart';
-
 class GithubCubit extends HydratedCubit<GithubState> {
   GithubCubit({
-    required this.notesCubit,
     required this.githubRepository,
   }) : super(const GithubState());
-  final NotesCubit notesCubit;
   final GithubRepository githubRepository;
 
   Future<String?> getFileLocalPath(String fileName) async {
@@ -40,11 +36,11 @@ class GithubCubit extends HydratedCubit<GithubState> {
     return null;
   }
 
-  Future<void> getAndUpdateNotes({
+  Future<String?> getAndUpdateNotes({
     required BuildContext context,
+    String? encryptionKey,
     String? redirectNoteId,
   }) async {
-    final encryptionKey = notesCubit.state.encryptionKey;
     final accessToken = state.accessToken;
     final ownerRepo = state.ownerRepo;
 
@@ -59,59 +55,40 @@ class GithubCubit extends HydratedCubit<GithubState> {
       final content = existingFile?.content;
 
       if (existingFile == null || content == null || content == '') {
-        resetWithError();
-        notesCubit.emit(const NotesState());
-        return;
+        reset(shouldError: true);
+        return null;
       }
 
       final isEncryptedString = isEncrypted(content);
 
       if (isEncryptedString && encryptionKey == null) {
-        resetWithError();
-        notesCubit.emit(const NotesState());
-        return;
+        reset(shouldError: true);
+        return null;
       }
 
       final decrypted =
           isEncryptedString ? decrypt(content, encryptionKey!) : content;
 
       if (decrypted == null) {
-        resetWithError();
-        notesCubit.emit(const NotesState());
-        return;
+        reset(shouldError: true);
+        return null;
       }
 
-      final finalContent = json.decode(decrypted);
-
-      final list = notesCubit.fromJson(finalContent);
-      notesCubit.emit(list);
       emit(state.copyWith(loading: false, sha: existingFile.sha));
+      return decrypted;
     }
-
-    if (redirectNoteId != null) {
-      final note = notesCubit.state.notes
-          .where((n) => n.id == redirectNoteId && !n.isDeleted)
-          .toList();
-      if (note.isNotEmpty) {
-        if (!context.mounted) return;
-        navigateToDetails(
-          context: context,
-          isDeletedList: false,
-          note: note[0],
-        );
-      }
-    }
+    return null;
   }
 
-  Future<void> setRepoUrl(
+  Future<RemoteConnectionResult> setRepoUrl(
     String ownerRepo,
     bool keepLocal,
     Future<String?> Function() enterEncryptionKeyDialog,
   ) async {
     final accessToken = state.accessToken;
     if (accessToken == null) {
-      resetWithError();
-      return;
+      reset(shouldError: true);
+      return RemoteConnectionResult();
     }
     emit(state.copyWith(loading: true, error: false));
 
@@ -129,34 +106,29 @@ class GithubCubit extends HydratedCubit<GithubState> {
     final content = existingFile?.content;
 
     if (keepLocal || existingFile?.sha == null || content == null) {
-      await createOrUpdateRemoteNotes(shouldResetIfError: false);
-      return;
+      return RemoteConnectionResult(shouldCreateRemote: true);
     }
 
     final isEncryptedString = isEncrypted(content);
     if (isEncryptedString) {
       final encryptionKey = await enterEncryptionKeyDialog();
       if (encryptionKey == null) {
-        resetWithError();
-        return;
+        reset(shouldError: true);
+        return RemoteConnectionResult();
       }
 
       final decrypted = decrypt(content, encryptionKey);
       if (decrypted == null) {
-        resetWithError();
-        return;
+        reset(shouldError: true);
+        return RemoteConnectionResult();
       }
 
-      final finalContent = json.decode(decrypted);
-      final notes = notesCubit.fromJson(finalContent);
-      notesCubit.emit(notes);
       emit(state.copyWith(loading: false));
-      return;
+      return RemoteConnectionResult(content: decrypted);
     }
 
-    final finalContent = json.decode(content);
-    notesCubit.emit(notesCubit.fromJson(finalContent));
     emit(state.copyWith(loading: false));
+    return RemoteConnectionResult(content: content);
   }
 
   bool isLoggedIn() {
@@ -166,7 +138,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
   }
 
   Future<FileData?> uploadNewFile(
-    String fileName,
+    String safeFileName,
     Uint8List data,
   ) async {
     final ownerRepo = state.ownerRepo;
@@ -175,8 +147,6 @@ class GithubCubit extends HydratedCubit<GithubState> {
       return null;
     }
     emit(state.copyWith(loading: true));
-
-    final safeFileName = notesCubit.nonExistentFileName(fileName: fileName);
 
     var newFile = await githubRepository.createNewFile(
       ownerRepo,
@@ -215,10 +185,10 @@ class GithubCubit extends HydratedCubit<GithubState> {
   }
 
   Future<void> createOrUpdateRemoteNotes({
+    required Map<String, dynamic> notesJSONMap,
     bool shouldResetIfError = true,
+    String? encryptionKey,
   }) async {
-    final encryptionKey = notesCubit.state.encryptionKey;
-
     final ownerRepo = state.ownerRepo;
     final sha = state.sha;
     final accessToken = state.accessToken;
@@ -227,8 +197,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     }
     emit(state.copyWith(loading: true));
 
-    final jsonMap = notesCubit.state.toJson();
-    final stringifiedContent = json.encode(jsonMap);
+    final stringifiedContent = json.encode(notesJSONMap);
     final finalizedStringContent = encryptionKey == null
         ? stringifiedContent
         : encrypt(stringifiedContent, encryptionKey);
@@ -243,7 +212,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     if (newNote != null && newNote.sha != null) {
       emit(state.copyWith(sha: newNote.sha));
     } else if (shouldResetIfError) {
-      resetWithError();
+      reset(shouldError: true);
     } else {
       emit(state.copyWith(error: true, ownerRepo: ''));
     }
@@ -251,16 +220,9 @@ class GithubCubit extends HydratedCubit<GithubState> {
     emit(state.copyWith(loading: false));
   }
 
-  /// Sets error to true, loading to false, ownerRepo to empty
-  /// and resets the GithubState.
-  void resetWithError() {
+  void reset({bool shouldError = false}) {
     emit(const GithubState());
-    emit(state.copyWith(loading: false, error: true, ownerRepo: ''));
-  }
-
-  void reset() {
-    emit(const GithubState());
-    emit(state.copyWith(loading: false, ownerRepo: ''));
+    emit(state.copyWith(loading: false, ownerRepo: '', error: shouldError));
   }
 
   void invalidateError() {

@@ -187,8 +187,8 @@ Future<void> _deleteFile(
   FileData file,
   String noteId,
 ) async {
-  final ghResult = await context.read<GithubCubit>().deleteFile(file);
-  if (!ghResult) {
+  final fileDeleteResult = await context.read<NotesCubit>().deleteFile(file);
+  if (!fileDeleteResult) {
     if (context.mounted) showSnackBar(context, 'File could not be deleted.');
   }
 
@@ -197,7 +197,7 @@ Future<void> _deleteFile(
           noteId,
           file.name,
         );
-    context.read<GithubCubit>().createOrUpdateRemoteNotes();
+    context.read<NotesCubit>().createOrUpdateRemoteNotes();
   }
 }
 
@@ -212,7 +212,7 @@ Future<void> openFile(BuildContext context, FileData file) async {
 Future<void> _openFileWithData(BuildContext context, FileData file) async {
   try {
     final filePath =
-        await context.read<GithubCubit>().getFileLocalPath(file.name);
+        await context.read<NotesCubit>().getFileLocalPath(file.name);
 
     if (filePath != null) {
       var res = await OpenFilex.open(filePath);
@@ -251,7 +251,7 @@ Future<void> _openLink(BuildContext context, FileData file) async {
 }
 
 Future<void> uploadFile(BuildContext context, Note note) async {
-  final isLoggedIn = context.read<GithubCubit>().isLoggedIn();
+  final isLoggedIn = context.read<NotesCubit>().isLoggedIn();
   if (!isLoggedIn) {
     showSnackBar(context, 'Please log in to upload files.');
     return;
@@ -276,17 +276,11 @@ Future<void> uploadFile(BuildContext context, Note note) async {
 
   if (!context.mounted || imageBytes == null) return;
 
-  final fileData =
-      await context.read<GithubCubit>().uploadNewFile(fileName, imageBytes);
-
-  if (!context.mounted || fileData == null) return;
-
-  context.read<NotesCubit>().addNoteFileData(
-        noteId: note.id,
-        fileName: fileData.name,
-        fileSha: fileData.sha,
+  await context.read<NotesCubit>().uploadNewFileAndNotes(
+        note.id,
+        fileName,
+        imageBytes,
       );
-  context.read<GithubCubit>().createOrUpdateRemoteNotes();
 }
 
 Future<String?> encryptionKeyDialog({

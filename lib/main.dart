@@ -49,16 +49,19 @@ class App extends StatelessWidget {
           create: (context) => GithubRepository(),
         ),
       ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (context) => SelectedNoteCubit()),
-          BlocProvider(create: (context) => NotesCubit()),
-        ],
-        child: BlocProvider(
-          create: (context) => GithubCubit(
-            notesCubit: context.read<NotesCubit>(),
-            githubRepository: context.read<GithubRepository>(),
-          ),
+      child: BlocProvider(
+        create: (context) => GithubCubit(
+          githubRepository: context.read<GithubRepository>(),
+        ),
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => SelectedNoteCubit()),
+            BlocProvider(
+              create: (context) => NotesCubit(
+                githubCubit: context.read<GithubCubit>(),
+              ),
+            ),
+          ],
           child: MaterialApp(
             title: 'NotelyTask',
             theme: themeData,

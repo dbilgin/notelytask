@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/selected_note_cubit.dart';
 import 'package:notelytask/service/native_service.dart';
 import 'package:notelytask/service/navigation_service.dart';
@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     NativeService.initialiseWidgetListener(context);
     context.read<SelectedNoteCubit>().setNoteId(null);
-    context.read<GithubCubit>().getAndUpdateNotes(context: context);
+    context.read<NotesCubit>().getAndUpdateNotes(context: context);
   }
 
   Future<void> setAndUpdate() async {
