@@ -6,8 +6,9 @@ import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/github_state.dart';
-import 'package:notelytask/models/remote_connection_result.dart';
+import 'package:notelytask/cubit/models/remote_connection_result.dart';
 import 'package:notelytask/repository/github_repository.dart';
+import 'package:notelytask/repository/models/get_notes_result.dart';
 import 'package:notelytask/utils.dart';
 
 class GithubCubit extends HydratedCubit<GithubState> {
@@ -36,7 +37,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     return null;
   }
 
-  Future<String?> getAndUpdateNotes({
+  Future<GetNotesResult> getRemoteNotes({
     required BuildContext context,
     String? encryptionKey,
     String? redirectNoteId,
@@ -56,14 +57,13 @@ class GithubCubit extends HydratedCubit<GithubState> {
 
       if (existingFile == null || content == null || content == '') {
         reset(shouldError: true);
-        return null;
+        return GetNotesResult();
       }
 
       final isEncryptedString = isEncrypted(content);
 
       if (isEncryptedString && encryptionKey == null) {
-        reset(shouldError: true);
-        return null;
+        return GetNotesResult(pinNeeded: true);
       }
 
       final decrypted =
@@ -71,13 +71,14 @@ class GithubCubit extends HydratedCubit<GithubState> {
 
       if (decrypted == null) {
         reset(shouldError: true);
-        return null;
+        return GetNotesResult();
       }
 
       emit(state.copyWith(loading: false, sha: existingFile.sha));
-      return decrypted;
+
+      return GetNotesResult(notesString: decrypted);
     }
-    return null;
+    return GetNotesResult();
   }
 
   Future<RemoteConnectionResult> setRepoUrl(
@@ -222,7 +223,12 @@ class GithubCubit extends HydratedCubit<GithubState> {
 
   void reset({bool shouldError = false}) {
     emit(const GithubState());
-    emit(state.copyWith(loading: false, ownerRepo: '', error: shouldError));
+    emit(state.copyWith(
+      loading: false,
+      ownerRepo: null,
+      error: shouldError,
+      accessToken: null,
+    ));
   }
 
   void invalidateError() {

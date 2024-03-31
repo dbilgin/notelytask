@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     NativeService.initialiseWidgetListener(context);
     context.read<SelectedNoteCubit>().setNoteId(null);
-    context.read<NotesCubit>().getAndUpdateNotes(context: context);
+    context.read<NotesCubit>().getAndUpdateLocalNotes(context: context);
   }
 
   Future<void> setAndUpdate() async {

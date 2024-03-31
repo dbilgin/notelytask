@@ -29,6 +29,10 @@ class NotesCubit extends HydratedCubit<NotesState> {
   Future<void> createOrUpdateRemoteNotes({
     bool shouldResetIfError = true,
   }) async {
+    if (!githubCubit.isLoggedIn()) {
+      return;
+    }
+
     final jsonMap = state.toJson();
     return await githubCubit.createOrUpdateRemoteNotes(
       shouldResetIfError: shouldResetIfError,
@@ -105,19 +109,63 @@ class NotesCubit extends HydratedCubit<NotesState> {
     }
   }
 
-  Future<void> getAndUpdateNotes({
+  void reset({
+    bool shouldError = false,
+  }) {
+    githubCubit.reset(shouldError: shouldError);
+    final newState = NotesState(
+      encryptionKey: null,
+      notes: state.notes,
+    );
+    emit(newState);
+  }
+
+  Future<void> getAndUpdateLocalNotes({
     required BuildContext context,
     String? redirectNoteId,
   }) async {
-    final result = await githubCubit.getAndUpdateNotes(
+    if (!githubCubit.isLoggedIn()) {
+      return;
+    }
+
+    final result = await githubCubit.getRemoteNotes(
       context: context,
       encryptionKey: state.encryptionKey,
       redirectNoteId: redirectNoteId,
     );
-    if (result == null) {
+    final notesString = result.notesString;
+
+    if (result.pinNeeded && context.mounted) {
+      final pinResult = await encryptionKeyDialog(
+        context: context,
+        title: 'Encryption Pin Missing',
+        text: 'Your notes are encrypted but you have no pin saved locally.',
+        isPinRequired: true,
+      );
+      if (pinResult == null) {
+        reset(shouldError: true);
+        emit(const NotesState());
+        return;
+      }
+
+      if (!context.mounted) {
+        reset(shouldError: true);
+        emit(const NotesState());
+        return;
+      }
+
+      setEncryptionKey(pinResult);
+      return getAndUpdateLocalNotes(
+        context: context,
+        redirectNoteId: redirectNoteId,
+      );
+    }
+
+    if (notesString == null) {
+      reset(shouldError: true);
       emit(const NotesState());
     } else {
-      final finalContent = json.decode(result);
+      final finalContent = json.decode(notesString);
       final list = fromJson(finalContent);
       emit(list);
     }

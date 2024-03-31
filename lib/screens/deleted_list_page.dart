@@ -15,7 +15,7 @@ class DeletedListPage extends StatefulWidget {
 class _DeletedListPageState extends State<DeletedListPage> {
   @override
   void initState() {
-    context.read<NotesCubit>().getAndUpdateNotes(context: context);
+    context.read<NotesCubit>().getAndUpdateLocalNotes(context: context);
     super.initState();
   }
 
