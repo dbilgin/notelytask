@@ -3,7 +3,7 @@ description: A simple notes application.
 
 publish_to: 'none'
 
-version: 3.0.2
+version: 3.0.3
 
 environment:
   sdk: '>=3.3.3 <4.0.0'
