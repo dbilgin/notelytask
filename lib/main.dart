@@ -9,6 +9,7 @@ import 'package:notelytask/screens/github_page.dart';
 import 'package:notelytask/screens/home_page.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:notelytask/screens/privacy_page.dart';
 import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/theme.dart';
 import 'package:path_provider/path_provider.dart';
@@ -90,6 +91,7 @@ class App extends StatelessWidget {
                                 true,
                       ),
                     ),
+                '/privacy': (context) => const PrivacyPage(),
               };
 
               if (routes[settingsUri.path] == null) {
