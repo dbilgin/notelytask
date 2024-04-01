@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 
 final themeData = ThemeData(
-  disabledColor: Colors.red,
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ButtonStyle(
       textStyle: MaterialStateProperty.resolveWith((states) {

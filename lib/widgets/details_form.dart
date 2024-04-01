@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/theme.dart';
 import 'package:notelytask/utils.dart';
 import 'package:notelytask/widgets/file_list.dart';
 
@@ -26,6 +28,7 @@ class DetailsForm extends StatefulWidget {
 }
 
 class _DetailsFormState extends State<DetailsForm> {
+  bool _displayMarkdown = false;
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _textController = TextEditingController();
@@ -103,23 +106,34 @@ class _DetailsFormState extends State<DetailsForm> {
                               enabledBorder: InputBorder.none,
                             ),
                           ),
-                          Expanded(
-                            child: TextFormField(
-                              onChanged: (text) => _submit(),
-                              maxLines: null,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                              decoration: const InputDecoration(
-                                hintText: 'Description',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                border: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                enabledBorder: InputBorder.none,
+                          if (!_displayMarkdown)
+                            Expanded(
+                              child: TextFormField(
+                                onChanged: (text) => _submit(),
+                                maxLines: null,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                                decoration: const InputDecoration(
+                                  hintText: 'Description',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  border: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                ),
+                                keyboardType: TextInputType.multiline,
+                                controller: _textController,
+                                // expands: true,
                               ),
-                              keyboardType: TextInputType.multiline,
-                              controller: _textController,
-                              // expands: true,
                             ),
-                          ),
+                          if (_displayMarkdown)
+                            Expanded(
+                              child: Markdown(
+                                selectable: true,
+                                data: _textController.text,
+                                styleSheet: MarkdownStyleSheet(
+                                  checkbox: themeData.textTheme.bodySmall,
+                                ),
+                              ),
+                            ),
                         ],
                 ),
               ),
@@ -129,19 +143,31 @@ class _DetailsFormState extends State<DetailsForm> {
             builder: (context, isKeyboardVisible) {
               return Visibility(
                 visible: !isKeyboardVisible,
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.file_upload),
-                      tooltip: 'Upload File',
-                      onPressed: () => uploadFile(context, widget.note),
-                      color: Colors.white,
-                    ),
-                    FileList(
-                      noteId: widget.note.id,
-                    ),
-                  ],
+                child: Container(
+                  color: themeData.colorScheme.primary,
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Wrap(
+                    alignment: WrapAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.file_upload),
+                        tooltip: 'Upload File',
+                        onPressed: () => uploadFile(context, widget.note),
+                        color: Colors.white,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.featured_play_list),
+                        tooltip: 'Toggle Markdown',
+                        onPressed: () => setState(
+                            () => _displayMarkdown = !_displayMarkdown),
+                        color: Colors.white,
+                      ),
+                      FileList(
+                        noteId: widget.note.id,
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
