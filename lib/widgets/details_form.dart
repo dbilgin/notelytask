@@ -5,6 +5,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
+import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,7 +29,6 @@ class DetailsForm extends StatefulWidget {
 }
 
 class _DetailsFormState extends State<DetailsForm> {
-  bool _displayMarkdown = false;
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _textController = TextEditingController();
@@ -71,6 +71,8 @@ class _DetailsFormState extends State<DetailsForm> {
 
   @override
   Widget build(BuildContext context) {
+    bool markdownEnabled = context.read<SettingsCubit>().state.markdownEnabled;
+
     var shouldHideForm = widget.isDeletedList &&
         _titleController.text.isEmpty &&
         _textController.text.isEmpty;
@@ -106,7 +108,7 @@ class _DetailsFormState extends State<DetailsForm> {
                               enabledBorder: InputBorder.none,
                             ),
                           ),
-                          if (!_displayMarkdown)
+                          if (!markdownEnabled)
                             Expanded(
                               child: TextFormField(
                                 onChanged: (text) => _submit(),
@@ -124,7 +126,7 @@ class _DetailsFormState extends State<DetailsForm> {
                                 // expands: true,
                               ),
                             ),
-                          if (_displayMarkdown)
+                          if (markdownEnabled)
                             Expanded(
                               child: Markdown(
                                 selectable: true,
@@ -159,8 +161,8 @@ class _DetailsFormState extends State<DetailsForm> {
                       IconButton(
                         icon: const Icon(Icons.featured_play_list),
                         tooltip: 'Toggle Markdown',
-                        onPressed: () => setState(
-                            () => _displayMarkdown = !_displayMarkdown),
+                        onPressed: () =>
+                            context.read<SettingsCubit>().toggleMarkdown(),
                         color: Colors.white,
                       ),
                       FileList(

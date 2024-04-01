@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
-import 'package:notelytask/cubit/selected_note_cubit.dart';
+import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/models/note.dart';
+import 'package:notelytask/models/settings_state.dart';
 import 'package:notelytask/screens/details_page.dart';
 import 'package:notelytask/widgets/note_list.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,9 +33,9 @@ class _NoteListDetailedState extends State<NoteListDetailed> {
             isDeletedList: widget.isDeletedList,
           ),
         ),
-        BlocBuilder<SelectedNoteCubit, String?>(
-          builder: (context, String? state) {
-            String? selectedNoteId = state;
+        BlocBuilder<SettingsCubit, SettingsState>(
+          builder: (context, SettingsState state) {
+            String? selectedNoteId = state.selectedNoteId;
             Note? existingNote = selectedNoteId != null
                 ? context
                     .read<NotesCubit>()

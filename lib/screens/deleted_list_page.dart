@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
-import 'package:notelytask/cubit/selected_note_cubit.dart';
+import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/widgets/github_loader.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
 
@@ -39,7 +39,7 @@ class _DeletedListPageState extends State<DeletedListPage> {
       body: PopScope(
         canPop: true,
         onPopInvoked: (didPop) {
-          context.read<SelectedNoteCubit>().setNoteId(null);
+          context.read<SettingsCubit>().setSelectedNoteId(null);
         },
         child: const NoteListLayout(isDeletedList: true),
       ),
