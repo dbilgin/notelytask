@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
-import 'package:notelytask/cubit/selected_note_cubit.dart';
+import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/widgets/details_form.dart';
 import 'package:notelytask/widgets/github_loader.dart';
@@ -29,7 +29,7 @@ class _DetailsPageState extends State<DetailsPage> {
     note = Note.generateNew(note: widget.note);
 
     context.read<NotesCubit>().setNote(note);
-    context.read<SelectedNoteCubit>().setNoteId(note.id);
+    context.read<SettingsCubit>().setSelectedNoteId(note.id);
 
     super.initState();
   }

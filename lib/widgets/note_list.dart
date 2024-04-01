@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
-import 'package:notelytask/cubit/selected_note_cubit.dart';
+import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,8 +42,8 @@ class _NoteListState extends State<NoteList> {
 
     if (!mounted) return;
 
-    if (context.read<SelectedNoteCubit>().state == note.id) {
-      context.read<SelectedNoteCubit>().setNoteId(null);
+    if (context.read<SettingsCubit>().state.selectedNoteId == note.id) {
+      context.read<SettingsCubit>().setSelectedNoteId(null);
     }
     context.read<NotesCubit>().createOrUpdateRemoteNotes();
   }

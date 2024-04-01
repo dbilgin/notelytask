@@ -18,7 +18,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:encrypt/encrypt.dart' as e;
 
-import 'cubit/selected_note_cubit.dart';
+import 'cubit/settings_cubit.dart';
 import 'models/note.dart';
 
 GetIt getIt = GetIt.instance;
@@ -43,7 +43,7 @@ void navigateToDetails({
       ),
     );
   }
-  context.read<SelectedNoteCubit>().setNoteId(note?.id);
+  context.read<SettingsCubit>().setSelectedNoteId(note?.id);
 }
 
 void saveToRepoAlert({

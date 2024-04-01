@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
-import 'package:notelytask/cubit/selected_note_cubit.dart';
+import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/repository/github_repository.dart';
 import 'package:notelytask/screens/details_page.dart';
 import 'package:notelytask/screens/github_page.dart';
@@ -55,7 +55,7 @@ class App extends StatelessWidget {
         ),
         child: MultiBlocProvider(
           providers: [
-            BlocProvider(create: (context) => SelectedNoteCubit()),
+            BlocProvider(create: (context) => SettingsCubit()),
             BlocProvider(
               create: (context) => NotesCubit(
                 githubCubit: context.read<GithubCubit>(),
