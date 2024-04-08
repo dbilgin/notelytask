@@ -208,7 +208,7 @@ class GithubRepository {
     }
   }
 
-  Future<GithubState> initialLogin() async {
+  Future<GithubState?> initialLogin() async {
     try {
       final url = Uri.https(
         'github.com',
@@ -236,20 +236,10 @@ class GithubRepository {
           expiresIn: expiresIn,
         );
       } else {
-        return const GithubState(
-          deviceCode: null,
-          userCode: null,
-          verificationUri: null,
-          expiresIn: null,
-        );
+        return null;
       }
     } catch (e) {
-      return const GithubState(
-        deviceCode: null,
-        userCode: null,
-        verificationUri: null,
-        expiresIn: null,
-      );
+      return null;
     }
   }
 
