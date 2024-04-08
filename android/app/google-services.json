@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "731300865453",
+    "firebase_url": "https://notelytask.firebaseio.com",
+    "project_id": "notelytask",
+    "storage_bucket": "notelytask.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:731300865453:android:9a6638f59f98d66773ad24",
+        "android_client_info": {
+          "package_name": "com.omedacore.notelytask"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "731300865453-l079ctbqc4tbhtkmgm56atjo3m610lf7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.omedacore.notelytask",
+            "certificate_hash": "a673aa29997e33ad1024aacbe8d19ab4e62a3d65"
+          }
+        },
+        {
+          "client_id": "731300865453-lf1glbqkkmbld8qvcvl3s5kqohj11m3d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.omedacore.notelytask",
+            "certificate_hash": "8d7aef42c68464a9bd641fad8579331671f14bde"
+          }
+        },
+        {
+          "client_id": "731300865453-ad51mhq87bsg9ah5305qsu0fd7no815u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsA_4g7Bg4niV4pGbwSp0jKQvYjr-Y_nc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "731300865453-ad51mhq87bsg9ah5305qsu0fd7no815u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
