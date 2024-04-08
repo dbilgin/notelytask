@@ -33,8 +33,12 @@ class _HomePageState extends State<HomePage> {
     NativeService.updateNotes(context, args);
   }
 
-  void _navigateToLogin() {
+  void _navigateToGithubLogin() {
     getIt<NavigationService>().pushNamed('/github');
+  }
+
+  void _navigateToGDriveLogin() {
+    getIt<NavigationService>().pushNamed('/google_drive');
   }
 
   void _navigateToDeletedList() {
@@ -61,7 +65,12 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: Image.asset('assets/github.png'),
             tooltip: 'Github Integration',
-            onPressed: _navigateToLogin,
+            onPressed: _navigateToGithubLogin,
+          ),
+          IconButton(
+            icon: Image.asset('assets/google_drive.png'),
+            tooltip: 'Google Drive Integration',
+            onPressed: _navigateToGDriveLogin,
           ),
         ],
         bottom: const PreferredSize(
