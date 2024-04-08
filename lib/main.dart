@@ -2,13 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
-import 'package:notelytask/cubit/google_drive_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/repository/github_repository.dart';
-import 'package:notelytask/repository/google_drive_repository.dart';
 import 'package:notelytask/screens/details_page.dart';
 import 'package:notelytask/screens/github_page.dart';
-import 'package:notelytask/screens/google_drive_page.dart';
 import 'package:notelytask/screens/home_page.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -52,23 +49,11 @@ class App extends StatelessWidget {
         RepositoryProvider<GithubRepository>(
           create: (context) => GithubRepository(),
         ),
-        RepositoryProvider<GoogleDriveRepository>(
-          create: (context) => GoogleDriveRepository(),
-        ),
       ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => GithubCubit(
-              githubRepository: context.read<GithubRepository>(),
-            ),
-          ),
-          BlocProvider(
-            create: (context) => GoogleDriveCubit(
-              googleDriveRepository: context.read<GoogleDriveRepository>(),
-            ),
-          ),
-        ],
+      child: BlocProvider(
+        create: (context) => GithubCubit(
+          githubRepository: context.read<GithubRepository>(),
+        ),
         child: MultiBlocProvider(
           providers: [
             BlocProvider(create: (context) => SettingsCubit()),
@@ -91,7 +76,6 @@ class App extends StatelessWidget {
                 '/': (context) => const HomePage(),
                 '/deleted_list': (context) => const DeletedListPage(),
                 '/github': (context) => GithubPage(code: ghUserCode),
-                '/google_drive': (context) => const GoogleDrivePage(),
                 '/details': (context) => Scaffold(
                       body: DetailsPage(
                         note:

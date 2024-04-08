@@ -1,14 +1,9 @@
-import 'package:equatable/equatable.dart';
-
-class RemoteConnectionResult extends Equatable {
+class RemoteConnectionResult {
   final String? content;
   final bool shouldCreateRemote;
 
-  const RemoteConnectionResult({
+  RemoteConnectionResult({
     this.content,
     this.shouldCreateRemote = false,
   });
-
-  @override
-  List<Object?> get props => [content, shouldCreateRemote];
 }

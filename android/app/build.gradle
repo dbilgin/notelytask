@@ -4,14 +4,6 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-def keyProperties = new Properties()
-keyProperties.load(new FileInputStream(file('key.properties')))
-
-def debugStoreFile = keyProperties.getProperty('DEBUG_STORE_FILE')
-def debugStorePassword = keyProperties.getProperty('DEBUG_STORE_PASSWORD')
-def debugKeyAlias = keyProperties.getProperty('DEBUG_KEY_ALIAS')
-def debugKeyPassword = keyProperties.getProperty('DEBUG_KEY_PASSWORD')
-
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -49,21 +41,14 @@ android {
     }
 
     defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.omedacore.notelytask"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        multiDexEnabled true
-    }
-
-    signingConfigs {
-        debug {
-            storeFile file(debugStoreFile)
-            storePassword debugStorePassword
-            keyAlias debugKeyAlias
-            keyPassword debugKeyPassword
-        }
     }
 
     buildTypes {
