@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/google_drive_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/models/notes_state.dart';
@@ -13,8 +14,10 @@ import 'package:notelytask/utils.dart';
 class NotesCubit extends HydratedCubit<NotesState> {
   NotesCubit({
     required this.githubCubit,
+    required this.googleDriveCubit,
   }) : super(const NotesState());
   final GithubCubit githubCubit;
+  final GoogleDriveCubit googleDriveCubit;
 
   @override
   void onChange(Change<NotesState> change) {
@@ -29,7 +32,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
   Future<void> createOrUpdateRemoteNotes({
     bool shouldResetIfError = true,
   }) async {
-    if (!githubCubit.isLoggedIn()) {
+    if (!githubCubit.state.isLoggedIn()) {
       return;
     }
 
@@ -81,16 +84,25 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   bool isLoggedIn() {
-    return githubCubit.isLoggedIn();
+    return githubCubit.state.isLoggedIn() ||
+        googleDriveCubit.state.isLoggedIn();
   }
 
-  Future<void> setRemoteConnection(
-    String ownerRepo,
-    bool keepLocal,
-    Future<String?> Function() enterEncryptionKeyDialog,
-  ) async {
+  Future<void> setRemoteConnection({
+    required bool keepLocal,
+    required Future<String?> Function() enterEncryptionKeyDialog,
+    String? ownerRepo,
+  }) async {
+    // final connectionResult = ownerRepo != null
+    //     ? await githubCubit.setRepoUrl(
+    //         ownerRepo,
+    //         keepLocal,
+    //         enterEncryptionKeyDialog,
+    //       )
+    //     : await googleDriveCubit.getNotesFile();
+
     final connectionResult = await githubCubit.setRepoUrl(
-      ownerRepo,
+      ownerRepo!,
       keepLocal,
       enterEncryptionKeyDialog,
     );
@@ -112,10 +124,15 @@ class NotesCubit extends HydratedCubit<NotesState> {
   void reset({
     bool shouldError = false,
   }) {
-    githubCubit.reset(shouldError: shouldError);
-    final newState = NotesState(
+    if (githubCubit.state.isLoggedIn()) {
+      githubCubit.reset(shouldError: shouldError);
+    } else {
+      googleDriveCubit.reset(shouldError: shouldError);
+    }
+
+    const newState = NotesState(
       encryptionKey: null,
-      notes: state.notes,
+      notes: [],
     );
     emit(newState);
   }
@@ -124,7 +141,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
     required BuildContext context,
     String? redirectNoteId,
   }) async {
-    if (!githubCubit.isLoggedIn()) {
+    if (!githubCubit.state.isLoggedIn()) {
       return;
     }
 
@@ -144,13 +161,11 @@ class NotesCubit extends HydratedCubit<NotesState> {
       );
       if (pinResult == null) {
         reset(shouldError: true);
-        emit(const NotesState());
         return;
       }
 
       if (!context.mounted) {
         reset(shouldError: true);
-        emit(const NotesState());
         return;
       }
 
@@ -163,7 +178,6 @@ class NotesCubit extends HydratedCubit<NotesState> {
 
     if (notesString == null) {
       reset(shouldError: true);
-      emit(const NotesState());
     } else {
       final finalContent = json.decode(notesString);
       final list = fromJson(finalContent);

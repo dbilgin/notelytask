@@ -10,6 +10,7 @@ class GoogleDriveCubit extends HydratedCubit<GoogleDriveState> {
 
   Future<bool> getTokens() async {
     reset();
+    emit(state.copyWith(loading: true));
 
     final signInData = await googleDriveRepository.signIn();
     if (signInData == null) {
@@ -26,13 +27,19 @@ class GoogleDriveCubit extends HydratedCubit<GoogleDriveState> {
         idToken: idToken,
       ),
     );
+    emit(state.copyWith(loading: false));
     return true;
   }
 
-  bool isLoggedIn() {
-    final idToken = state.idToken;
-    final accessToken = state.accessToken;
-    return idToken != null && accessToken != null;
+  Future<bool> signOut() async {
+    emit(state.copyWith(loading: true));
+    final signedOut = await googleDriveRepository.signOut();
+    if (signedOut) {
+      reset();
+    }
+
+    emit(state.copyWith(loading: false));
+    return signedOut;
   }
 
   void reset({bool shouldError = false}) {

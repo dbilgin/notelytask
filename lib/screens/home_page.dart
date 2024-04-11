@@ -6,8 +6,8 @@ import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/service/native_service.dart';
 import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/utils.dart';
-import 'package:notelytask/widgets/github_loader.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
+import 'package:notelytask/widgets/state_loader.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -75,7 +75,7 @@ class _HomePageState extends State<HomePage> {
         ],
         bottom: const PreferredSize(
           preferredSize: Size(double.infinity, 0),
-          child: GithubLoader(),
+          child: StateLoader(),
         ),
       ),
       body: const NoteListLayout(),

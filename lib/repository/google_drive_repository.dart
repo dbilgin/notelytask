@@ -4,13 +4,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:notelytask/cubit/models/google_sign_in_result.dart';
 
 class GoogleDriveRepository {
+  final List<String> scopes = [
+    'https://www.googleapis.com/auth/drive.appdata',
+    'https://www.googleapis.com/auth/drive.file',
+  ];
   Future<GoogleSignInResult?> signIn() async {
     try {
-      const List<String> scopes = [
-        'https://www.googleapis.com/auth/drive.appdata',
-        'https://www.googleapis.com/auth/drive.file',
-      ];
-
       GoogleSignIn googleSignIn = GoogleSignIn(
         clientId: dotenv.env['GOOGLE_CLIENT_ID'],
         scopes: scopes,
@@ -36,6 +35,19 @@ class GoogleDriveRepository {
           : null;
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<bool> signOut() async {
+    try {
+      GoogleSignIn googleSignIn = GoogleSignIn(
+        clientId: dotenv.env['GOOGLE_CLIENT_ID'],
+        scopes: scopes,
+      );
+      await googleSignIn.disconnect();
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 }

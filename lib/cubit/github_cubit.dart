@@ -187,7 +187,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     final ownerRepo = state.ownerRepo;
     final sha = state.sha;
     final accessToken = state.accessToken;
-    if (!isLoggedIn() || ownerRepo == null || accessToken == null) {
+    if (!state.isLoggedIn() || ownerRepo == null || accessToken == null) {
       return;
     }
     emit(state.copyWith(loading: true));
@@ -215,20 +215,15 @@ class GithubCubit extends HydratedCubit<GithubState> {
     emit(state.copyWith(loading: false));
   }
 
-  bool isLoggedIn() {
-    final ownerRepo = state.ownerRepo;
-    final accessToken = state.accessToken;
-    return ownerRepo != null && accessToken != null;
-  }
-
   void reset({bool shouldError = false}) {
-    emit(const GithubState());
-    emit(state.copyWith(
-      loading: false,
-      ownerRepo: null,
-      error: shouldError,
-      accessToken: null,
-    ));
+    emit(
+      const GithubState().copyWith(
+        loading: false,
+        ownerRepo: null,
+        error: shouldError,
+        accessToken: null,
+      ),
+    );
   }
 
   void invalidateError() {
