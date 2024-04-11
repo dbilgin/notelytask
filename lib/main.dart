@@ -75,6 +75,7 @@ class App extends StatelessWidget {
             BlocProvider(
               create: (context) => NotesCubit(
                 githubCubit: context.read<GithubCubit>(),
+                googleDriveCubit: context.read<GoogleDriveCubit>(),
               ),
             ),
           ],

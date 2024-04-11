@@ -14,6 +14,12 @@ class GoogleDriveState extends Equatable {
     this.idToken,
   });
 
+  bool isLoggedIn() {
+    final idToken = this.idToken;
+    final accessToken = this.accessToken;
+    return idToken != null && accessToken != null;
+  }
+
   factory GoogleDriveState.fromJson(Map<String, dynamic> json) {
     return GoogleDriveState(
       loading: json['loading'] as bool? ?? false,

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
-import 'package:notelytask/widgets/github_loader.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
+import 'package:notelytask/widgets/state_loader.dart';
 
 class DeletedListPage extends StatefulWidget {
   const DeletedListPage({super.key});
@@ -33,7 +33,7 @@ class _DeletedListPageState extends State<DeletedListPage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         bottom: const PreferredSize(
           preferredSize: Size(double.infinity, 0),
-          child: GithubLoader(),
+          child: StateLoader(),
         ),
       ),
       body: PopScope(
