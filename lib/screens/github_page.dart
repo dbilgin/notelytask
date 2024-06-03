@@ -45,7 +45,7 @@ class _GithubPageState extends State<GithubPage> {
     saveToRepoAlert(
       context: context,
       onPressed: (bool keepLocal) async {
-        await context.read<NotesCubit>().setRemoteConnection(
+        final result = await context.read<NotesCubit>().setRemoteConnection(
               ownerRepo: repoUrl,
               keepLocal: keepLocal,
               enterEncryptionKeyDialog: () => encryptionKeyDialog(
@@ -56,6 +56,9 @@ class _GithubPageState extends State<GithubPage> {
                 isPinRequired: true,
               ),
             );
+        if (!result && mounted) {
+          showSnackBar(context, 'An error occurred.');
+        }
       },
     );
   }

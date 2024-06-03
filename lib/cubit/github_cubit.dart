@@ -40,7 +40,6 @@ class GithubCubit extends HydratedCubit<GithubState> {
   Future<GetNotesResult> getRemoteNotes({
     required BuildContext context,
     String? encryptionKey,
-    String? redirectNoteId,
   }) async {
     final accessToken = state.accessToken;
     final ownerRepo = state.ownerRepo;
@@ -98,17 +97,18 @@ class GithubCubit extends HydratedCubit<GithubState> {
       accessToken,
     );
 
+    final content = existingFile?.content;
+
+    if (keepLocal || existingFile?.sha == null || content == null) {
+      return const RemoteConnectionResult(shouldCreateRemote: true);
+    }
+
     emit(
       state.copyWith(
         ownerRepo: ownerRepo,
         sha: existingFile?.sha,
       ),
     );
-    final content = existingFile?.content;
-
-    if (keepLocal || existingFile?.sha == null || content == null) {
-      return const RemoteConnectionResult(shouldCreateRemote: true);
-    }
 
     final isEncryptedString = isEncrypted(content);
     if (isEncryptedString) {
@@ -143,7 +143,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     }
     emit(state.copyWith(loading: true));
 
-    var newFile = await githubRepository.createNewFile(
+    final newFile = await githubRepository.createNewFile(
       ownerRepo,
       accessToken,
       data,
@@ -157,7 +157,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     }
 
     emit(state.copyWith(loading: false));
-    return FileData(name: safeFileName, sha: sha);
+    return FileData(name: safeFileName, id: sha);
   }
 
   Future<bool> deleteFile(FileData fileData) async {
@@ -171,7 +171,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     bool isDeleted = await githubRepository.deleteFile(
       ownerRepo,
       accessToken,
-      fileData.sha,
+      fileData.id,
       fileData.name,
     );
 
@@ -197,7 +197,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
         ? stringifiedContent
         : encrypt(stringifiedContent, encryptionKey);
 
-    var newNote = await githubRepository.createOrUpdateNotesFile(
+    final newNote = await githubRepository.createOrUpdateNotesFile(
       ownerRepo,
       accessToken,
       finalizedStringContent,

@@ -23,6 +23,6 @@ Map<String, dynamic> _$NoteToJson(Note instance) => <String, dynamic>{
       'title': instance.title,
       'text': instance.text,
       'date': instance.date.toIso8601String(),
-      'fileDataList': instance.fileDataList,
+      'fileDataList': instance.fileDataList.map((e) => e.toJson()).toList(),
       'isDeleted': instance.isDeleted,
     };
