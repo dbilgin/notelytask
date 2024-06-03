@@ -5,11 +5,11 @@ part 'file_data.g.dart';
 @JsonSerializable(explicitToJson: true)
 class FileData {
   final String name;
-  final String sha;
+  final String id;
 
   FileData({
     required this.name,
-    required this.sha,
+    required this.id,
   });
 
   factory FileData.fromJson(Map<String, dynamic> json) =>

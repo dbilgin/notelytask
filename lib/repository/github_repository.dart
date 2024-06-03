@@ -32,17 +32,17 @@ class GithubRepository {
         'message': '$fileName uploaded',
         'content': encodedContent,
       };
-      var response = await put(
+      final response = await put(
         url,
         headers: {'Authorization': 'bearer $accessToken'},
         body: jsonEncode(body),
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
+        final jsonResponse = json.decode(response.body) as Map<String, dynamic>;
 
-        var content = jsonResponse['content'];
-        var sha = content['sha'];
+        final content = jsonResponse['content'];
+        final sha = content['sha'];
 
         return GithubFile(
           sha: sha,
@@ -70,7 +70,7 @@ class GithubRepository {
         'message': '$fileName deleted',
         'sha': sha,
       };
-      var response = await delete(
+      final response = await delete(
         url,
         headers: {'Authorization': 'bearer $accessToken'},
         body: jsonEncode(body),
@@ -110,17 +110,17 @@ class GithubRepository {
               'message': 'Notes added',
               'content': encodedContent,
             };
-      var response = await put(
+      final response = await put(
         url,
         headers: {'Authorization': 'bearer $accessToken'},
         body: jsonEncode(body),
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
+        final jsonResponse = json.decode(response.body) as Map<String, dynamic>;
 
-        var content = jsonResponse['content'];
-        var sha = content['sha'];
+        final content = jsonResponse['content'];
+        final sha = content['sha'];
 
         return GithubFile(
           sha: sha,
@@ -143,7 +143,7 @@ class GithubRepository {
         'api.github.com',
         '/repos/$ownerRepo/contents/$fileName',
       );
-      var response = await get(
+      final response = await get(
         url,
         headers: {
           'Authorization': 'bearer $accessToken',
@@ -182,13 +182,13 @@ class GithubRepository {
         'api.github.com',
         '/repos/$ownerRepo/contents/notes.json',
       );
-      var response = await get(
+      final response = await get(
         url,
         headers: {'Authorization': 'bearer $accessToken'},
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        var jsonResponse = json.decode(response.body);
+        final jsonResponse = json.decode(response.body);
 
         final sha = jsonResponse['sha'];
 
@@ -219,15 +219,15 @@ class GithubRepository {
         },
       );
 
-      var response = await post(url, headers: {'Accept': 'application/json'});
+      final response = await post(url, headers: {'Accept': 'application/json'});
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        var jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
 
-        var deviceCode = jsonResponse['device_code'];
-        var userCode = jsonResponse['user_code'];
-        var verificationUri = jsonResponse['verification_uri'];
-        var expiresIn = jsonResponse['expires_in'];
+        final deviceCode = jsonResponse['device_code'];
+        final userCode = jsonResponse['user_code'];
+        final verificationUri = jsonResponse['verification_uri'];
+        final expiresIn = jsonResponse['expires_in'];
 
         return GithubState(
           deviceCode: deviceCode,
@@ -266,12 +266,12 @@ class GithubRepository {
       );
     }
     try {
-      var response = await post(url, headers: {'Accept': 'application/json'});
+      final response = await post(url, headers: {'Accept': 'application/json'});
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        var jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
 
-        var accessToken = jsonResponse['access_token'];
+        final accessToken = jsonResponse['access_token'];
         return accessToken;
       } else {
         return null;
