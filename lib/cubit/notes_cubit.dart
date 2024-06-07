@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
-import 'package:notelytask/cubit/google_drive_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/models/notes_state.dart';
@@ -14,10 +13,8 @@ import 'package:notelytask/utils.dart';
 class NotesCubit extends HydratedCubit<NotesState> {
   NotesCubit({
     required this.githubCubit,
-    required this.googleDriveCubit,
   }) : super(const NotesState());
   final GithubCubit githubCubit;
-  final GoogleDriveCubit googleDriveCubit;
 
   @override
   void onChange(Change<NotesState> change) {
@@ -34,26 +31,15 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }) async {
     final jsonMap = state.toJson();
 
-    if (githubCubit.state.isLoggedIn()) {
-      return await githubCubit.createOrUpdateRemoteNotes(
-        shouldResetIfError: shouldResetIfError,
-        encryptionKey: state.encryptionKey,
-        notesJSONMap: jsonMap,
-      );
-    } else if (googleDriveCubit.state.accessToken != null) {
-      return await googleDriveCubit.createOrUpdateRemoteNotes(
-        shouldResetIfError: shouldResetIfError,
-        encryptionKey: state.encryptionKey,
-        notesJSONMap: jsonMap,
-      );
-    }
+    return await githubCubit.createOrUpdateRemoteNotes(
+      shouldResetIfError: shouldResetIfError,
+      encryptionKey: state.encryptionKey,
+      notesJSONMap: jsonMap,
+    );
   }
 
   Future<bool> deleteFileAndUpdate(String noteId, FileData fileData) async {
-    final deleteFile = githubCubit.state.isLoggedIn()
-        ? githubCubit.deleteFile
-        : googleDriveCubit.deleteFile;
-    final remoteDeleteResult = await deleteFile(fileData);
+    final remoteDeleteResult = await githubCubit.deleteFile(fileData);
     if (!remoteDeleteResult) return false;
     _deleteNoteFileData(
       noteId,
@@ -64,10 +50,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   Future<bool> deleteFile(FileData fileData) async {
-    final deleteFile = githubCubit.state.isLoggedIn()
-        ? githubCubit.deleteFile
-        : googleDriveCubit.deleteFile;
-    return await deleteFile(fileData);
+    return await githubCubit.deleteFile(fileData);
   }
 
   Future<void> uploadNewFileAndNotes(
@@ -80,11 +63,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
       notes: state.notes,
     );
 
-    final uploadNewFile = githubCubit.state.isLoggedIn()
-        ? githubCubit.uploadNewFile
-        : googleDriveCubit.uploadNewFile;
-
-    final fileData = await uploadNewFile(
+    final fileData = await githubCubit.uploadNewFile(
       safeFileName,
       data,
     );
@@ -102,8 +81,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   bool isLoggedIn() {
-    return githubCubit.state.isLoggedIn() ||
-        googleDriveCubit.state.isLoggedIn();
+    return githubCubit.state.isLoggedIn();
   }
 
   Future<bool> setRemoteConnection({
@@ -118,10 +96,11 @@ class NotesCubit extends HydratedCubit<NotesState> {
             keepLocal,
             enterEncryptionKeyDialog,
           )
-        : await googleDriveCubit.setFileId(
-            fileId: fileId,
-            enterEncryptionKeyDialog: enterEncryptionKeyDialog,
-          );
+        : null;
+
+    if (connectionResult == null) {
+      return false;
+    }
 
     if (connectionResult.shouldCreateRemote) {
       await createOrUpdateRemoteNotes(shouldResetIfError: false);
@@ -142,11 +121,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
   void reset({
     bool shouldError = false,
   }) {
-    if (githubCubit.state.isLoggedIn()) {
-      githubCubit.reset(shouldError: shouldError);
-    } else {
-      googleDriveCubit.reset(shouldError: shouldError);
-    }
+    githubCubit.reset(shouldError: shouldError);
 
     const newState = NotesState(
       encryptionKey: null,
@@ -159,16 +134,11 @@ class NotesCubit extends HydratedCubit<NotesState> {
     required BuildContext context,
     String? redirectNoteId,
   }) async {
-    if (!githubCubit.state.isLoggedIn() &&
-        !googleDriveCubit.state.isLoggedIn()) {
+    if (!githubCubit.state.isLoggedIn()) {
       return;
     }
 
-    final getRemoteNotes = githubCubit.state.isLoggedIn()
-        ? githubCubit.getRemoteNotes
-        : googleDriveCubit.getRemoteNotes;
-
-    final result = await getRemoteNotes(
+    final result = await githubCubit.getRemoteNotes(
       context: context,
       encryptionKey: state.encryptionKey,
     );
@@ -225,8 +195,6 @@ class NotesCubit extends HydratedCubit<NotesState> {
   Future<String?> getFileLocalPath(FileData fileData) async {
     if (githubCubit.state.isLoggedIn()) {
       return await githubCubit.getFileLocalPath(fileData.name);
-    } else if (googleDriveCubit.state.isLoggedIn()) {
-      return await googleDriveCubit.getFileLocalPath(fileData);
     }
     return null;
   }
