@@ -56,11 +56,12 @@ void saveToRepoAlert({
       return AlertDialog(
         backgroundColor: const Color(0xff2a2a31),
         title: Text(
-          'Github Connection',
+          'Github Connection Warning',
           style: Theme.of(context).textTheme.titleLarge,
         ),
         content: Text(
-          'Would you like to keep your local data and overwrite your repo?',
+          '''Warning! This action will make changes to your repository on Github!
+Would you like to keep your local data and overwrite your repo?''',
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         actions: [
