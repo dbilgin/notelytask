@@ -3,7 +3,7 @@ description: A simple notes application.
 
 publish_to: 'none'
 
-version: 3.0.3
+version: 3.1.0
 
 environment:
   sdk: '>=3.3.3 <4.0.0'
@@ -52,7 +52,6 @@ flutter:
     - assets/icon.png
     - assets/foreground.png
     - assets/github.png
-    - assets/google_drive.png
     - assets/.env
 
 flutter_icons:
