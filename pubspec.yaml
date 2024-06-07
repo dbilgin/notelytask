@@ -38,6 +38,8 @@ dependencies:
   pinput: ^4.0.0
   flutter_markdown: ^0.6.22
   flutter_widget_from_html: ^0.14.11
+  google_sign_in: ^6.2.1
+  http_parser: ^4.0.2
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +52,7 @@ flutter:
     - assets/icon.png
     - assets/foreground.png
     - assets/github.png
+    - assets/google_drive.png
     - assets/.env
 
 flutter_icons:

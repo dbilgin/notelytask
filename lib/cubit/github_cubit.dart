@@ -40,7 +40,6 @@ class GithubCubit extends HydratedCubit<GithubState> {
   Future<GetNotesResult> getRemoteNotes({
     required BuildContext context,
     String? encryptionKey,
-    String? redirectNoteId,
   }) async {
     final accessToken = state.accessToken;
     final ownerRepo = state.ownerRepo;
@@ -89,7 +88,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     final accessToken = state.accessToken;
     if (accessToken == null) {
       reset(shouldError: true);
-      return RemoteConnectionResult();
+      return const RemoteConnectionResult();
     }
     emit(state.copyWith(loading: true, error: false));
 
@@ -98,30 +97,31 @@ class GithubCubit extends HydratedCubit<GithubState> {
       accessToken,
     );
 
+    final content = existingFile?.content;
+
+    if (keepLocal || existingFile?.sha == null || content == null) {
+      return const RemoteConnectionResult(shouldCreateRemote: true);
+    }
+
     emit(
       state.copyWith(
         ownerRepo: ownerRepo,
         sha: existingFile?.sha,
       ),
     );
-    final content = existingFile?.content;
-
-    if (keepLocal || existingFile?.sha == null || content == null) {
-      return RemoteConnectionResult(shouldCreateRemote: true);
-    }
 
     final isEncryptedString = isEncrypted(content);
     if (isEncryptedString) {
       final encryptionKey = await enterEncryptionKeyDialog();
       if (encryptionKey == null) {
         reset(shouldError: true);
-        return RemoteConnectionResult();
+        return const RemoteConnectionResult();
       }
 
       final decrypted = decrypt(content, encryptionKey);
       if (decrypted == null) {
         reset(shouldError: true);
-        return RemoteConnectionResult();
+        return const RemoteConnectionResult();
       }
 
       emit(state.copyWith(loading: false));
@@ -130,12 +130,6 @@ class GithubCubit extends HydratedCubit<GithubState> {
 
     emit(state.copyWith(loading: false));
     return RemoteConnectionResult(content: content);
-  }
-
-  bool isLoggedIn() {
-    final ownerRepo = state.ownerRepo;
-    final accessToken = state.accessToken;
-    return ownerRepo != null && accessToken != null;
   }
 
   Future<FileData?> uploadNewFile(
@@ -149,7 +143,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     }
     emit(state.copyWith(loading: true));
 
-    var newFile = await githubRepository.createNewFile(
+    final newFile = await githubRepository.createNewFile(
       ownerRepo,
       accessToken,
       data,
@@ -163,7 +157,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     }
 
     emit(state.copyWith(loading: false));
-    return FileData(name: safeFileName, sha: sha);
+    return FileData(name: safeFileName, id: sha);
   }
 
   Future<bool> deleteFile(FileData fileData) async {
@@ -177,7 +171,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     bool isDeleted = await githubRepository.deleteFile(
       ownerRepo,
       accessToken,
-      fileData.sha,
+      fileData.id,
       fileData.name,
     );
 
@@ -193,7 +187,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     final ownerRepo = state.ownerRepo;
     final sha = state.sha;
     final accessToken = state.accessToken;
-    if (!isLoggedIn() || ownerRepo == null || accessToken == null) {
+    if (!state.isLoggedIn() || ownerRepo == null || accessToken == null) {
       return;
     }
     emit(state.copyWith(loading: true));
@@ -203,7 +197,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
         ? stringifiedContent
         : encrypt(stringifiedContent, encryptionKey);
 
-    var newNote = await githubRepository.createOrUpdateNotesFile(
+    final newNote = await githubRepository.createOrUpdateNotesFile(
       ownerRepo,
       accessToken,
       finalizedStringContent,
@@ -222,13 +216,14 @@ class GithubCubit extends HydratedCubit<GithubState> {
   }
 
   void reset({bool shouldError = false}) {
-    emit(const GithubState());
-    emit(state.copyWith(
-      loading: false,
-      ownerRepo: null,
-      error: shouldError,
-      accessToken: null,
-    ));
+    emit(
+      const GithubState().copyWith(
+        loading: false,
+        ownerRepo: null,
+        error: shouldError,
+        accessToken: null,
+      ),
+    );
   }
 
   void invalidateError() {
@@ -236,7 +231,13 @@ class GithubCubit extends HydratedCubit<GithubState> {
   }
 
   Future<void> launchLogin() async {
-    var loginResult = await githubRepository.initialLogin();
+    reset();
+    final loginResult = await githubRepository.initialLogin();
+    if (loginResult == null) {
+      reset(shouldError: true);
+      return;
+    }
+
     emit(
       state.copyWith(
         deviceCode: loginResult.deviceCode,

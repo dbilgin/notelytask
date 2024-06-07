@@ -8,10 +8,10 @@ part of 'file_data.dart';
 
 FileData _$FileDataFromJson(Map<String, dynamic> json) => FileData(
       name: json['name'] as String,
-      sha: json['sha'] as String,
+      id: json['id'] as String,
     );
 
 Map<String, dynamic> _$FileDataToJson(FileData instance) => <String, dynamic>{
       'name': instance.name,
-      'sha': instance.sha,
+      'id': instance.id,
     };

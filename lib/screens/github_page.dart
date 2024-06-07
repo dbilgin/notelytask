@@ -8,6 +8,7 @@ import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/utils.dart';
+import 'package:notelytask/widgets/state_loader.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class GithubPage extends StatefulWidget {
@@ -44,10 +45,10 @@ class _GithubPageState extends State<GithubPage> {
     saveToRepoAlert(
       context: context,
       onPressed: (bool keepLocal) async {
-        await context.read<NotesCubit>().setRemoteConnection(
-              repoUrl,
-              keepLocal,
-              () => encryptionKeyDialog(
+        final result = await context.read<NotesCubit>().setRemoteConnection(
+              ownerRepo: repoUrl,
+              keepLocal: keepLocal,
+              enterEncryptionKeyDialog: () => encryptionKeyDialog(
                 context: context,
                 title: 'Enter Your Encryption Pin',
                 text:
@@ -55,6 +56,9 @@ class _GithubPageState extends State<GithubPage> {
                 isPinRequired: true,
               ),
             );
+        if (!result && mounted) {
+          showSnackBar(context, 'An error occurred.');
+        }
       },
     );
   }
@@ -118,6 +122,10 @@ class _GithubPageState extends State<GithubPage> {
           color: Colors.white,
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
+        bottom: const PreferredSize(
+          preferredSize: Size(double.infinity, 0),
+          child: StateLoader(),
+        ),
       ),
       body: BlocBuilder<GithubCubit, GithubState>(
         builder: (context, state) {

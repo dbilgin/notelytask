@@ -204,8 +204,7 @@ Future<void> openFile(BuildContext context, FileData file) async {
 
 Future<void> _openFileWithData(BuildContext context, FileData file) async {
   try {
-    final filePath =
-        await context.read<NotesCubit>().getFileLocalPath(file.name);
+    final filePath = await context.read<NotesCubit>().getFileLocalPath(file);
 
     if (filePath != null) {
       var res = await OpenFilex.open(filePath);
@@ -415,4 +414,67 @@ String nonExistentFileName({
       notes: notes,
     );
   }
+}
+
+Future<String?> googleFileIdDialog(
+  BuildContext context,
+) async {
+  return showDialog<String?>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      final fileIdController = TextEditingController();
+      String? fileId;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Add/Create File ID'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 16.0),
+                  child: Text(
+                    'Leave empty to create a new file.',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                SizedBox(
+                  height: 50.0,
+                  width: MediaQuery.of(context).size.width - 100,
+                  child: TextField(
+                    controller: fileIdController,
+                    onChanged: (value) => setState(() => fileId = value),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Existing File ID ',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop(null);
+                },
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                onPressed: () => Navigator.of(context).pop(fileId),
+                child: const Text('Set'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
 }
