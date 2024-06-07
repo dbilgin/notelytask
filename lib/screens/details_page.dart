@@ -4,7 +4,7 @@ import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/widgets/details_form.dart';
-import 'package:notelytask/widgets/github_loader.dart';
+import 'package:notelytask/widgets/state_loader.dart';
 
 class DetailsPage extends StatefulWidget {
   final Note? note;
@@ -59,7 +59,7 @@ class _DetailsPageState extends State<DetailsPage> {
           ),
           bottom: const PreferredSize(
             preferredSize: Size(double.infinity, 0),
-            child: GithubLoader(),
+            child: StateLoader(),
           ),
         ),
         body: layout,

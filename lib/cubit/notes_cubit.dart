@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/google_drive_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/models/notes_state.dart';
@@ -13,8 +14,10 @@ import 'package:notelytask/utils.dart';
 class NotesCubit extends HydratedCubit<NotesState> {
   NotesCubit({
     required this.githubCubit,
+    required this.googleDriveCubit,
   }) : super(const NotesState());
   final GithubCubit githubCubit;
+  final GoogleDriveCubit googleDriveCubit;
 
   @override
   void onChange(Change<NotesState> change) {
@@ -29,31 +32,42 @@ class NotesCubit extends HydratedCubit<NotesState> {
   Future<void> createOrUpdateRemoteNotes({
     bool shouldResetIfError = true,
   }) async {
-    if (!githubCubit.isLoggedIn()) {
-      return;
-    }
-
     final jsonMap = state.toJson();
-    return await githubCubit.createOrUpdateRemoteNotes(
-      shouldResetIfError: shouldResetIfError,
-      encryptionKey: state.encryptionKey,
-      notesJSONMap: jsonMap,
-    );
+
+    if (githubCubit.state.isLoggedIn()) {
+      return await githubCubit.createOrUpdateRemoteNotes(
+        shouldResetIfError: shouldResetIfError,
+        encryptionKey: state.encryptionKey,
+        notesJSONMap: jsonMap,
+      );
+    } else if (googleDriveCubit.state.accessToken != null) {
+      return await googleDriveCubit.createOrUpdateRemoteNotes(
+        shouldResetIfError: shouldResetIfError,
+        encryptionKey: state.encryptionKey,
+        notesJSONMap: jsonMap,
+      );
+    }
   }
 
   Future<bool> deleteFileAndUpdate(String noteId, FileData fileData) async {
-    final remoteDeleteResult = await githubCubit.deleteFile(fileData);
+    final deleteFile = githubCubit.state.isLoggedIn()
+        ? githubCubit.deleteFile
+        : googleDriveCubit.deleteFile;
+    final remoteDeleteResult = await deleteFile(fileData);
     if (!remoteDeleteResult) return false;
     _deleteNoteFileData(
       noteId,
       fileData.name,
     );
-    createOrUpdateRemoteNotes();
+    await createOrUpdateRemoteNotes();
     return true;
   }
 
   Future<bool> deleteFile(FileData fileData) async {
-    return await githubCubit.deleteFile(fileData);
+    final deleteFile = githubCubit.state.isLoggedIn()
+        ? githubCubit.deleteFile
+        : googleDriveCubit.deleteFile;
+    return await deleteFile(fileData);
   }
 
   Future<void> uploadNewFileAndNotes(
@@ -65,39 +79,53 @@ class NotesCubit extends HydratedCubit<NotesState> {
       fileName: fileName,
       notes: state.notes,
     );
-    final fileData = await githubCubit.uploadNewFile(
+
+    final uploadNewFile = githubCubit.state.isLoggedIn()
+        ? githubCubit.uploadNewFile
+        : googleDriveCubit.uploadNewFile;
+
+    final fileData = await uploadNewFile(
       safeFileName,
       data,
     );
 
-    if (fileData == null) return;
+    if (fileData == null) {
+      return;
+    }
     _addNoteFileData(
       noteId: noteId,
       fileName: fileData.name,
-      fileSha: fileData.sha,
+      fileId: fileData.id,
     );
 
-    await createOrUpdateRemoteNotes();
+    return await createOrUpdateRemoteNotes();
   }
 
   bool isLoggedIn() {
-    return githubCubit.isLoggedIn();
+    return githubCubit.state.isLoggedIn() ||
+        googleDriveCubit.state.isLoggedIn();
   }
 
-  Future<void> setRemoteConnection(
-    String ownerRepo,
-    bool keepLocal,
-    Future<String?> Function() enterEncryptionKeyDialog,
-  ) async {
-    final connectionResult = await githubCubit.setRepoUrl(
-      ownerRepo,
-      keepLocal,
-      enterEncryptionKeyDialog,
-    );
+  Future<bool> setRemoteConnection({
+    required bool keepLocal,
+    required Future<String?> Function() enterEncryptionKeyDialog,
+    String? ownerRepo,
+    String? fileId,
+  }) async {
+    final connectionResult = ownerRepo != null
+        ? await githubCubit.setRepoUrl(
+            ownerRepo,
+            keepLocal,
+            enterEncryptionKeyDialog,
+          )
+        : await googleDriveCubit.setFileId(
+            fileId: fileId,
+            enterEncryptionKeyDialog: enterEncryptionKeyDialog,
+          );
 
     if (connectionResult.shouldCreateRemote) {
       await createOrUpdateRemoteNotes(shouldResetIfError: false);
-      return;
+      return true;
     }
 
     final content = connectionResult.content;
@@ -106,16 +134,23 @@ class NotesCubit extends HydratedCubit<NotesState> {
       final finalContent = json.decode(content);
       final notes = fromJson(finalContent);
       emit(notes);
+      return true;
     }
+    return false;
   }
 
   void reset({
     bool shouldError = false,
   }) {
-    githubCubit.reset(shouldError: shouldError);
-    final newState = NotesState(
+    if (githubCubit.state.isLoggedIn()) {
+      githubCubit.reset(shouldError: shouldError);
+    } else {
+      googleDriveCubit.reset(shouldError: shouldError);
+    }
+
+    const newState = NotesState(
       encryptionKey: null,
-      notes: state.notes,
+      notes: [],
     );
     emit(newState);
   }
@@ -124,15 +159,20 @@ class NotesCubit extends HydratedCubit<NotesState> {
     required BuildContext context,
     String? redirectNoteId,
   }) async {
-    if (!githubCubit.isLoggedIn()) {
+    if (!githubCubit.state.isLoggedIn() &&
+        !googleDriveCubit.state.isLoggedIn()) {
       return;
     }
 
-    final result = await githubCubit.getRemoteNotes(
+    final getRemoteNotes = githubCubit.state.isLoggedIn()
+        ? githubCubit.getRemoteNotes
+        : googleDriveCubit.getRemoteNotes;
+
+    final result = await getRemoteNotes(
       context: context,
       encryptionKey: state.encryptionKey,
-      redirectNoteId: redirectNoteId,
     );
+
     final notesString = result.notesString;
 
     if (result.pinNeeded && context.mounted) {
@@ -144,13 +184,11 @@ class NotesCubit extends HydratedCubit<NotesState> {
       );
       if (pinResult == null) {
         reset(shouldError: true);
-        emit(const NotesState());
         return;
       }
 
       if (!context.mounted) {
         reset(shouldError: true);
-        emit(const NotesState());
         return;
       }
 
@@ -163,7 +201,6 @@ class NotesCubit extends HydratedCubit<NotesState> {
 
     if (notesString == null) {
       reset(shouldError: true);
-      emit(const NotesState());
     } else {
       final finalContent = json.decode(notesString);
       final list = fromJson(finalContent);
@@ -185,8 +222,13 @@ class NotesCubit extends HydratedCubit<NotesState> {
     }
   }
 
-  Future<String?> getFileLocalPath(String fileName) async {
-    return await githubCubit.getFileLocalPath(fileName);
+  Future<String?> getFileLocalPath(FileData fileData) async {
+    if (githubCubit.state.isLoggedIn()) {
+      return await githubCubit.getFileLocalPath(fileData.name);
+    } else if (googleDriveCubit.state.isLoggedIn()) {
+      return await googleDriveCubit.getFileLocalPath(fileData);
+    }
+    return null;
   }
 
   void setEncryptionKey(String? key) {
@@ -259,19 +301,19 @@ class NotesCubit extends HydratedCubit<NotesState> {
   void _addNoteFileData({
     required String noteId,
     required String fileName,
-    required String fileSha,
+    required String fileId,
   }) {
     final noteIndex = state.notes.indexWhere((element) => element.id == noteId);
     List<Note> updatedNotes = List<Note>.from(state.notes);
 
     if (noteIndex == -1) {
       final newNote = Note.generateNew()
-          .copyWith(fileDataList: [FileData(name: fileName, sha: fileSha)]);
+          .copyWith(fileDataList: [FileData(name: fileName, id: fileId)]);
       updatedNotes.add(newNote);
     } else {
       List<FileData> updatedFileDataList =
           List<FileData>.from(state.notes[noteIndex].fileDataList)
-            ..add(FileData(name: fileName, sha: fileSha));
+            ..add(FileData(name: fileName, id: fileId));
       updatedNotes[noteIndex] =
           state.notes[noteIndex].copyWith(fileDataList: updatedFileDataList);
     }

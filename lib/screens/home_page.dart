@@ -1,13 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/google_drive_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
+import 'package:notelytask/models/github_state.dart';
+import 'package:notelytask/models/google_drive_state.dart';
 import 'package:notelytask/service/native_service.dart';
 import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/utils.dart';
-import 'package:notelytask/widgets/github_loader.dart';
 import 'package:notelytask/widgets/note_list_layout.dart';
+import 'package:notelytask/widgets/state_loader.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -33,8 +37,12 @@ class _HomePageState extends State<HomePage> {
     NativeService.updateNotes(context, args);
   }
 
-  void _navigateToLogin() {
+  void _navigateToGithubLogin() {
     getIt<NavigationService>().pushNamed('/github');
+  }
+
+  void _navigateToGDriveLogin() {
+    getIt<NavigationService>().pushNamed('/google_drive');
   }
 
   void _navigateToDeletedList() {
@@ -58,15 +66,38 @@ class _HomePageState extends State<HomePage> {
             onPressed: _navigateToDeletedList,
             color: Colors.white,
           ),
-          IconButton(
-            icon: Image.asset('assets/github.png'),
-            tooltip: 'Github Integration',
-            onPressed: _navigateToLogin,
-          ),
+          BlocBuilder<GoogleDriveCubit, GoogleDriveState>(builder: (
+            googleDriveContext,
+            googleDriveState,
+          ) {
+            if (!googleDriveState.isLoggedIn()) {
+              return IconButton(
+                icon: Image.asset('assets/github.png'),
+                tooltip: 'Github Integration',
+                onPressed: _navigateToGithubLogin,
+              );
+            } else {
+              return Container();
+            }
+          }),
+          BlocBuilder<GithubCubit, GithubState>(builder: (
+            githubContext,
+            githubState,
+          ) {
+            if (!githubState.isLoggedIn()) {
+              return IconButton(
+                icon: Image.asset('assets/google_drive.png'),
+                tooltip: 'Google Drive Integration',
+                onPressed: _navigateToGDriveLogin,
+              );
+            } else {
+              return Container();
+            }
+          }),
         ],
         bottom: const PreferredSize(
           preferredSize: Size(double.infinity, 0),
-          child: GithubLoader(),
+          child: StateLoader(),
         ),
       ),
       body: const NoteListLayout(),

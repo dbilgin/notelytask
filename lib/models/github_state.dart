@@ -25,6 +25,12 @@ class GithubState extends Equatable {
     this.expiresIn,
   });
 
+  bool isLoggedIn() {
+    final ownerRepo = this.ownerRepo;
+    final accessToken = this.accessToken;
+    return ownerRepo != null && accessToken != null;
+  }
+
   factory GithubState.fromJson(Map<String, dynamic> json) {
     return GithubState(
       loading: json['loading'] as bool? ?? false,
