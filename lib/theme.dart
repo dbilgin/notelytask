@@ -4,21 +4,21 @@ import 'package:pinput/pinput.dart';
 final themeData = ThemeData(
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ButtonStyle(
-      textStyle: MaterialStateProperty.resolveWith((states) {
+      textStyle: WidgetStateProperty.resolveWith((states) {
         return const TextStyle(
           color: Color(0xffdce3e8),
           fontWeight: FontWeight.bold,
         );
       }),
-      backgroundColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.disabled)) {
-          return Colors.grey.withOpacity(0.12);
+      backgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return Colors.grey.withValues(alpha: 0.12);
         }
         return const Color(0xff17181c);
       }),
-      foregroundColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.disabled)) {
-          return Colors.grey.withOpacity(0.38);
+      foregroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return Colors.grey.withValues(alpha: 0.38);
         }
         return const Color(0xffdce3e8);
       }),
@@ -26,7 +26,7 @@ final themeData = ThemeData(
   ),
   textButtonTheme: TextButtonThemeData(
     style: ButtonStyle(
-      foregroundColor: MaterialStateProperty.all(
+      foregroundColor: WidgetStateProperty.all(
         const Color(0xffdce3e8),
       ),
     ),

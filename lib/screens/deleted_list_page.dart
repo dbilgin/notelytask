@@ -38,7 +38,7 @@ class _DeletedListPageState extends State<DeletedListPage> {
       ),
       body: PopScope(
         canPop: true,
-        onPopInvoked: (didPop) {
+        onPopInvokedWithResult: (didPop, _) {
           context.read<SettingsCubit>().setSelectedNoteId(null);
         },
         child: const NoteListLayout(isDeletedList: true),
