@@ -13,6 +13,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - run: echo "${{ secrets.ENV_FILE }}" | base64 --decode > assets/.env
+
       - name: Setup Flutter SDK
         uses: flutter-actions/setup-flutter@v3
         with:
