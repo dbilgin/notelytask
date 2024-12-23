@@ -48,3 +48,8 @@ app.*.map.json
 .env
 
 google-services.json
+
+**/generated_plugin_registrant.cc
+**/generated_plugins.cmake
+**/GeneratedPluginRegistrant.swift
+**/generated_plugins.cmake
