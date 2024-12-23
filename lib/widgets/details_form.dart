@@ -9,6 +9,7 @@ import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/models/settings_state.dart';
 import 'package:notelytask/theme.dart';
 import 'package:notelytask/utils.dart';
 import 'package:notelytask/widgets/file_list.dart';
@@ -71,111 +72,115 @@ class _DetailsFormState extends State<DetailsForm> {
 
   @override
   Widget build(BuildContext context) {
-    bool markdownEnabled = context.read<SettingsCubit>().state.markdownEnabled;
-
     var shouldHideForm = widget.isDeletedList &&
         _titleController.text.isEmpty &&
         _textController.text.isEmpty;
 
-    return BlocListener<GithubCubit, GithubState>(
-      listener: (context, state) {
-        if (state.error) {
-          showSnackBar(context, 'Error with Github integration.');
-          context.read<NotesCubit>().invalidateError();
-        }
-      },
-      child: Column(
-        children: [
-          Expanded(
-            child: Form(
-              key: _formKey,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Column(
-                  children: shouldHideForm
-                      ? [Container()]
-                      : [
-                          TextFormField(
-                            onChanged: (text) => _submit(),
-                            controller: _titleController,
-                            textInputAction: TextInputAction.next,
-                            style: Theme.of(context).textTheme.headlineMedium,
-                            decoration: const InputDecoration(
-                              hintText: 'Title',
-                              hintStyle: TextStyle(color: Colors.grey),
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                            ),
-                          ),
-                          if (!markdownEnabled)
-                            Expanded(
-                              child: TextFormField(
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, settingsState) {
+        return BlocListener<GithubCubit, GithubState>(
+          listener: (context, state) {
+            if (state.error) {
+              showSnackBar(context, 'Error with Github integration.');
+              context.read<NotesCubit>().invalidateError();
+            }
+          },
+          child: Column(
+            children: [
+              Expanded(
+                child: Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Column(
+                      children: shouldHideForm
+                          ? [Container()]
+                          : [
+                              TextFormField(
                                 onChanged: (text) => _submit(),
-                                maxLines: null,
-                                style: Theme.of(context).textTheme.bodyLarge,
+                                controller: _titleController,
+                                textInputAction: TextInputAction.next,
+                                style:
+                                    Theme.of(context).textTheme.headlineMedium,
                                 decoration: const InputDecoration(
-                                  hintText: 'Description',
+                                  hintText: 'Title',
                                   hintStyle: TextStyle(color: Colors.grey),
                                   border: InputBorder.none,
                                   focusedBorder: InputBorder.none,
                                   enabledBorder: InputBorder.none,
                                 ),
-                                keyboardType: TextInputType.multiline,
-                                controller: _textController,
-                                // expands: true,
                               ),
-                            ),
-                          if (markdownEnabled)
-                            Expanded(
-                              child: Markdown(
-                                selectable: true,
-                                data: _textController.text,
-                                styleSheet: MarkdownStyleSheet(
-                                  checkbox: themeData.textTheme.bodySmall,
+                              if (!settingsState.markdownEnabled)
+                                Expanded(
+                                  child: TextFormField(
+                                    onChanged: (text) => _submit(),
+                                    maxLines: null,
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Description',
+                                      hintStyle: TextStyle(color: Colors.grey),
+                                      border: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                    ),
+                                    keyboardType: TextInputType.multiline,
+                                    controller: _textController,
+                                    // expands: true,
+                                  ),
                                 ),
-                              ),
-                            ),
-                        ],
-                ),
-              ),
-            ),
-          ),
-          KeyboardVisibilityBuilder(
-            builder: (context, isKeyboardVisible) {
-              return Visibility(
-                visible: !isKeyboardVisible,
-                child: Container(
-                  color: themeData.colorScheme.primary,
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Wrap(
-                    alignment: WrapAlignment.end,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.file_upload),
-                        tooltip: 'Upload File',
-                        onPressed: () => uploadFile(context, widget.note),
-                        color: Colors.white,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.featured_play_list),
-                        tooltip: 'Toggle Markdown',
-                        onPressed: () =>
-                            context.read<SettingsCubit>().toggleMarkdown(),
-                        color: Colors.white,
-                      ),
-                      FileList(
-                        noteId: widget.note.id,
-                      ),
-                    ],
+                              if (settingsState.markdownEnabled)
+                                Expanded(
+                                  child: Markdown(
+                                    selectable: true,
+                                    data: _textController.text,
+                                    styleSheet: MarkdownStyleSheet(
+                                      checkbox: themeData.textTheme.bodySmall,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                    ),
                   ),
                 ),
-              );
-            },
+              ),
+              KeyboardVisibilityBuilder(
+                builder: (context, isKeyboardVisible) {
+                  return Visibility(
+                    visible: !isKeyboardVisible,
+                    child: Container(
+                      color: themeData.colorScheme.primary,
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Wrap(
+                        alignment: WrapAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.file_upload),
+                            tooltip: 'Upload File',
+                            onPressed: () => uploadFile(context, widget.note),
+                            color: Colors.white,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.featured_play_list),
+                            tooltip: 'Toggle Markdown',
+                            onPressed: () =>
+                                context.read<SettingsCubit>().toggleMarkdown(),
+                            color: Colors.white,
+                          ),
+                          FileList(
+                            noteId: widget.note.id,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

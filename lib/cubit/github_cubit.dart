@@ -97,18 +97,18 @@ class GithubCubit extends HydratedCubit<GithubState> {
       accessToken,
     );
 
-    final content = existingFile?.content;
-
-    if (keepLocal || existingFile?.sha == null || content == null) {
-      return const RemoteConnectionResult(shouldCreateRemote: true);
-    }
-
     emit(
       state.copyWith(
         ownerRepo: ownerRepo,
         sha: existingFile?.sha,
       ),
     );
+
+    final content = existingFile?.content;
+
+    if (keepLocal || existingFile?.sha == null || content == null) {
+      return const RemoteConnectionResult(shouldCreateRemote: true);
+    }
 
     final isEncryptedString = isEncrypted(content);
     if (isEncryptedString) {
@@ -188,6 +188,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
     final sha = state.sha;
     final accessToken = state.accessToken;
     if (!state.isLoggedIn() || ownerRepo == null || accessToken == null) {
+      emit(state.copyWith(loading: false));
       return;
     }
     emit(state.copyWith(loading: true));
