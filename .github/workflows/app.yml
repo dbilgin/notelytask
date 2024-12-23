@@ -89,7 +89,7 @@ jobs:
       with:
         tag_name: ${{ steps.previoustag.outputs.tag }}
         name: ${{ steps.previoustag.outputs.tag }}
-        body_path: whatsNewDirectory/whatsnew-en-US
+        generate_release_notes: true
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
