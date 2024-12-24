@@ -68,7 +68,10 @@ class _NoteListState extends State<NoteList> {
                   context: context,
                   isDeletedList: widget.isDeletedList,
                 ),
-                child: const Icon(Icons.add),
+                child: const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                ),
               ),
             ),
           Expanded(
