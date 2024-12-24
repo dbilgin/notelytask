@@ -77,7 +77,10 @@ class _HomePageState extends State<HomePage> {
                 isDeletedList: false,
               ),
               tooltip: 'Add New Note',
-              child: const Icon(Icons.add),
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
             )
           : null,
     );

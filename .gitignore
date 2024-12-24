@@ -53,3 +53,5 @@ google-services.json
 **/generated_plugins.cmake
 **/GeneratedPluginRegistrant.swift
 **/generated_plugins.cmake
+
+.firebase/
