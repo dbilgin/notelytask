@@ -28,7 +28,7 @@ class Note extends Equatable {
         id: note?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         title: note?.title ?? '',
         text: note?.text ?? '',
-        date: DateTime.now(),
+        date: note?.date ?? DateTime.now(),
         isDeleted: note?.isDeleted ?? false,
         fileDataList: note?.fileDataList ?? [],
       );
