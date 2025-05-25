@@ -277,10 +277,15 @@ class _NoteListState extends State<NoteList> {
                         ),
                         child: Card(
                           margin: EdgeInsets.zero,
-                          color: Theme.of(listContext).colorScheme.surface,
+                          color: Theme.of(listContext)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                          elevation: 3,
+                          shadowColor: Colors.black.withValues(alpha: 0.2),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
+                          clipBehavior: Clip.antiAlias,
                           child: GestureDetector(
                             onSecondaryTapDown: (details) => _showContextMenu(
                               listContext,
