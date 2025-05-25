@@ -286,94 +286,104 @@ class _NoteListState extends State<NoteList> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           clipBehavior: Clip.antiAlias,
-                          child: GestureDetector(
-                            onSecondaryTapDown: (details) => _showContextMenu(
-                              listContext,
-                              details.globalPosition,
-                              note,
-                            ),
-                            onLongPress: () => _showContextMenu(
-                              listContext,
-                              null,
-                              note,
-                            ),
-                            child: ListTile(
-                              onTap: () => navigateToDetails(
-                                context: listContext,
-                                note: note,
-                                isDeletedList: widget.isDeletedList,
+                          child: Builder(
+                            builder: (cardContext) => GestureDetector(
+                              onSecondaryTapDown: (details) => _showContextMenu(
+                                listContext,
+                                details.globalPosition,
+                                note,
                               ),
-                              contentPadding: const EdgeInsets.all(16),
-                              title: Text(
-                                note.title.isEmpty
-                                    ? 'Untitled Note'
-                                    : note.title,
-                                style: Theme.of(listContext)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: note.title.isEmpty
-                                          ? Theme.of(listContext)
-                                              .colorScheme
-                                              .onSurfaceVariant
-                                          : Theme.of(listContext)
-                                              .colorScheme
-                                              .onSurface,
-                                    ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (note.text.isNotEmpty) ...[
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      note.text,
-                                      style: Theme.of(listContext)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            color: Theme.of(listContext)
+                              onLongPress: () {
+                                final RenderBox renderBox =
+                                    cardContext.findRenderObject() as RenderBox;
+                                final position = renderBox.localToGlobal(
+                                  renderBox.size.center(Offset.zero),
+                                );
+                                _showContextMenu(
+                                  listContext,
+                                  position,
+                                  note,
+                                );
+                              },
+                              child: ListTile(
+                                onTap: () => navigateToDetails(
+                                  context: listContext,
+                                  note: note,
+                                  isDeletedList: widget.isDeletedList,
+                                ),
+                                contentPadding: const EdgeInsets.all(16),
+                                title: Text(
+                                  note.title.isEmpty
+                                      ? 'Untitled Note'
+                                      : note.title,
+                                  style: Theme.of(listContext)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: note.title.isEmpty
+                                            ? Theme.of(listContext)
                                                 .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                  if (fileNames.isNotEmpty) ...[
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
+                                                .onSurfaceVariant
+                                            : Theme.of(listContext)
+                                                .colorScheme
+                                                .onSurface,
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(listContext)
-                                            .colorScheme
-                                            .primary
-                                            .withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        '${fileNames.length} file${fileNames.length > 1 ? 's' : ''}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (note.text.isNotEmpty) ...[
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        note.text,
                                         style: Theme.of(listContext)
                                             .textTheme
-                                            .labelSmall
+                                            .bodyMedium
                                             ?.copyWith(
                                               color: Theme.of(listContext)
                                                   .colorScheme
-                                                  .primary,
-                                              fontWeight: FontWeight.w500,
+                                                  .onSurfaceVariant,
                                             ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ),
+                                    ],
+                                    if (fileNames.isNotEmpty) ...[
+                                      const SizedBox(height: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(listContext)
+                                              .colorScheme
+                                              .primary
+                                              .withValues(alpha: 0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          '${fileNames.length} file${fileNames.length > 1 ? 's' : ''}',
+                                          style: Theme.of(listContext)
+                                              .textTheme
+                                              .labelSmall
+                                              ?.copyWith(
+                                                color: Theme.of(listContext)
+                                                    .colorScheme
+                                                    .primary,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
                                   ],
-                                ],
+                                ),
+                                trailing: _buildDateChip(context, note.date),
                               ),
-                              trailing: _buildDateChip(context, note.date),
                             ),
                           ),
                         ),
