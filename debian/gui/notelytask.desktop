@@ -1,8 +1,10 @@
 [Desktop Entry]
-Version=4.0.0
+Version=1.0
 Name=NotelyTask
 GenericName=Notes Application
 Comment=A simple notes application with GitHub integration
+Exec=notelytask
+Icon=notelytask
 Terminal=false
 Type=Application
 Categories=Office;TextEditor;Utility;
