@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/service/native_service.dart';
@@ -23,8 +24,16 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     NativeService.initialiseWidgetListener(context);
-    context.read<SettingsCubit>().setSelectedNoteId(null);
-    context.read<NotesCubit>().getAndUpdateLocalNotes(context: context);
+    context.read<GithubCubit>().loadSecureData().then((_) {
+      final localContext = context;
+      if (!localContext.mounted) {
+        return;
+      }
+      localContext.read<SettingsCubit>().setSelectedNoteId(null);
+      localContext
+          .read<NotesCubit>()
+          .getAndUpdateLocalNotes(context: localContext);
+    });
   }
 
   Future<void> setAndUpdate() async {

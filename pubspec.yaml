@@ -39,6 +39,7 @@ dependencies:
   flutter_markdown: ^0.7.4+3
   flutter_widget_from_html: ^0.15.3
   http_parser: ^4.0.2
+  flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
   flutter_test:
