@@ -14,7 +14,8 @@ class FileList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scrollController = ScrollController();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return BlocBuilder<NotesCubit, NotesState>(
       builder: (context, state) {
@@ -22,46 +23,100 @@ class FileList extends StatelessWidget {
             .firstWhereOrNull((element) => element.id == noteId)
             ?.fileDataList;
 
-        return Container(
-          color: Theme.of(context).colorScheme.primary,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxHeight: 100.0,
+        if (fileDataList == null || fileDataList.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return PopupMenuButton<String>(
+          icon: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
             ),
-            child: Scrollbar(
-              controller: scrollController,
-              thumbVisibility: true,
-              thickness: 8.0,
-              radius: const Radius.circular(8.0),
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: Column(
-                  children: [
-                    if (fileDataList != null)
-                      for (var fileData in fileDataList)
-                        TextButton(
-                          onPressed: () => openFile(context, fileData),
-                          onLongPress: () =>
-                              showFileBottomSheet(context, fileData, noteId),
-                          child: Row(
-                            children: [
-                              Icon(
-                                getFileIcon(fileData.name),
-                                color: Colors.white,
-                                size: 40.0,
-                              ),
-                              Text(
-                                fileData.name,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ],
-                          ),
-                        ),
-                  ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.attach_file_rounded,
+                  size: 14,
+                  color: colorScheme.primary,
                 ),
-              ),
+                const SizedBox(width: 4),
+                Text(
+                  '${fileDataList.length}',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
+          itemBuilder: (context) {
+            List<PopupMenuEntry<String>> items = [];
+
+            for (int i = 0; i < fileDataList.length; i++) {
+              final fileData = fileDataList[i];
+
+              // Add file item
+              items.add(
+                PopupMenuItem<String>(
+                  value: 'open_$i',
+                  child: Row(
+                    children: [
+                      Icon(
+                        getFileIcon(fileData.name),
+                        color: colorScheme.primary,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          fileData.name,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.edit_outlined,
+                          color: colorScheme.primary,
+                          size: 16,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          showFileBottomSheet(context, fileData, noteId);
+                        },
+                        tooltip: 'More',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 24,
+                          minHeight: 24,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+
+              if (i < fileDataList.length - 1) {
+                items.add(const PopupMenuDivider());
+              }
+            }
+
+            return items;
+          },
+          onSelected: (value) {
+            if (value.startsWith('open_')) {
+              final index = int.parse(value.substring(5));
+              final fileData = fileDataList[index];
+              openFile(context, fileData);
+            }
+          },
+          tooltip: 'View attachments',
         );
       },
     );

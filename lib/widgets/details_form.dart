@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -10,7 +11,6 @@ import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/models/settings_state.dart';
-import 'package:notelytask/theme.dart';
 import 'package:notelytask/utils.dart';
 import 'package:notelytask/widgets/file_list.dart';
 
@@ -39,13 +39,14 @@ class _DetailsFormState extends State<DetailsForm> {
   void initState() {
     _titleController.text = widget.note.title;
     _textController.text = widget.note.text;
-
     super.initState();
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
+    _titleController.dispose();
+    _textController.dispose();
     super.dispose();
   }
 
@@ -56,13 +57,21 @@ class _DetailsFormState extends State<DetailsForm> {
 
     if (_debounce?.isActive ?? false) _debounce?.cancel();
 
+    // Get the current note from state to ensure we have the latest file list
+    final currentNote = context
+        .read<NotesCubit>()
+        .state
+        .notes
+        .where((n) => n.id == widget.note.id)
+        .firstOrNull;
+
     var note = Note(
       id: widget.note.id,
       title: _titleController.text,
       text: _textController.text,
       date: DateTime.now(),
       isDeleted: widget.note.isDeleted,
-      fileDataList: widget.note.fileDataList,
+      fileDataList: currentNote?.fileDataList ?? widget.note.fileDataList,
     );
     _debounce = Timer(
       const Duration(milliseconds: 1000),
@@ -72,6 +81,9 @@ class _DetailsFormState extends State<DetailsForm> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     var shouldHideForm = widget.isDeletedList &&
         _titleController.text.isEmpty &&
         _textController.text.isEmpty;
@@ -88,89 +100,165 @@ class _DetailsFormState extends State<DetailsForm> {
           child: Column(
             children: [
               Expanded(
-                child: Form(
-                  key: _formKey,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Column(
-                      children: shouldHideForm
-                          ? [Container()]
-                          : [
+                child: shouldHideForm
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.note_outlined,
+                              size: 64,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Note is empty',
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Form(
+                        key: _formKey,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Title Field
                               TextFormField(
-                                onChanged: (text) => _submit(),
                                 controller: _titleController,
+                                onChanged: (text) => _submit(),
                                 textInputAction: TextInputAction.next,
-                                style:
-                                    Theme.of(context).textTheme.headlineMedium,
-                                decoration: const InputDecoration(
-                                  hintText: 'Title',
-                                  hintStyle: TextStyle(color: Colors.grey),
-                                  border: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Note title...',
+                                  hintStyle: TextStyle(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: colorScheme.surface,
+                                  contentPadding: const EdgeInsets.all(16),
                                 ),
                               ),
+
+                              const SizedBox(height: 16),
+
+                              // Content Field
                               if (!settingsState.markdownEnabled)
                                 Expanded(
                                   child: TextFormField(
+                                    controller: _textController,
                                     onChanged: (text) => _submit(),
                                     maxLines: null,
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Description',
-                                      hintStyle: TextStyle(color: Colors.grey),
-                                      border: InputBorder.none,
-                                      focusedBorder: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
+                                    expands: true,
+                                    textAlignVertical: TextAlignVertical.top,
+                                    style: theme.textTheme.bodyLarge,
+                                    decoration: InputDecoration(
+                                      hintText: 'Start writing your note...',
+                                      hintStyle: TextStyle(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      filled: true,
+                                      fillColor: colorScheme.surface,
+                                      contentPadding: const EdgeInsets.all(16),
+                                      alignLabelWithHint: true,
                                     ),
                                     keyboardType: TextInputType.multiline,
-                                    controller: _textController,
-                                    // expands: true,
                                   ),
                                 ),
+
+                              // Markdown Preview
                               if (settingsState.markdownEnabled)
                                 Expanded(
-                                  child: Markdown(
-                                    selectable: true,
-                                    data: _textController.text,
-                                    styleSheet: MarkdownStyleSheet(
-                                      checkbox: themeData.textTheme.bodySmall,
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.surface,
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
+                                    alignment: Alignment.topLeft,
+                                    child: _textController.text.isEmpty
+                                        ? Text(
+                                            'Nothing to preview...',
+                                            style: theme.textTheme.bodyLarge
+                                                ?.copyWith(
+                                              color:
+                                                  colorScheme.onSurfaceVariant,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          )
+                                        : SingleChildScrollView(
+                                            child: Markdown(
+                                              data: _textController.text,
+                                              shrinkWrap: true,
+                                              physics:
+                                                  const NeverScrollableScrollPhysics(),
+                                              selectable: true,
+                                              styleSheet: MarkdownStyleSheet(
+                                                p: theme.textTheme.bodyLarge,
+                                              ),
+                                            ),
+                                          ),
                                   ),
                                 ),
                             ],
-                    ),
-                  ),
-                ),
+                          ),
+                        ),
+                      ),
               ),
               KeyboardVisibilityBuilder(
                 builder: (context, isKeyboardVisible) {
                   return Visibility(
                     visible: !isKeyboardVisible,
                     child: Container(
-                      color: themeData.colorScheme.primary,
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Wrap(
-                        alignment: WrapAlignment.end,
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        border: Border(
+                          top: BorderSide(
+                            color: colorScheme.onSurface.withValues(alpha: 0.1),
+                          ),
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.file_upload),
+                            icon: const Icon(Icons.attach_file_rounded),
                             tooltip: 'Upload File',
                             onPressed: () => uploadFile(context, widget.note),
-                            color: Colors.white,
+                            color: colorScheme.onSurface,
                           ),
                           IconButton(
-                            icon: const Icon(Icons.featured_play_list),
-                            tooltip: 'Toggle Markdown',
+                            icon: Icon(
+                              settingsState.markdownEnabled
+                                  ? Icons.edit_rounded
+                                  : Icons.preview_rounded,
+                            ),
+                            tooltip: settingsState.markdownEnabled
+                                ? 'Edit Mode'
+                                : 'Preview Mode',
                             onPressed: () =>
                                 context.read<SettingsCubit>().toggleMarkdown(),
-                            color: Colors.white,
+                            color: settingsState.markdownEnabled
+                                ? colorScheme.primary
+                                : colorScheme.onSurface,
                           ),
-                          FileList(
-                            noteId: widget.note.id,
-                          ),
+                          const Spacer(),
+                          FileList(noteId: widget.note.id),
                         ],
                       ),
                     ),

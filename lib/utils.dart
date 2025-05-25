@@ -159,7 +159,7 @@ void showFileBottomSheet(BuildContext context, FileData file, String noteId) {
               if (context.mounted) Navigator.of(context).pop();
             },
           ),
-          if (!kIsWeb)
+          if (!kIsWeb && !isDesktop)
             ListTile(
               leading: const Icon(Icons.share),
               title: const Text('Share'),
@@ -478,4 +478,9 @@ Future<String?> googleFileIdDialog(
       );
     },
   );
+}
+
+bool get isDesktop {
+  return !kIsWeb &&
+      (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
 }

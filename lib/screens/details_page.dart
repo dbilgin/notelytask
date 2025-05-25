@@ -41,6 +41,9 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     var layout = SafeArea(
       child: DetailsForm(
         key: Key((note.id)),
@@ -52,13 +55,36 @@ class _DetailsPageState extends State<DetailsPage> {
 
     if (widget.withAppBar) {
       return Scaffold(
+        backgroundColor: colorScheme.surface,
         appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          iconTheme: const IconThemeData(
-            color: Colors.white,
+          backgroundColor: colorScheme.surface,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: () => Navigator.of(context).pop(),
+            color: colorScheme.onSurface,
+          ),
+          title: Row(
+            children: [
+              Icon(
+                widget.isDeletedList
+                    ? Icons.visibility_rounded
+                    : Icons.edit_note_rounded,
+                color: colorScheme.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                widget.isDeletedList ? 'View Note' : 'Edit Note',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ],
           ),
           bottom: const PreferredSize(
-            preferredSize: Size(double.infinity, 0),
+            preferredSize: Size(double.infinity, 4),
             child: StateLoader(),
           ),
         ),
