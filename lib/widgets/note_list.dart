@@ -212,7 +212,7 @@ class _NoteListState extends State<NoteList> {
                     ),
                   )
                 : ListView.separated(
-                    itemBuilder: (context, index) {
+                    itemBuilder: (listContext, index) {
                       final note = widget.notes[index];
                       final fileData = note.fileDataList;
                       final fileNames = fileData.map((e) => e.name);
@@ -277,24 +277,24 @@ class _NoteListState extends State<NoteList> {
                         ),
                         child: Card(
                           margin: EdgeInsets.zero,
-                          color: Theme.of(context).colorScheme.surface,
+                          color: Theme.of(listContext).colorScheme.surface,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: GestureDetector(
                             onSecondaryTapDown: (details) => _showContextMenu(
-                              context,
+                              listContext,
                               details.globalPosition,
                               note,
                             ),
                             onLongPress: () => _showContextMenu(
-                              context,
+                              listContext,
                               null,
                               note,
                             ),
                             child: ListTile(
                               onTap: () => navigateToDetails(
-                                context: context,
+                                context: listContext,
                                 note: note,
                                 isDeletedList: widget.isDeletedList,
                               ),
@@ -303,16 +303,16 @@ class _NoteListState extends State<NoteList> {
                                 note.title.isEmpty
                                     ? 'Untitled Note'
                                     : note.title,
-                                style: Theme.of(context)
+                                style: Theme.of(listContext)
                                     .textTheme
                                     .titleLarge
                                     ?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: note.title.isEmpty
-                                          ? Theme.of(context)
+                                          ? Theme.of(listContext)
                                               .colorScheme
                                               .onSurfaceVariant
-                                          : Theme.of(context)
+                                          : Theme.of(listContext)
                                               .colorScheme
                                               .onSurface,
                                     ),
@@ -326,11 +326,11 @@ class _NoteListState extends State<NoteList> {
                                     const SizedBox(height: 8),
                                     Text(
                                       note.text,
-                                      style: Theme.of(context)
+                                      style: Theme.of(listContext)
                                           .textTheme
                                           .bodyMedium
                                           ?.copyWith(
-                                            color: Theme.of(context)
+                                            color: Theme.of(listContext)
                                                 .colorScheme
                                                 .onSurfaceVariant,
                                           ),
@@ -346,7 +346,7 @@ class _NoteListState extends State<NoteList> {
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Theme.of(context)
+                                        color: Theme.of(listContext)
                                             .colorScheme
                                             .primary
                                             .withValues(alpha: 0.1),
@@ -354,11 +354,11 @@ class _NoteListState extends State<NoteList> {
                                       ),
                                       child: Text(
                                         '${fileNames.length} file${fileNames.length > 1 ? 's' : ''}',
-                                        style: Theme.of(context)
+                                        style: Theme.of(listContext)
                                             .textTheme
                                             .labelSmall
                                             ?.copyWith(
-                                              color: Theme.of(context)
+                                              color: Theme.of(listContext)
                                                   .colorScheme
                                                   .primary,
                                               fontWeight: FontWeight.w500,
