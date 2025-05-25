@@ -382,7 +382,8 @@ class _NoteListState extends State<NoteList> {
                                     ],
                                   ],
                                 ),
-                                trailing: _buildDateChip(context, note.date),
+                                trailing:
+                                    _buildDateChip(listContext, note.date),
                               ),
                             ),
                           ),
