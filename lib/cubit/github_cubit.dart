@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/cubit/models/remote_connection_result.dart';
@@ -11,11 +12,82 @@ import 'package:notelytask/repository/github_repository.dart';
 import 'package:notelytask/repository/models/get_notes_result.dart';
 import 'package:notelytask/utils.dart';
 
-class GithubCubit extends HydratedCubit<GithubState> {
+class GithubCubit extends Cubit<GithubState> {
   GithubCubit({
     required this.githubRepository,
   }) : super(const GithubState());
+
   final GithubRepository githubRepository;
+  static const _secureStorage = FlutterSecureStorage(
+    aOptions: AndroidOptions(
+      encryptedSharedPreferences: true,
+    ),
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.first_unlock_this_device,
+    ),
+  );
+
+  // Secure storage keys
+  static const String _accessTokenKey = 'github_access_token';
+  static const String _ownerRepoKey = 'github_owner_repo';
+  static const String _shaKey = 'github_sha';
+
+  /// Load sensitive data from secure storage on initialization
+  Future<void> loadSecureData() async {
+    try {
+      final accessToken = await _secureStorage.read(key: _accessTokenKey);
+      final ownerRepo = await _secureStorage.read(key: _ownerRepoKey);
+      final sha = await _secureStorage.read(key: _shaKey);
+
+      if (accessToken != null || ownerRepo != null || sha != null) {
+        emit(state.copyWith(
+          accessToken: accessToken,
+          ownerRepo: ownerRepo,
+          sha: sha,
+        ));
+      }
+    } catch (e) {
+      // If there's an error reading from secure storage, continue with empty state
+      debugPrint('Error loading secure data: $e');
+    }
+  }
+
+  /// Save sensitive data to secure storage
+  Future<void> _saveSecureData() async {
+    try {
+      if (state.accessToken != null) {
+        await _secureStorage.write(
+            key: _accessTokenKey, value: state.accessToken);
+      } else {
+        await _secureStorage.delete(key: _accessTokenKey);
+      }
+
+      if (state.ownerRepo != null) {
+        await _secureStorage.write(key: _ownerRepoKey, value: state.ownerRepo);
+      } else {
+        await _secureStorage.delete(key: _ownerRepoKey);
+      }
+
+      if (state.sha != null) {
+        await _secureStorage.write(key: _shaKey, value: state.sha);
+      } else {
+        await _secureStorage.delete(key: _shaKey);
+      }
+    } catch (e) {
+      debugPrint('Error saving secure data: $e');
+    }
+  }
+
+  /// Clear all secure storage data
+  Future<void> _clearSecureData() async {
+    try {
+      await _secureStorage.delete(key: _accessTokenKey);
+      await _secureStorage.delete(key: _ownerRepoKey);
+      await _secureStorage.delete(key: _shaKey);
+    } catch (e) {
+      debugPrint('Error clearing secure data: $e');
+    }
+  }
 
   Future<String?> getFileLocalPath(String fileName) async {
     final accessToken = state.accessToken;
@@ -74,6 +146,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
       }
 
       emit(state.copyWith(loading: false, sha: existingFile.sha));
+      await _saveSecureData();
 
       return GetNotesResult(notesString: decrypted);
     }
@@ -103,6 +176,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
         sha: existingFile?.sha,
       ),
     );
+    await _saveSecureData();
 
     final content = existingFile?.content;
 
@@ -207,6 +281,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
 
     if (newNote != null && newNote.sha != null) {
       emit(state.copyWith(sha: newNote.sha));
+      await _saveSecureData();
     } else if (shouldResetIfError) {
       reset(shouldError: true);
     } else {
@@ -225,6 +300,7 @@ class GithubCubit extends HydratedCubit<GithubState> {
         accessToken: null,
       ),
     );
+    _clearSecureData();
   }
 
   void invalidateError() {
@@ -253,15 +329,6 @@ class GithubCubit extends HydratedCubit<GithubState> {
     emit(
       state.copyWith(accessToken: await githubRepository.getAccessToken(code)),
     );
-  }
-
-  @override
-  GithubState fromJson(Map<String, dynamic> json) {
-    return GithubState.fromJson(json);
-  }
-
-  @override
-  Map<String, dynamic> toJson(GithubState state) {
-    return state.toJson();
+    await _saveSecureData();
   }
 }
