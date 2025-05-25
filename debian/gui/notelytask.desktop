@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=4.0.0
+Name=NotelyTask
+GenericName=Notes Application
+Comment=A simple notes application with GitHub integration
+Terminal=false
+Type=Application
+Categories=Office;TextEditor;Utility;
+Keywords=notes;markdown;text;editor;sync;github;
+StartupNotify=true
+StartupWMClass=notelytask 

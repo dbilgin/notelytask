@@ -1,0 +1,17 @@
+flutter_app: 
+  command: notelytask
+  arch: x64
+  parent: /opt
+  nonInteractive: false
+
+control:
+  Package: notelytask
+  Version: 4.0.0
+  Architecture: amd64
+  Priority: optional
+  Depends: libgtk-3-0, libblkid1, liblzma5
+  Maintainer: dbilgin <dbilgindev@gmail.com>
+  Description: A simple notes application
+   NotelyTask is a cross-platform notes application built with Flutter.
+   It supports markdown editing, file attachments, GitHub synchronization,
+   and provides a clean, modern interface for organizing your notes.

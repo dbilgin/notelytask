@@ -19,6 +19,24 @@ The Github integration is implemented for syncronization between different devic
 
 Once the user logs in with their Github account and enters a repository, NotelyTask will remember this repository and start committing users notes into a `.json` file. If the user logs in on another device and chooses to get the data from the selected repository, the new device will sync with the uploaded `.json` file. If the Github connection is not reset, this syncronization will happen every time the application is opened.
 
+## Building for Linux (Ubuntu/Debian)
+
+You can build a .deb package for Ubuntu/Debian systems:
+
+```bash
+# Install flutter_to_debian
+dart pub global activate flutter_to_debian
+
+# Build the app
+flutter build linux --release
+
+# Create .deb package
+flutter_to_debian
+
+# Install the package
+sudo dpkg -i debian/packages/*.deb
+```
+
 ## How does it look?
 <div>
   <img src="https://user-images.githubusercontent.com/15243788/144157310-82e89cae-a18d-422c-8432-6d58a2830c4f.png" width="300" />
