@@ -46,6 +46,101 @@ class _NoteListState extends State<NoteList> {
     context.read<NotesCubit>().createOrUpdateRemoteNotes();
   }
 
+  void _showContextMenu(BuildContext context, Offset? position, Note note) {
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    // For long press (mobile), show at center of screen
+    final Offset menuPosition = position ??
+        Offset(MediaQuery.of(context).size.width / 2,
+            MediaQuery.of(context).size.height / 2);
+
+    showMenu(
+      context: context,
+      position: RelativeRect.fromRect(
+        menuPosition & const Size(40, 40),
+        Offset.zero & overlay.size,
+      ),
+      items: widget.isDeletedList
+          ? [
+              PopupMenuItem(
+                value: 'restore',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.restore,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text('Restore'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'delete_permanent',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.delete_forever,
+                      color: Theme.of(context).colorScheme.error,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text('Delete Permanently'),
+                  ],
+                ),
+              ),
+            ]
+          : [
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.delete,
+                      color: Theme.of(context).colorScheme.error,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text('Delete'),
+                  ],
+                ),
+              ),
+            ],
+    ).then((value) {
+      if (value != null) {
+        _handleContextMenuAction(value, note);
+      }
+    });
+  }
+
+  void _handleContextMenuAction(String action, Note note) async {
+    switch (action) {
+      case 'delete':
+        context.read<NotesCubit>().deleteNote(note);
+        break;
+      case 'restore':
+        context.read<NotesCubit>().restoreNote(note);
+        break;
+      case 'delete_permanent':
+        for (var fileData in note.fileDataList) {
+          await context.read<NotesCubit>().deleteFile(fileData);
+        }
+        if (mounted) {
+          context.read<NotesCubit>().deleteNotePermanently(note.id);
+        }
+        break;
+    }
+
+    if (!mounted) return;
+
+    if (context.read<SettingsCubit>().state.selectedNoteId == note.id) {
+      context.read<SettingsCubit>().setSelectedNoteId(null);
+    }
+    context.read<NotesCubit>().createOrUpdateRemoteNotes();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<GithubCubit, GithubState>(
@@ -186,81 +281,95 @@ class _NoteListState extends State<NoteList> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: ListTile(
-                            onTap: () => navigateToDetails(
-                              context: context,
-                              note: note,
-                              isDeletedList: widget.isDeletedList,
+                          child: GestureDetector(
+                            onSecondaryTapDown: (details) => _showContextMenu(
+                              context,
+                              details.globalPosition,
+                              note,
                             ),
-                            contentPadding: const EdgeInsets.all(16),
-                            title: Text(
-                              note.title.isEmpty ? 'Untitled Note' : note.title,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: note.title.isEmpty
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .onSurface,
-                                  ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            onLongPress: () => _showContextMenu(
+                              context,
+                              null,
+                              note,
                             ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (note.text.isNotEmpty) ...[
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    note.text,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: Theme.of(context)
+                            child: ListTile(
+                              onTap: () => navigateToDetails(
+                                context: context,
+                                note: note,
+                                isDeletedList: widget.isDeletedList,
+                              ),
+                              contentPadding: const EdgeInsets.all(16),
+                              title: Text(
+                                note.title.isEmpty
+                                    ? 'Untitled Note'
+                                    : note.title,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: note.title.isEmpty
+                                          ? Theme.of(context)
                                               .colorScheme
-                                              .onSurfaceVariant,
-                                        ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                                if (fileNames.isNotEmpty) ...[
-                                  const SizedBox(height: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
+                                              .onSurfaceVariant
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
                                     ),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      '${fileNames.length} file${fileNames.length > 1 ? 's' : ''}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (note.text.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      note.text,
                                       style: Theme.of(context)
                                           .textTheme
-                                          .labelSmall
+                                          .bodyMedium
                                           ?.copyWith(
                                             color: Theme.of(context)
                                                 .colorScheme
-                                                .primary,
-                                            fontWeight: FontWeight.w500,
+                                                .onSurfaceVariant,
                                           ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
+                                  ],
+                                  if (fileNames.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        '${fileNames.length} file${fileNames.length > 1 ? 's' : ''}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
                                 ],
-                              ],
+                              ),
+                              trailing: _buildDateChip(context, note.date),
                             ),
-                            trailing: _buildDateChip(context, note.date),
                           ),
                         ),
                       );

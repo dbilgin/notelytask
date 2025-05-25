@@ -5,7 +5,7 @@ enum AppTheme {
   defaultDark,
   oceanBlue,
   forestGreen,
-  sunsetOrange,
+  slateDark,
   purpleNight,
   rosePink,
 }
@@ -13,12 +13,12 @@ enum AppTheme {
 class AppColors {
   static const Color primary = Color(0xFF6366F1);
   static const Color primaryVariant = Color(0xFF4F46E5);
-  static const Color secondary = Color(0xFF10B981);
-  static const Color secondaryVariant = Color(0xFF059669);
+  static const Color secondary = Color(0xFF8B5CF6);
+  static const Color secondaryVariant = Color(0xFF7C3AED);
 
-  static const Color background = Color(0xFF0F172A);
-  static const Color surface = Color(0xFF1E293B);
-  static const Color surfaceVariant = Color(0xFF334155);
+  static const Color background = Color(0xFF17181C);
+  static const Color surface = Color(0xFF1F2024);
+  static const Color surfaceVariant = Color(0xFF2A2B30);
 
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color onSurface = Color(0xFFF1F5F9);
@@ -76,15 +76,15 @@ class ForestGreenColors {
   static const Color border = Color(0xFF64748B);
 }
 
-class SunsetOrangeColors {
-  static const Color primary = Color(0xFFF97316);
-  static const Color primaryVariant = Color(0xFFEA580C);
-  static const Color secondary = Color(0xFFF59E0B);
-  static const Color secondaryVariant = Color(0xFFD97706);
+class SlateDarkColors {
+  static const Color primary = Color(0xFF6366F1);
+  static const Color primaryVariant = Color(0xFF4F46E5);
+  static const Color secondary = Color(0xFF10B981);
+  static const Color secondaryVariant = Color(0xFF059669);
 
-  static const Color background = Color(0xFF1A120C);
-  static const Color surface = Color(0xFF2B1F1A);
-  static const Color surfaceVariant = Color(0xFF3D2F2A);
+  static const Color background = Color(0xFF0F172A);
+  static const Color surface = Color(0xFF1E293B);
+  static const Color surfaceVariant = Color(0xFF334155);
 
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color onSurface = Color(0xFFF1F5F9);
@@ -166,12 +166,12 @@ class ThemeHelper {
           'background': ForestGreenColors.background,
           'surface': ForestGreenColors.surface,
         };
-      case AppTheme.sunsetOrange:
+      case AppTheme.slateDark:
         return {
-          'primary': SunsetOrangeColors.primary,
-          'secondary': SunsetOrangeColors.secondary,
-          'background': SunsetOrangeColors.background,
-          'surface': SunsetOrangeColors.surface,
+          'primary': SlateDarkColors.primary,
+          'secondary': SlateDarkColors.secondary,
+          'background': SlateDarkColors.background,
+          'surface': SlateDarkColors.surface,
         };
       case AppTheme.purpleNight:
         return {
@@ -198,8 +198,8 @@ class ThemeHelper {
         return 'Ocean Blue';
       case AppTheme.forestGreen:
         return 'Forest Green';
-      case AppTheme.sunsetOrange:
-        return 'Sunset Orange';
+      case AppTheme.slateDark:
+        return 'Slate Dark';
       case AppTheme.purpleNight:
         return 'Purple Night';
       case AppTheme.rosePink:
@@ -269,23 +269,23 @@ ThemeData getThemeData(AppTheme theme) {
         'border': ForestGreenColors.border,
       };
       break;
-    case AppTheme.sunsetOrange:
+    case AppTheme.slateDark:
       colors = {
-        'primary': SunsetOrangeColors.primary,
-        'primaryVariant': SunsetOrangeColors.primaryVariant,
-        'secondary': SunsetOrangeColors.secondary,
-        'secondaryVariant': SunsetOrangeColors.secondaryVariant,
-        'background': SunsetOrangeColors.background,
-        'surface': SunsetOrangeColors.surface,
-        'surfaceVariant': SunsetOrangeColors.surfaceVariant,
-        'onPrimary': SunsetOrangeColors.onPrimary,
-        'onSurface': SunsetOrangeColors.onSurface,
-        'onSurfaceVariant': SunsetOrangeColors.onSurfaceVariant,
-        'error': SunsetOrangeColors.error,
-        'warning': SunsetOrangeColors.warning,
-        'success': SunsetOrangeColors.success,
-        'divider': SunsetOrangeColors.divider,
-        'border': SunsetOrangeColors.border,
+        'primary': SlateDarkColors.primary,
+        'primaryVariant': SlateDarkColors.primaryVariant,
+        'secondary': SlateDarkColors.secondary,
+        'secondaryVariant': SlateDarkColors.secondaryVariant,
+        'background': SlateDarkColors.background,
+        'surface': SlateDarkColors.surface,
+        'surfaceVariant': SlateDarkColors.surfaceVariant,
+        'onPrimary': SlateDarkColors.onPrimary,
+        'onSurface': SlateDarkColors.onSurface,
+        'onSurfaceVariant': SlateDarkColors.onSurfaceVariant,
+        'error': SlateDarkColors.error,
+        'warning': SlateDarkColors.warning,
+        'success': SlateDarkColors.success,
+        'divider': SlateDarkColors.divider,
+        'border': SlateDarkColors.border,
       };
       break;
     case AppTheme.purpleNight:
