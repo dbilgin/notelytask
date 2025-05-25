@@ -7,9 +7,26 @@ import 'package:notelytask/models/settings_state.dart';
 import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/theme.dart';
 import 'package:notelytask/utils.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  String version = '';
+  Future<String> getVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    return '${packageInfo.version}+${packageInfo.buildNumber}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getVersion().then((value) => setState(() => version = value));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -318,7 +335,7 @@ class SettingsPage extends StatelessWidget {
                       color: colorScheme.onSurface,
                     ),
                     title: const Text('About NotelyTask'),
-                    subtitle: const Text('Version 1.0.0'),
+                    subtitle: Text('Version $version'),
                     onTap: () {
                       showDialog(
                         context: context,
