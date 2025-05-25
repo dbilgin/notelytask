@@ -39,8 +39,8 @@ sudo dpkg -i debian/packages/*.deb
 
 ## How does it look?
 <div>
-  <img src="https://user-images.githubusercontent.com/15243788/144157310-82e89cae-a18d-422c-8432-6d58a2830c4f.png" width="300" />
-  <img src="https://user-images.githubusercontent.com/15243788/144157320-3546d9cd-86f1-463b-a051-8dedc457cf40.png" width="300" />
-  <img src="https://user-images.githubusercontent.com/15243788/144157324-36481f03-9ab3-4223-ae93-319645de3f9b.png" width="300" />
-  <img src="https://user-images.githubusercontent.com/15243788/144158100-e252e60a-2906-4e81-ab5e-537e79cee8cb.png" width="300" />
+  <img src="https://github.com/user-attachments/assets/805b4752-c2d4-4505-8d6c-1ee377831051" width="300" />
+  <img src="https://github.com/user-attachments/assets/8b19d248-8596-49d9-ac3c-35d4b3701e43" width="300" />
+  <img src="https://github.com/user-attachments/assets/854ea8bd-ad51-40ac-b1c3-340e507f122a" width="300" />
+  <img src="https://github.com/user-attachments/assets/f596fe36-26b7-4f57-ab7b-8e684c58a6b6" width="300" />
 </div>
