@@ -7,7 +7,6 @@ import 'package:notelytask/models/github_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/utils.dart';
-import 'package:notelytask/widgets/note_list_row_files.dart';
 
 class NoteList extends StatefulWidget {
   final List<Note> notes;
@@ -23,7 +22,6 @@ class NoteList extends StatefulWidget {
 }
 
 class _NoteListState extends State<NoteList> {
-  /// Swipe Left index is 2
   void _dismissed(DismissDirection direction, Note note) async {
     if (!widget.isDeletedList) {
       context.read<NotesCubit>().deleteNote(note);
@@ -59,89 +57,253 @@ class _NoteListState extends State<NoteList> {
       },
       child: Column(
         children: [
-          if (kIsWeb && !widget.isDeletedList)
+          if ((kIsWeb || isDesktop) && !widget.isDeletedList)
             Container(
               width: double.infinity,
-              margin: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
+              margin: const EdgeInsets.only(bottom: 16),
+              child: ElevatedButton.icon(
                 onPressed: () => navigateToDetails(
                   context: context,
                   isDeletedList: widget.isDeletedList,
                 ),
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Create New Note'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
               ),
             ),
           Expanded(
-            child: ListView.separated(
-              itemBuilder: (context, index) {
-                var fileData = widget.notes[index].fileDataList;
-                var fileNames = fileData.map((e) => e.name);
-
-                return Dismissible(
-                  key: ValueKey<int>(
-                      widget.notes[index].date.millisecondsSinceEpoch),
-                  onDismissed: (direction) =>
-                      _dismissed(direction, widget.notes[index]),
-                  background: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    color: Colors.red,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: widget.notes.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          widget.isDeletedList ? Icons.restore : Icons.delete,
-                          color: Colors.white,
-                          size: 30.0,
+                          widget.isDeletedList
+                              ? Icons.delete_outline
+                              : Icons.note_add_rounded,
+                          size: 64,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                        const Icon(
-                          Icons.delete,
-                          color: Colors.white,
-                          size: 30.0,
+                        const SizedBox(height: 16),
+                        Text(
+                          widget.isDeletedList
+                              ? 'No deleted notes'
+                              : 'No notes yet',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.isDeletedList
+                              ? 'Deleted notes will appear here'
+                              : 'Tap the + button to create your first note',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        onTap: () => navigateToDetails(
-                          context: context,
-                          note: widget.notes[index],
-                          isDeletedList: widget.isDeletedList,
+                  )
+                : ListView.separated(
+                    itemBuilder: (context, index) {
+                      final note = widget.notes[index];
+                      final fileData = note.fileDataList;
+                      final fileNames = fileData.map((e) => e.name);
+
+                      return Dismissible(
+                        key: ValueKey<int>(note.date.millisecondsSinceEpoch),
+                        onDismissed: (direction) => _dismissed(direction, note),
+                        background: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          decoration: BoxDecoration(
+                            color: widget.isDeletedList
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFFEF4444),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            children: [
+                              Icon(
+                                widget.isDeletedList
+                                    ? Icons.restore
+                                    : Icons.delete,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                widget.isDeletedList ? 'Restore' : 'Delete',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        title: Text(
-                          widget.notes[index].title,
-                          style: Theme.of(context).textTheme.titleMedium,
+                        secondaryBackground: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF4444),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.centerRight,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              const Text(
+                                'Delete',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(
+                                Icons.delete_forever,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ],
+                          ),
                         ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.notes[index].text,
-                              overflow: TextOverflow.fade,
-                              style: Theme.of(context).textTheme.bodySmall,
-                              maxLines: 5,
+                        child: Card(
+                          margin: EdgeInsets.zero,
+                          color: Theme.of(context).colorScheme.surface,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            onTap: () => navigateToDetails(
+                              context: context,
+                              note: note,
+                              isDeletedList: widget.isDeletedList,
                             ),
-                            if (fileNames.isNotEmpty)
-                              NoteListRowFiles(fileNames: fileNames),
-                          ],
+                            contentPadding: const EdgeInsets.all(16),
+                            title: Text(
+                              note.title.isEmpty ? 'Untitled Note' : note.title,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: note.title.isEmpty
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (note.text.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    note.text,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                                if (fileNames.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      '${fileNames.length} file${fileNames.length > 1 ? 's' : ''}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            trailing: _buildDateChip(context, note.date),
+                          ),
                         ),
-                        isThreeLine: true,
-                      ),
-                    ],
+                      );
+                    },
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemCount: widget.notes.length,
                   ),
-                );
-              },
-              separatorBuilder: (context, index) => const Divider(
-                color: Colors.white,
-              ),
-              itemCount: widget.notes.length,
-            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDateChip(BuildContext context, DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    String timeText;
+    if (difference.inDays > 0) {
+      timeText = '${difference.inDays}d';
+    } else if (difference.inHours > 0) {
+      timeText = '${difference.inHours}h';
+    } else if (difference.inMinutes > 0) {
+      timeText = '${difference.inMinutes}m';
+    } else {
+      timeText = 'now';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        timeText,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
       ),
     );
   }

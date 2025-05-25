@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
+import 'package:notelytask/models/settings_state.dart';
 import 'package:notelytask/repository/github_repository.dart';
 import 'package:notelytask/screens/details_page.dart';
 import 'package:notelytask/screens/github_page.dart';
 import 'package:notelytask/screens/home_page.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:notelytask/screens/privacy_page.dart';
+import 'package:notelytask/screens/privacy_policy_page.dart';
+import 'package:notelytask/screens/settings_page.dart';
 import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/theme.dart';
 import 'package:path_provider/path_provider.dart';
@@ -67,49 +69,54 @@ class App extends StatelessWidget {
               ),
             ),
           ],
-          child: MaterialApp(
-            title: 'NotelyTask',
-            theme: themeData,
-            navigatorKey: getIt<NavigationService>().navigatorKey,
-            initialRoute: '/',
-            onGenerateRoute: (RouteSettings settings) {
-              final settingsUri = Uri.parse(settings.name ?? '/');
-              final ghUserCode = settingsUri.queryParameters['code'];
+          child: BlocBuilder<SettingsCubit, SettingsState>(
+            builder: (context, settingsState) {
+              return MaterialApp(
+                title: 'NotelyTask',
+                theme: getThemeData(settingsState.selectedTheme),
+                navigatorKey: getIt<NavigationService>().navigatorKey,
+                initialRoute: '/',
+                onGenerateRoute: (RouteSettings settings) {
+                  final settingsUri = Uri.parse(settings.name ?? '/');
+                  final ghUserCode = settingsUri.queryParameters['code'];
 
-              var routes = <String, WidgetBuilder>{
-                '/': (context) => const HomePage(),
-                '/deleted_list': (context) => const DeletedListPage(),
-                '/github': (context) => GithubPage(code: ghUserCode),
-                '/details': (context) => Scaffold(
-                      body: DetailsPage(
-                        note:
-                            (settings.arguments as DetailNavigationParameters?)
+                  var routes = <String, WidgetBuilder>{
+                    '/': (context) => const HomePage(),
+                    '/deleted_list': (context) => const DeletedListPage(),
+                    '/github': (context) => GithubPage(code: ghUserCode),
+                    '/details': (context) => Scaffold(
+                          body: DetailsPage(
+                            note: (settings.arguments
+                                    as DetailNavigationParameters?)
                                 ?.note,
-                        withAppBar:
-                            (settings.arguments as DetailNavigationParameters?)
+                            withAppBar: (settings.arguments
+                                        as DetailNavigationParameters?)
                                     ?.withAppBar ??
                                 true,
-                        isDeletedList:
-                            (settings.arguments as DetailNavigationParameters?)
+                            isDeletedList: (settings.arguments
+                                        as DetailNavigationParameters?)
                                     ?.isDeletedList ??
                                 true,
-                      ),
-                    ),
-                '/privacy': (context) => const PrivacyPage(),
-              };
+                          ),
+                        ),
+                    '/settings': (context) => const SettingsPage(),
+                    '/privacy_policy': (context) => const PrivacyPolicyPage(),
+                  };
 
-              if (routes[settingsUri.path] == null) {
-                return MaterialPageRoute(
-                  settings: const RouteSettings(name: '/'),
-                  builder: (context) => const HomePage(),
-                );
-              } else {
-                WidgetBuilder builder = routes[settingsUri.path]!;
-                return MaterialPageRoute(
-                  settings: RouteSettings(name: settingsUri.toString()),
-                  builder: (ctx) => builder(ctx),
-                );
-              }
+                  if (routes[settingsUri.path] == null) {
+                    return MaterialPageRoute(
+                      settings: const RouteSettings(name: '/'),
+                      builder: (context) => const HomePage(),
+                    );
+                  } else {
+                    WidgetBuilder builder = routes[settingsUri.path]!;
+                    return MaterialPageRoute(
+                      settings: RouteSettings(name: settingsUri.toString()),
+                      builder: (ctx) => builder(ctx),
+                    );
+                  }
+                },
+              );
             },
           ),
         ),

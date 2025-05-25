@@ -8,13 +8,23 @@ class StateLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return BlocBuilder<GithubCubit, GithubState>(
-      builder: (context, ghState) => (ghState.loading)
-          ? const LinearProgressIndicator(
-              minHeight: 1,
-              color: Color(0xffdce3e8),
-            )
-          : Container(),
+      builder: (context, state) {
+        if (!state.loading) {
+          return const SizedBox.shrink();
+        }
+
+        return SizedBox(
+          height: 4,
+          child: LinearProgressIndicator(
+            backgroundColor: colorScheme.onSurface.withValues(alpha: 0.1),
+            valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+            minHeight: 4,
+          ),
+        );
+      },
     );
   }
 }

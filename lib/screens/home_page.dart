@@ -33,10 +33,6 @@ class _HomePageState extends State<HomePage> {
     NativeService.updateNotes(context, args);
   }
 
-  void _navigateToGithubLogin() {
-    getIt<NavigationService>().pushNamed('/github');
-  }
-
   void _navigateToDeletedList() {
     context.read<SettingsCubit>().setSelectedNoteId(null);
     getIt<NavigationService>().pushNamed('/deleted_list');
@@ -44,43 +40,64 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text(
-          'NotelyTask',
-          style: TextStyle(color: Colors.white),
+        backgroundColor: colorScheme.surface,
+        elevation: 0,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/foreground.png',
+              width: 40,
+              height: 40,
+              color: colorScheme.primary,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'NotelyTask',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ],
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_rounded),
             tooltip: 'Deleted Notes',
             onPressed: _navigateToDeletedList,
-            color: Colors.white,
+            color: colorScheme.onSurface,
           ),
           IconButton(
-            icon: Image.asset('assets/github.png'),
-            tooltip: 'Github Integration',
-            onPressed: _navigateToGithubLogin,
+            icon: const Icon(Icons.settings_rounded),
+            tooltip: 'Settings',
+            onPressed: () => getIt<NavigationService>().pushNamed('/settings'),
+            color: colorScheme.onSurface,
           ),
         ],
         bottom: const PreferredSize(
-          preferredSize: Size(double.infinity, 0),
+          preferredSize: Size(double.infinity, 4),
           child: StateLoader(),
         ),
       ),
-      body: const NoteListLayout(),
-      floatingActionButton: !kIsWeb
+      body: const Padding(
+        padding: EdgeInsets.all(16),
+        child: NoteListLayout(),
+      ),
+      floatingActionButton: !kIsWeb && !isDesktop
           ? FloatingActionButton(
               onPressed: () => navigateToDetails(
                 context: context,
                 isDeletedList: false,
               ),
-              tooltip: 'Add New Note',
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-              ),
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              child: const Icon(Icons.add_rounded),
             )
           : null,
     );
