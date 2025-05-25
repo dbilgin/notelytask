@@ -55,3 +55,6 @@ google-services.json
 **/generated_plugins.cmake
 
 .firebase/
+
+# Debian packaging (flutter_to_debian)
+debian/packages/
