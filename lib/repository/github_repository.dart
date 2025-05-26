@@ -247,7 +247,7 @@ class GithubRepository {
     Uri? url;
     if (kIsWeb) {
       url = Uri.https(
-        'api.notelytask.com',
+        'notelytaskapi.dbilgin.com',
         '/accessToken',
         {
           'client_id': dotenv.env['GITHUB_CLIENT_ID'],
