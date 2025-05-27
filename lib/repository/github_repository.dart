@@ -246,9 +246,13 @@ class GithubRepository {
   Future<String?> getAccessToken(String code) async {
     Uri? url;
     if (kIsWeb) {
+      final endpoint = dotenv.env['ENDPOINT'];
+      if (endpoint == null) {
+        return null;
+      }
       url = Uri.https(
-        'notelytaskapi.dbilgin.com',
-        '/accessToken',
+        endpoint,
+        '/notelytask-access-token',
         {
           'client_id': dotenv.env['GITHUB_CLIENT_ID'],
           'code': code,
