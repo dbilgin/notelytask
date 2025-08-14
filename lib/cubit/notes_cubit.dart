@@ -132,7 +132,6 @@ class NotesCubit extends HydratedCubit<NotesState> {
 
   Future<void> getAndUpdateLocalNotes({
     required BuildContext context,
-    String? redirectNoteId,
   }) async {
     if (!githubCubit.state.isLoggedIn()) {
       return;
@@ -165,7 +164,6 @@ class NotesCubit extends HydratedCubit<NotesState> {
       setEncryptionKey(pinResult);
       return getAndUpdateLocalNotes(
         context: context,
-        redirectNoteId: redirectNoteId,
       );
     }
 
@@ -176,20 +174,10 @@ class NotesCubit extends HydratedCubit<NotesState> {
       final list = fromJson(finalContent);
       emit(list);
     }
+  }
 
-    if (redirectNoteId != null) {
-      final note = state.notes
-          .where((n) => n.id == redirectNoteId && !n.isDeleted)
-          .toList();
-      if (note.isNotEmpty) {
-        if (!context.mounted) return;
-        navigateToDetails(
-          context: context,
-          isDeletedList: false,
-          note: note[0],
-        );
-      }
-    }
+  Future<Note?> getNoteById(String noteId) async {
+    return state.notes.firstWhere((n) => n.id == noteId);
   }
 
   Future<String?> getFileLocalPath(FileData fileData) async {
