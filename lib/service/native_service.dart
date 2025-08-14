@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
+import 'package:notelytask/utils.dart';
 
 class NativeService {
   static MethodChannel widgetChannel =
@@ -22,8 +23,18 @@ class NativeService {
           var noteId = call.arguments['note_id'].toString();
           context.read<NotesCubit>().getAndUpdateLocalNotes(
                 context: context,
-                redirectNoteId: noteId,
               );
+          final redirectNote =
+              await context.read<NotesCubit>().getNoteById(noteId);
+
+          if (redirectNote != null) {
+            if (!context.mounted) return;
+            navigateToDetails(
+              context: context,
+              isDeletedList: false,
+              note: redirectNote,
+            );
+          }
         }
       } catch (e) {
         return;
@@ -51,7 +62,18 @@ class NativeService {
   static Future<void> updateNotes(BuildContext context, String noteId) async {
     await context.read<NotesCubit>().getAndUpdateLocalNotes(
           context: context,
-          redirectNoteId: noteId,
         );
+
+    if (!context.mounted) return;
+    final redirectNote = await context.read<NotesCubit>().getNoteById(noteId);
+
+    if (redirectNote != null) {
+      if (!context.mounted) return;
+      navigateToDetails(
+        context: context,
+        isDeletedList: false,
+        note: redirectNote,
+      );
+    }
   }
 }
