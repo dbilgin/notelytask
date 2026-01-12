@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/models/github_state.dart';
+import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/models/settings_state.dart';
 import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/theme.dart';
@@ -26,6 +28,32 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     getVersion().then((value) => setState(() => version = value));
+  }
+
+  Future<void> _onSubmitEncryption(String key) async {
+    context.read<NotesCubit>().setEncryptionKey(key);
+    await context.read<NotesCubit>().createOrUpdateRemoteNotes();
+
+    if (!mounted) return;
+    await context.read<NotesCubit>().getAndUpdateLocalNotes(context: context);
+    if (!mounted) return;
+    showSnackBar(context, 'Encryption successful.');
+  }
+
+  Future<void> _onSubmitDecryption(String key) async {
+    final existingKey = context.read<NotesCubit>().state.encryptionKey;
+    if (key != existingKey) {
+      showSnackBar(context, 'Wrong pin, decryption failed.');
+      return;
+    }
+
+    context.read<NotesCubit>().setEncryptionKey(null);
+    await context.read<NotesCubit>().createOrUpdateRemoteNotes();
+
+    if (!mounted) return;
+    await context.read<NotesCubit>().getAndUpdateLocalNotes(context: context);
+    if (!mounted) return;
+    showSnackBar(context, 'Decryption successful.');
   }
 
   @override
@@ -137,6 +165,51 @@ class _SettingsPageState extends State<SettingsPage> {
                                 side: BorderSide(color: colorScheme.error),
                               ),
                             ),
+                          ),
+                          BlocBuilder<NotesCubit, NotesState>(
+                            builder: (notesContext, notesState) {
+                              if (githubState.isLoggedIn() &&
+                                  githubState.ownerRepo != null) {
+                                return Column(
+                                  children: [
+                                    const SizedBox(height: 16),
+                                    if (notesState.encryptionKey == null)
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton.icon(
+                                          onPressed: () => encryptionKeyDialog(
+                                            context: context,
+                                            isPinRequired: false,
+                                            title: 'Enter Your Encryption Pin',
+                                            text:
+                                                'Do not lose this!\nThis will encrypt your notes.',
+                                            onSubmit: _onSubmitEncryption,
+                                          ),
+                                          icon: const Icon(Icons.lock_rounded),
+                                          label: const Text('Encrypt Notes'),
+                                        ),
+                                      ),
+                                    if (notesState.encryptionKey != null)
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton.icon(
+                                          onPressed: () => encryptionKeyDialog(
+                                            context: context,
+                                            isPinRequired: false,
+                                            title: 'Enter Your Encryption Pin',
+                                            text:
+                                                'Decryption will fail if wrong key is entered.',
+                                            onSubmit: _onSubmitDecryption,
+                                          ),
+                                          icon: const Icon(Icons.lock_open_rounded),
+                                          label: const Text('Decrypt Notes'),
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
                           ),
                         ] else ...[
                           Text(
