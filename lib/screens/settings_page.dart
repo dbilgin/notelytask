@@ -378,7 +378,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     onChanged: (value) {
                       context.read<SettingsCubit>().toggleMarkdown();
                     },
-                    activeColor: colorScheme.primary,
+                    activeThumbColor: colorScheme.primary,
                   ),
                 );
               },
