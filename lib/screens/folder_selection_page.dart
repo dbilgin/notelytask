@@ -1,52 +1,43 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/local_folder_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
-import 'package:notelytask/models/github_state.dart';
+import 'package:notelytask/models/local_folder_state.dart';
 import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/utils.dart';
 import 'package:notelytask/widgets/state_loader.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-class GithubPage extends StatefulWidget {
-  const GithubPage({super.key, this.code});
-  final String? code;
+class FolderSelectionPage extends StatefulWidget {
+  const FolderSelectionPage({super.key});
 
   @override
-  State<GithubPage> createState() => _GithubPageState();
+  State<FolderSelectionPage> createState() => _FolderSelectionPageState();
 }
 
-class _GithubPageState extends State<GithubPage> {
-  final repoUrlController = TextEditingController();
-  String? localRepoUrl;
+class _FolderSelectionPageState extends State<FolderSelectionPage> {
+  String? localFolderPath;
 
   @override
   void initState() {
-    final ghCode = widget.code;
-    if (ghCode != null) {
-      context.read<GithubCubit>().getAccessToken(ghCode);
-    }
-
-    repoUrlController.text = context.read<GithubCubit>().state.ownerRepo ?? '';
-    localRepoUrl = repoUrlController.text;
+    localFolderPath = context.read<LocalFolderCubit>().state.folderPath;
     super.initState();
   }
 
-  @override
-  void dispose() {
-    repoUrlController.dispose();
-    super.dispose();
+  Future<void> _selectFolder() async {
+    final selectedPath = await context.read<LocalFolderCubit>().selectFolder();
+    if (selectedPath != null && mounted) {
+      setState(() {
+        localFolderPath = selectedPath;
+      });
+    }
   }
 
-  void saveRepoUrl(String repoUrl) {
-    saveToRepoAlert(
+  void saveFolderPath(String folderPath) {
+    saveToFolderAlert(
       context: context,
       onPressed: (bool keepLocal) async {
         final result = await context.read<NotesCubit>().setRemoteConnection(
-              ownerRepo: repoUrl,
+              folderPath: folderPath,
               keepLocal: keepLocal,
               enterEncryptionKeyDialog: () => encryptionKeyDialog(
                 context: context,
@@ -61,27 +52,6 @@ class _GithubPageState extends State<GithubPage> {
         }
       },
     );
-  }
-
-  Future<void> _startConnectionToGithub() async {
-    if (kIsWeb) {
-      final url = Uri.https(
-        'github.com',
-        '/login/oauth/authorize',
-        {
-          'client_id': dotenv.env['GITHUB_CLIENT_ID'],
-          'scope': 'repo',
-        },
-      );
-      if (await canLaunchUrl(url)) {
-        launchUrl(
-          url,
-          webOnlyWindowName: '_self',
-        );
-      }
-    } else {
-      await context.read<GithubCubit>().launchLogin();
-    }
   }
 
   Future<void> _onSubmitEncryption(String key) async {
@@ -115,7 +85,7 @@ class _GithubPageState extends State<GithubPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Github',
+          'Local Storage',
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: const IconThemeData(
@@ -127,103 +97,100 @@ class _GithubPageState extends State<GithubPage> {
           child: StateLoader(),
         ),
       ),
-      body: BlocBuilder<GithubCubit, GithubState>(
+      body: BlocBuilder<LocalFolderCubit, LocalFolderState>(
         builder: (context, state) {
-          var deviceCode = state.deviceCode;
-          var userCode = state.userCode;
-          var verificationUri = state.verificationUri;
           List<Widget> children = [];
 
-          if (state.accessToken == null && deviceCode == null) {
+          if (state.folderPath == null) {
+            // Not connected - show folder selection
             children = [
-              ElevatedButton(
-                onPressed: _startConnectionToGithub,
-                child: const Text('Connect to Github'),
+              const Icon(
+                Icons.folder_open_rounded,
+                size: 64,
+                color: Colors.grey,
               ),
+              const SizedBox(height: 16),
+              Text(
+                'Select a folder to store your notes',
+                style: Theme.of(context).textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              if (localFolderPath != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    localFolderPath!,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              ElevatedButton.icon(
+                onPressed: _selectFolder,
+                icon: const Icon(Icons.folder_rounded),
+                label: Text(localFolderPath == null
+                    ? 'Select Folder'
+                    : 'Change Folder'),
+              ),
+              if (localFolderPath != null &&
+                  localFolderPath != state.folderPath)
+                ElevatedButton(
+                  onPressed: () => saveFolderPath(localFolderPath!),
+                  child: const Text('Save Folder'),
+                ),
             ];
-          } else if (state.accessToken == null &&
-              deviceCode != null &&
-              userCode != null &&
-              verificationUri != null) {
-            void onCopyPressed() {
-              Clipboard.setData(ClipboardData(text: userCode));
-              showSnackBar(context, 'Copied!');
-            }
-
+          } else {
+            // Connected - show folder info and encryption options
             children = [
+              const Icon(
+                Icons.folder_rounded,
+                size: 64,
+                color: Colors.green,
+              ),
+              const SizedBox(height: 16),
               Text(
-                'Your access code',
+                'Connected to Local Folder',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
-              Row(
-                children: [
-                  SelectableText(
-                    userCode,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.copy,
-                      color: Color(0xff2e8fff),
-                    ),
-                    tooltip: 'Copy Code',
-                    onPressed: onCopyPressed,
-                  ),
-                ],
-              ),
-              Text(
-                'Activation Link',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              GestureDetector(
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Text(
-                  verificationUri,
-                  style: const TextStyle(
-                    color: Colors.blue,
-                  ),
-                ),
-                onTap: () => launchUrl(Uri.parse(verificationUri)),
-              ),
-              ElevatedButton(
-                onPressed: () async => await context
-                    .read<GithubCubit>()
-                    .getAccessToken(deviceCode),
-                child: const Text('I activated my account'),
-              ),
-            ];
-          } else if (state.accessToken != null) {
-            children = [
-              Text(
-                'Connected to GitHub',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              SizedBox(
-                height: 50.0,
-                width: MediaQuery.of(context).size.width - 100,
-                child: TextField(
-                  controller: repoUrlController,
-                  onChanged: (value) => setState(() => localRepoUrl = value),
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'owner/repo',
-                  ),
+                  state.folderPath!,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
                 ),
               ),
-              ElevatedButton(
-                onPressed: localRepoUrl == state.ownerRepo
-                    ? null
-                    : () => saveRepoUrl(repoUrlController.text),
-                child: const Text('Save Repo'),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _selectFolder,
+                icon: const Icon(Icons.folder_rounded),
+                label: const Text('Change Folder'),
               ),
+              if (localFolderPath != null &&
+                  localFolderPath != state.folderPath)
+                ElevatedButton(
+                  onPressed: () => saveFolderPath(localFolderPath!),
+                  child: const Text('Save New Folder'),
+                ),
               BlocBuilder<NotesCubit, NotesState>(builder: (
                 notesContext,
                 notesState,
               ) {
                 return Wrap(
                   children: [
-                    if (state.accessToken != null &&
-                        state.ownerRepo != null &&
-                        notesState.encryptionKey == null)
+                    if (state.isConnected() && notesState.encryptionKey == null)
                       ElevatedButton(
                         onPressed: () => encryptionKeyDialog(
                           context: context,
@@ -235,9 +202,7 @@ class _GithubPageState extends State<GithubPage> {
                         ),
                         child: const Text('Encrypt Notes'),
                       ),
-                    if (state.accessToken != null &&
-                        state.ownerRepo != null &&
-                        notesState.encryptionKey != null)
+                    if (state.isConnected() && notesState.encryptionKey != null)
                       ElevatedButton(
                         onPressed: () => encryptionKeyDialog(
                           context: context,
@@ -254,13 +219,14 @@ class _GithubPageState extends State<GithubPage> {
             ];
           }
 
-          return BlocListener<GithubCubit, GithubState>(
+          return BlocListener<LocalFolderCubit, LocalFolderState>(
             listener: (context, state) {
-              if (state.error && repoUrlController.text.isNotEmpty) {
-                showSnackBar(context, 'Error integrating repository.');
+              if (state.error) {
+                showSnackBar(context, 'Error accessing folder.');
                 context.read<NotesCubit>().invalidateError();
-
-                repoUrlController.text = '';
+                setState(() {
+                  localFolderPath = null;
+                });
               }
             },
             child: Padding(
@@ -278,10 +244,11 @@ class _GithubPageState extends State<GithubPage> {
                     ElevatedButton(
                       onPressed: () {
                         context.read<NotesCubit>().reset();
-                        repoUrlController.text = '';
-                        localRepoUrl = '';
+                        setState(() {
+                          localFolderPath = null;
+                        });
                       },
-                      child: const Text('Reset Github Connection'),
+                      child: const Text('Reset Connection'),
                     ),
                   ],
                 ),

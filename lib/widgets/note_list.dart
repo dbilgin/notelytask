@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/local_folder_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
-import 'package:notelytask/models/github_state.dart';
+import 'package:notelytask/models/local_folder_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/utils.dart';
@@ -143,10 +143,10 @@ class _NoteListState extends State<NoteList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<GithubCubit, GithubState>(
+    return BlocListener<LocalFolderCubit, LocalFolderState>(
       listener: (context, state) {
         if (state.error) {
-          showSnackBar(context, 'Error with Github integration.');
+          showSnackBar(context, 'Error with local folder.');
           context.read<NotesCubit>().invalidateError();
         }
       },
