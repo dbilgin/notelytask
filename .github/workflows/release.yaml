@@ -78,7 +78,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-deb
-          path: notelytask_${{ steps.version.outputs.VERSION }}_amd64.deb
+          path: build/linux/x64/release/debian/notelytask_${{ steps.version.outputs.VERSION }}_amd64.deb
 
   build-android:
     needs: analyze
