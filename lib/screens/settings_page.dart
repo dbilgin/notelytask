@@ -434,32 +434,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
 
-            const SizedBox(height: 24),
-
-            // Editor Settings Section
-            _buildSectionHeader(context, 'Editor'),
-            const SizedBox(height: 12),
-            BlocBuilder<SettingsCubit, SettingsState>(
-              builder: (context, settingsState) {
-                return Card(
-                  color: colorScheme.surface,
-                  child: SwitchListTile(
-                    secondary: Icon(
-                      Icons.preview_rounded,
-                      color: colorScheme.onSurface,
-                    ),
-                    title: const Text('Markdown Preview'),
-                    subtitle: const Text('Enable markdown preview mode'),
-                    value: settingsState.markdownEnabled,
-                    onChanged: (value) {
-                      context.read<SettingsCubit>().toggleMarkdown();
-                    },
-                    activeThumbColor: colorScheme.primary,
-                  ),
-                );
-              },
-            ),
-
             const SizedBox(height: 32),
           ],
         ),
