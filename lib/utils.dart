@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
-import 'package:notelytask/cubit/github_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/service/navigation_service.dart';
@@ -15,7 +14,6 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pinput/pinput.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:encrypt/encrypt.dart' as e;
 
 import 'cubit/settings_cubit.dart';
@@ -46,7 +44,7 @@ void navigateToDetails({
   context.read<SettingsCubit>().setSelectedNoteId(note?.id);
 }
 
-void saveToRepoAlert({
+void saveToFolderAlert({
   required BuildContext context,
   required Function(bool keepLocal) onPressed,
 }) {
@@ -56,12 +54,12 @@ void saveToRepoAlert({
       return AlertDialog(
         backgroundColor: const Color(0xff2a2a31),
         title: Text(
-          'Github Connection Warning',
+          'Folder Connection Warning',
           style: Theme.of(context).textTheme.titleLarge,
         ),
         content: Text(
-          '''Warning! This action will make changes to your repository on Github!
-Would you like to keep your local data and overwrite your repo?''',
+          '''Warning! This action will make changes to your local folder!
+Would you like to keep your current data and overwrite the folder?''',
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         actions: [
@@ -200,7 +198,7 @@ Future<void> _shareFile(String path) async {
 }
 
 Future<void> openFile(BuildContext context, FileData file) async {
-  kIsWeb ? _openLink(context, file) : await _openFileWithData(context, file);
+  await _openFileWithData(context, file);
 }
 
 Future<void> _openFileWithData(BuildContext context, FileData file) async {
@@ -214,28 +212,9 @@ Future<void> _openFileWithData(BuildContext context, FileData file) async {
       if (res.message.contains('does not exist')) {
         showSnackBar(context, 'File could not be found.');
       }
-    }
-  } catch (e) {
-    if (!context.mounted) return;
-    showSnackBar(context, 'File error.');
-  }
-}
-
-Future<void> _openLink(BuildContext context, FileData file) async {
-  try {
-    final ownerRepo = context.read<GithubCubit>().state.ownerRepo;
-    if (ownerRepo == null) {
-      showSnackBar(context, 'Credential error.');
-      return;
-    }
-
-    final fileUri = Uri.parse(
-      'https://github.com/$ownerRepo/blob/master/${file.name}?raw=true',
-    );
-    if (await canLaunchUrl(fileUri)) {
-      await launchUrl(fileUri);
-    } else if (context.mounted) {
-      showSnackBar(context, 'File could not be found.');
+    } else {
+      if (!context.mounted) return;
+      showSnackBar(context, 'File not found. Please select a folder first.');
     }
   } catch (e) {
     if (!context.mounted) return;
@@ -244,9 +223,9 @@ Future<void> _openLink(BuildContext context, FileData file) async {
 }
 
 Future<void> uploadFile(BuildContext context, Note note) async {
-  final isLoggedIn = context.read<NotesCubit>().isLoggedIn();
-  if (!isLoggedIn) {
-    showSnackBar(context, 'Please log in to upload files.');
+  final isConnected = context.read<NotesCubit>().isConnected();
+  if (!isConnected) {
+    showSnackBar(context, 'Please select a folder to upload files.');
     return;
   }
 
@@ -415,69 +394,6 @@ String nonExistentFileName({
       notes: notes,
     );
   }
-}
-
-Future<String?> googleFileIdDialog(
-  BuildContext context,
-) async {
-  return showDialog<String?>(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      final fileIdController = TextEditingController();
-      String? fileId;
-
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text('Add/Create File ID'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 16.0),
-                  child: Text(
-                    'Leave empty to create a new file.',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                SizedBox(
-                  height: 50.0,
-                  width: MediaQuery.of(context).size.width - 100,
-                  child: TextField(
-                    controller: fileIdController,
-                    onChanged: (value) => setState(() => fileId = value),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Existing File ID ',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop(null);
-                },
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                onPressed: () => Navigator.of(context).pop(fileId),
-                child: const Text('Set'),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
 }
 
 bool get isDesktop {

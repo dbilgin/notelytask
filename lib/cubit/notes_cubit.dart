@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/local_folder_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/models/notes_state.dart';
@@ -12,9 +12,9 @@ import 'package:notelytask/utils.dart';
 
 class NotesCubit extends HydratedCubit<NotesState> {
   NotesCubit({
-    required this.githubCubit,
+    required this.localFolderCubit,
   }) : super(const NotesState());
-  final GithubCubit githubCubit;
+  final LocalFolderCubit localFolderCubit;
 
   @override
   void onChange(Change<NotesState> change) {
@@ -23,7 +23,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   void invalidateError() {
-    githubCubit.invalidateError();
+    localFolderCubit.invalidateError();
   }
 
   Future<void> createOrUpdateRemoteNotes({
@@ -31,7 +31,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }) async {
     final jsonMap = state.toJson();
 
-    return await githubCubit.createOrUpdateRemoteNotes(
+    return await localFolderCubit.createOrUpdateRemoteNotes(
       shouldResetIfError: shouldResetIfError,
       encryptionKey: state.encryptionKey,
       notesJSONMap: jsonMap,
@@ -39,7 +39,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   Future<bool> deleteFileAndUpdate(String noteId, FileData fileData) async {
-    final remoteDeleteResult = await githubCubit.deleteFile(fileData);
+    final remoteDeleteResult = await localFolderCubit.deleteFile(fileData);
     if (!remoteDeleteResult) return false;
     _deleteNoteFileData(
       noteId,
@@ -50,7 +50,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   Future<bool> deleteFile(FileData fileData) async {
-    return await githubCubit.deleteFile(fileData);
+    return await localFolderCubit.deleteFile(fileData);
   }
 
   Future<void> uploadNewFileAndNotes(
@@ -63,7 +63,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
       notes: state.notes,
     );
 
-    final fileData = await githubCubit.uploadNewFile(
+    final fileData = await localFolderCubit.uploadNewFile(
       safeFileName,
       data,
     );
@@ -80,19 +80,18 @@ class NotesCubit extends HydratedCubit<NotesState> {
     return await createOrUpdateRemoteNotes();
   }
 
-  bool isLoggedIn() {
-    return githubCubit.state.isLoggedIn();
+  bool isConnected() {
+    return localFolderCubit.state.isConnected();
   }
 
   Future<bool> setRemoteConnection({
     required bool keepLocal,
     required Future<String?> Function() enterEncryptionKeyDialog,
-    String? ownerRepo,
-    String? fileId,
+    String? folderPath,
   }) async {
-    final connectionResult = ownerRepo != null
-        ? await githubCubit.setRepoUrl(
-            ownerRepo,
+    final connectionResult = folderPath != null
+        ? await localFolderCubit.setFolderUrl(
+            folderPath,
             keepLocal,
             enterEncryptionKeyDialog,
           )
@@ -121,7 +120,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
   void reset({
     bool shouldError = false,
   }) {
-    githubCubit.reset(shouldError: shouldError);
+    localFolderCubit.reset(shouldError: shouldError);
 
     const newState = NotesState(
       encryptionKey: null,
@@ -133,11 +132,11 @@ class NotesCubit extends HydratedCubit<NotesState> {
   Future<void> getAndUpdateLocalNotes({
     required BuildContext context,
   }) async {
-    if (!githubCubit.state.isLoggedIn()) {
+    if (!localFolderCubit.state.isConnected()) {
       return;
     }
 
-    final result = await githubCubit.getRemoteNotes(
+    final result = await localFolderCubit.getRemoteNotes(
       context: context,
       encryptionKey: state.encryptionKey,
     );
@@ -168,7 +167,8 @@ class NotesCubit extends HydratedCubit<NotesState> {
     }
 
     if (notesString == null) {
-      reset(shouldError: true);
+      // No notes file yet is not an error for local folder
+      return;
     } else {
       final finalContent = json.decode(notesString);
       final list = fromJson(finalContent);
@@ -181,8 +181,8 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   Future<String?> getFileLocalPath(FileData fileData) async {
-    if (githubCubit.state.isLoggedIn()) {
-      return await githubCubit.getFileLocalPath(fileData.name);
+    if (localFolderCubit.state.isConnected()) {
+      return await localFolderCubit.getFileLocalPath(fileData.name);
     }
     return null;
   }

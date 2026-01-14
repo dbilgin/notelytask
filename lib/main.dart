@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/local_folder_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/models/settings_state.dart';
-import 'package:notelytask/repository/github_repository.dart';
+import 'package:notelytask/repository/local_folder_repository.dart';
 import 'package:notelytask/screens/details_page.dart';
-import 'package:notelytask/screens/github_page.dart';
+import 'package:notelytask/screens/folder_selection_page.dart';
 import 'package:notelytask/screens/home_page.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -48,15 +48,15 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<GithubRepository>(
-          create: (context) => GithubRepository(),
+        RepositoryProvider<LocalFolderRepository>(
+          create: (context) => LocalFolderRepository(),
         ),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => GithubCubit(
-              githubRepository: context.read<GithubRepository>(),
+            create: (context) => LocalFolderCubit(
+              localFolderRepository: context.read<LocalFolderRepository>(),
             ),
           ),
         ],
@@ -65,7 +65,7 @@ class App extends StatelessWidget {
             BlocProvider(create: (context) => SettingsCubit()),
             BlocProvider(
               create: (context) => NotesCubit(
-                githubCubit: context.read<GithubCubit>(),
+                localFolderCubit: context.read<LocalFolderCubit>(),
               ),
             ),
           ],
@@ -78,12 +78,12 @@ class App extends StatelessWidget {
                 initialRoute: '/',
                 onGenerateRoute: (RouteSettings settings) {
                   final settingsUri = Uri.parse(settings.name ?? '/');
-                  final ghUserCode = settingsUri.queryParameters['code'];
 
                   var routes = <String, WidgetBuilder>{
                     '/': (context) => const HomePage(),
                     '/deleted_list': (context) => const DeletedListPage(),
-                    '/github': (context) => GithubPage(code: ghUserCode),
+                    '/folder_selection': (context) =>
+                        const FolderSelectionPage(),
                     '/details': (context) => Scaffold(
                           body: DetailsPage(
                             note: (settings.arguments

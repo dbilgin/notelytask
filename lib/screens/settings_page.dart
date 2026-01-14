@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notelytask/cubit/github_cubit.dart';
+import 'package:notelytask/cubit/local_folder_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
-import 'package:notelytask/models/github_state.dart';
+import 'package:notelytask/models/local_folder_state.dart';
 import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/models/settings_state.dart';
 import 'package:notelytask/service/navigation_service.dart';
@@ -83,11 +83,11 @@ class _SettingsPageState extends State<SettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // GitHub Integration Section
-            _buildSectionHeader(context, 'GitHub Integration'),
+            // Local Storage Section
+            _buildSectionHeader(context, 'Local Storage'),
             const SizedBox(height: 12),
-            BlocBuilder<GithubCubit, GithubState>(
-              builder: (context, githubState) {
+            BlocBuilder<LocalFolderCubit, LocalFolderState>(
+              builder: (context, folderState) {
                 return Card(
                   color: colorScheme.surface,
                   child: Padding(
@@ -97,15 +97,14 @@ class _SettingsPageState extends State<SettingsPage> {
                       children: [
                         Row(
                           children: [
-                            Image.asset(
-                              'assets/github.png',
-                              width: 24,
-                              height: 24,
+                            Icon(
+                              Icons.folder_rounded,
+                              size: 24,
                               color: colorScheme.onSurface,
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'GitHub Account',
+                              'Storage Folder',
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
@@ -113,14 +112,14 @@ class _SettingsPageState extends State<SettingsPage> {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        if (githubState.isLoggedIn()) ...[
+                        if (folderState.isConnected()) ...[
                           Row(
                             children: [
                               CircleAvatar(
                                 radius: 20,
                                 backgroundColor: colorScheme.primary,
                                 child: Icon(
-                                  Icons.person_rounded,
+                                  Icons.folder_rounded,
                                   color: colorScheme.onPrimary,
                                   size: 24,
                                 ),
@@ -137,13 +136,15 @@ class _SettingsPageState extends State<SettingsPage> {
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    if (githubState.ownerRepo != null)
+                                    if (folderState.folderPath != null)
                                       Text(
-                                        'Repository: ${githubState.ownerRepo}',
+                                        folderState.folderPath!,
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                           color: colorScheme.onSurfaceVariant,
                                         ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                   ],
                                 ),
@@ -155,11 +156,12 @@ class _SettingsPageState extends State<SettingsPage> {
                             width: double.infinity,
                             child: OutlinedButton.icon(
                               onPressed: () {
-                                context.read<GithubCubit>().reset();
-                                showSnackBar(context, 'Logged out from GitHub');
+                                context.read<LocalFolderCubit>().reset();
+                                showSnackBar(
+                                    context, 'Disconnected from folder');
                               },
                               icon: const Icon(Icons.logout_rounded),
-                              label: const Text('Logout'),
+                              label: const Text('Disconnect'),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: colorScheme.error,
                                 side: BorderSide(color: colorScheme.error),
@@ -168,8 +170,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                           BlocBuilder<NotesCubit, NotesState>(
                             builder: (notesContext, notesState) {
-                              if (githubState.isLoggedIn() &&
-                                  githubState.ownerRepo != null) {
+                              if (folderState.isConnected()) {
                                 return Column(
                                   children: [
                                     const SizedBox(height: 16),
@@ -201,7 +202,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                                 'Decryption will fail if wrong key is entered.',
                                             onSubmit: _onSubmitDecryption,
                                           ),
-                                          icon: const Icon(Icons.lock_open_rounded),
+                                          icon: const Icon(
+                                              Icons.lock_open_rounded),
                                           label: const Text('Decrypt Notes'),
                                         ),
                                       ),
@@ -213,7 +215,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ] else ...[
                           Text(
-                            'Connect your GitHub account to sync notes across devices.',
+                            'Select a folder to store your notes locally.',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                             ),
@@ -223,10 +225,11 @@ class _SettingsPageState extends State<SettingsPage> {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                getIt<NavigationService>().pushNamed('/github');
+                                getIt<NavigationService>()
+                                    .pushNamed('/folder_selection');
                               },
-                              icon: const Icon(Icons.login_rounded),
-                              label: const Text('Connect GitHub'),
+                              icon: const Icon(Icons.folder_open_rounded),
+                              label: const Text('Select Folder'),
                             ),
                           ),
                         ],
