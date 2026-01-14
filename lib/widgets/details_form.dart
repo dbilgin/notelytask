@@ -82,7 +82,8 @@ class _DetailsFormState extends State<DetailsForm> {
   }
 
   void _submit() {
-    if (!_formKey.currentState!.validate()) {
+    final currentState = _formKey.currentState;
+    if (currentState == null || !currentState.validate()) {
       return;
     }
 
