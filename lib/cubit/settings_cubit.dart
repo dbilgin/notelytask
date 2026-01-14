@@ -7,15 +7,9 @@ class SettingsCubit extends HydratedCubit<SettingsState> {
 
   void setSelectedNoteId(String? noteId) {
     final newState = SettingsState(
-      markdownEnabled: state.markdownEnabled,
       selectedNoteId: noteId,
       selectedTheme: state.selectedTheme,
     );
-    emit(newState);
-  }
-
-  void toggleMarkdown() {
-    final newState = state.copyWith(markdownEnabled: !state.markdownEnabled);
     emit(newState);
   }
 
