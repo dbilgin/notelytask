@@ -1,24 +1,24 @@
 # NotelyTask
 
 ## What's this?
-NotelyTask is a very easy to use note-taking application, you can just open it and start taking your notes. It also supports Github integration if you want to syncronize between your devices. You can get your builds from [Releases](https://github.com/dbilgin/notelytask/releases) or build the app yourself by setting your own environment variables.
 
-☢️ **This app requires full access to your GitHub repositories, use with caution** ☢️
+NotelyTask is an easy to use note-taking application. Just open it and start taking notes. It supports local folder synchronization to keep your notes backed up and synced across devices. You can get builds from [Releases](https://github.com/dbilgin/notelytask/releases) or build the app yourself.
 
 ## How does it work?
-NotelyTask uses [hydrated_bloc](https://pub.dev/packages/hydrated_bloc) for immediately starting to preserve user data. This data is not saved anywhere on any servers when the user starts using it initially, everything stays in the hydrated bloc (the project has no tracking whatsoever). This allows the note data to be displayed to the user again when they come back to the application unless the data is manually removed.
 
-### Github Integration
-The Github integration is implemented for syncronization between different devices through a Github repo. The application connects to the Github API through NotelyTask's Github oauth application and is able to reach a repository that the user can commit to. At this point comes the only requirement for a backend service.
+NotelyTask uses [hydrated_bloc](https://pub.dev/packages/hydrated_bloc) for immediately preserving user data. Your notes are stored locally and the app has no tracking whatsoever.
 
-<hr>
+### Local Folder Sync
 
-⚠️ The web application is no longer available directly
-> The web application requires a backend to be able to sign in to Github and for this [notelytask-backend](https://github.com/dbilgin/notelytask-backend) is used. Apart from this there is no data transfer at any point with any other backend services.
+You can select a local folder (or a synced folder like Dropbox, Google Drive, Nextcloud, etc.) to store your notes. The app saves your notes as a `notes.json` file in the selected folder, allowing you to:
 
-<hr>
+- Back up your notes automatically
+- Sync across devices using any cloud storage service
+- Keep full control of your data
 
-Once the user logs in with their Github account and enters a repository, NotelyTask will remember this repository and start committing users notes into a `.json` file. If the user logs in on another device and chooses to get the data from the selected repository, the new device will sync with the uploaded `.json` file. If the Github connection is not reset, this syncronization will happen every time the application is opened.
+### Encryption
+
+NotelyTask supports optional PIN-based encryption for your notes. When enabled, your notes are encrypted before being saved to the sync folder.
 
 ## Building for Linux (Ubuntu/Debian)
 
@@ -35,10 +35,11 @@ flutter build linux --release
 flutter_to_debian
 
 # Install the package
-sudo dpkg -i debian/packages/*.deb
+sudo dpkg -i notelytask_*_amd64.deb
 ```
 
 ## How does it look?
+
 <div>
   <img src="https://github.com/user-attachments/assets/805b4752-c2d4-4505-8d6c-1ee377831051" width="300" />
   <img src="https://github.com/user-attachments/assets/8b19d248-8596-49d9-ac3c-35d4b3701e43" width="300" />
