@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - master
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   analyze:
@@ -11,9 +14,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - run: echo "${{ secrets.ENV_FILE }}" | base64 --decode > assets/.env
+      - name: Setup .env file
+        run: echo "${{ secrets.ENV_FILE }}" | base64 --decode > assets/.env
 
       - name: Setup Flutter SDK
         uses: flutter-actions/setup-flutter@v3
@@ -24,5 +28,5 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run Flutter Linter
+      - name: Run Flutter Analyzer
         run: flutter analyze
