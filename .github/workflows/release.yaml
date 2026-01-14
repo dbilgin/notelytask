@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+      - "[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
   analyze:
@@ -45,7 +45,8 @@ jobs:
           echo "Building version: $VERSION"
 
       - name: Update debian version
-        run: sed -i "s/Version: .*/Version: ${{ steps.version.outputs.VERSION }}/" debian/debian.yaml
+        run: |
+          sed -i "s/Version: .*/Version: ${{ steps.version.outputs.VERSION }}/" debian/debian.yaml
 
       - name: Install Linux build dependencies
         run: |
@@ -86,7 +87,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Needed for git rev-list --count
+          fetch-depth: 0 # Needed for git rev-list --count
 
       - name: Setup .env file
         run: echo "${{ secrets.ENV_FILE }}" > assets/.env
@@ -108,8 +109,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
       - name: Setup Flutter SDK
         uses: flutter-actions/setup-flutter@v3
