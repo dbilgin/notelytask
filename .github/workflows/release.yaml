@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup .env file
-        run: echo "${{ secrets.ENV_FILE }}" | base64 --decode > assets/.env
+        run: echo "${{ secrets.ENV_FILE }}" > assets/.env
 
       - name: Setup Flutter SDK
         uses: flutter-actions/setup-flutter@v3
@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup .env file
-        run: echo "${{ secrets.ENV_FILE }}" | base64 --decode > assets/.env
+        run: echo "${{ secrets.ENV_FILE }}" > assets/.env
 
       - name: Extract version from tag
         id: version
@@ -89,7 +89,7 @@ jobs:
           fetch-depth: 0  # Needed for git rev-list --count
 
       - name: Setup .env file
-        run: echo "${{ secrets.ENV_FILE }}" | base64 --decode > assets/.env
+        run: echo "${{ secrets.ENV_FILE }}" > assets/.env
 
       - name: Setup Android signing
         run: |
