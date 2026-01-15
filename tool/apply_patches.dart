@@ -5,8 +5,25 @@
 
 import 'dart:io';
 
+Future<String?> getPubCacheDir() async {
+  // Use dart pub cache to get the actual cache directory
+  final result =
+      await Process.run('dart', ['pub', 'cache', 'list'], runInShell: true);
+
+  if (result.exitCode == 0) {
+    // The cache list output includes the cache directory
+    // Parse from output or use environment
+    final pubCache = Platform.environment['PUB_CACHE'];
+    if (pubCache != null) return pubCache;
+
+    final home = Platform.environment['HOME'] ?? '';
+    return '$home/.pub-cache';
+  }
+
+  return null;
+}
+
 void main() async {
-  final homeDir = Platform.environment['HOME'] ?? '';
   final patchesDir = Directory('patches');
 
   if (!patchesDir.existsSync()) {
@@ -14,18 +31,27 @@ void main() async {
     return;
   }
 
+  // Get pub cache directory
+  final pubCache = Platform.environment['PUB_CACHE'] ??
+      '${Platform.environment['HOME']}/.pub-cache';
+
+  final hostedDir = Directory('$pubCache/hosted/pub.dev');
+  if (!hostedDir.existsSync()) {
+    print('Pub cache not found at: $pubCache/hosted/pub.dev');
+    print('PUB_CACHE env: ${Platform.environment['PUB_CACHE']}');
+    print('HOME env: ${Platform.environment['HOME']}');
+    return;
+  }
+
   for (final file in patchesDir.listSync()) {
     if (file is File && file.path.endsWith('.patch')) {
       final fileName = file.uri.pathSegments.last;
-      // Parse package name and version from filename: package+version.patch
       final parts = fileName.replaceAll('.patch', '').split('+');
       if (parts.length != 2) continue;
 
       final packageName = parts[0];
       final version = parts[1];
-
-      final packagePath =
-          '$homeDir/.pub-cache/hosted/pub.dev/$packageName-$version';
+      final packagePath = '$pubCache/hosted/pub.dev/$packageName-$version';
 
       if (!Directory(packagePath).existsSync()) {
         print('Package not found: $packagePath');
