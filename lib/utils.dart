@@ -1,10 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
@@ -334,33 +335,93 @@ Future<String?> encryptionKeyDialog({
   );
 }
 
+/// Derives a 256-bit AES key from PIN and salt using PBKDF2
+e.Key _deriveKey(String pin, Uint8List salt) {
+  // Use PBKDF2 with HMAC-SHA256, 100000 iterations
+  final pinBytes = utf8.encode(pin);
+
+  // PBKDF2 implementation using crypto package
+  final hmac = crypto.Hmac(crypto.sha256, pinBytes);
+
+  // Derive key using PBKDF2 algorithm
+  final derivedKey = _pbkdf2(hmac, salt, 100000, 32);
+
+  return e.Key(derivedKey);
+}
+
+/// PBKDF2 implementation
+Uint8List _pbkdf2(
+    crypto.Hmac hmac, Uint8List salt, int iterations, int keyLength) {
+  final numBlocks = (keyLength / hmac.convert([]).bytes.length).ceil();
+  final derivedKey = <int>[];
+
+  for (var blockNum = 1; blockNum <= numBlocks; blockNum++) {
+    final block = _pbkdf2Block(hmac, salt, iterations, blockNum);
+    derivedKey.addAll(block);
+  }
+
+  return Uint8List.fromList(derivedKey.sublist(0, keyLength));
+}
+
+Uint8List _pbkdf2Block(
+    crypto.Hmac hmac, Uint8List salt, int iterations, int blockNum) {
+  // First iteration: HMAC(password, salt || INT(blockNum))
+  final blockNumBytes = Uint8List(4)
+    ..buffer.asByteData().setUint32(0, blockNum, Endian.big);
+  final saltWithBlock = Uint8List.fromList([...salt, ...blockNumBytes]);
+
+  var u = Uint8List.fromList(hmac.convert(saltWithBlock).bytes);
+  var result = Uint8List.fromList(u);
+
+  // Subsequent iterations
+  for (var i = 1; i < iterations; i++) {
+    u = Uint8List.fromList(hmac.convert(u).bytes);
+    for (var j = 0; j < result.length; j++) {
+      result[j] ^= u[j];
+    }
+  }
+
+  return result;
+}
+
 String encrypt(String text, String pin) {
-  final notelyKey = dotenv.env['NOTELY_KEY'] ?? '';
-  final key = e.Key.fromUtf8(notelyKey);
-  e.Key.fromLength(32);
-  final iv = e.IV.fromUtf8(pin);
+  // Generate random 16-byte salt and IV
+  final salt = e.SecureRandom(16).bytes;
+  final iv = e.IV.fromSecureRandom(16);
 
-  final encrypter = e.Encrypter(e.AES(key));
+  // Derive 256-bit key from PIN using PBKDF2
+  final key = _deriveKey(pin, salt);
 
+  final encrypter = e.Encrypter(e.AES(key, mode: e.AESMode.cbc));
   final encrypted = encrypter.encrypt(text, iv: iv);
-  return encrypted.base64;
+
+  // Concatenate: salt (16) + iv (16) + ciphertext
+  final combined =
+      Uint8List.fromList([...salt, ...iv.bytes, ...encrypted.bytes]);
+  return base64.encode(combined);
 }
 
 String? decrypt(String encryptedText, String pin) {
   try {
-    final notelyKey = dotenv.env['NOTELY_KEY'] ?? '';
+    final combined = base64.decode(encryptedText);
 
-    final key = e.Key.fromUtf8(notelyKey);
-    e.Key.fromLength(32);
-    final iv = e.IV.fromUtf8(pin);
+    // Minimum length: 16 (salt) + 16 (iv) + 1 (at least 1 byte ciphertext)
+    if (combined.length < 33) {
+      return null;
+    }
 
-    final encrypter = e.Encrypter(e.AES(key));
+    // Extract salt (first 16 bytes), IV (next 16), ciphertext (rest)
+    final salt = Uint8List.fromList(combined.sublist(0, 16));
+    final ivBytes = Uint8List.fromList(combined.sublist(16, 32));
+    final ciphertext = Uint8List.fromList(combined.sublist(32));
 
-    final encrypted = e.Encrypted.fromBase64(encryptedText);
-    final decrypted = encrypter.decrypt(encrypted, iv: iv);
+    // Derive same key from PIN + salt
+    final key = _deriveKey(pin, salt);
+    final iv = e.IV(ivBytes);
 
-    return decrypted;
-  } catch (e) {
+    final encrypter = e.Encrypter(e.AES(key, mode: e.AESMode.cbc));
+    return encrypter.decrypt(e.Encrypted(ciphertext), iv: iv);
+  } catch (ex) {
     return null;
   }
 }

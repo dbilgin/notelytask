@@ -16,7 +16,6 @@ import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/theme.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'screens/deleted_list_page.dart';
 import 'util/configure_nonweb.dart'
@@ -27,7 +26,6 @@ GetIt getIt = GetIt.instance;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: "assets/.env");
   await GetStorage.init();
 
   configureApp();
