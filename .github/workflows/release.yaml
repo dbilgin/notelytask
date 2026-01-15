@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Apply patches
+        run: dart run tool/apply_patches.dart
+
       - name: Run Flutter Analyzer
         run: flutter analyze
 
@@ -30,9 +33,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup .env file
-        run: echo "${{ secrets.ENV_FILE }}" > assets/.env
 
       - name: Extract version from tag
         id: version
@@ -61,6 +61,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Apply patches
+        run: dart run tool/apply_patches.dart
 
       - name: Build Linux release
         run: flutter build linux --release
@@ -114,6 +117,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Apply patches
+        run: dart run tool/apply_patches.dart
 
       - name: Build APK
         run: flutter build apk --release --build-name=${{ steps.version.outputs.VERSION }} --build-number=${{ steps.version.outputs.BUILD_NUMBER }}

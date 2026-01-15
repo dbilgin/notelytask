@@ -36,7 +36,7 @@ dependencies:
   keyboard_detection: ^0.8.1
   encrypt: ^5.0.3
   pinput: ^5.0.0
-  flutter_code_editor: ^0.3.2
+  flutter_code_editor: ^0.3.5
   highlight: ^0.7.0
   flutter_widget_from_html: ^0.15.3
   http_parser: ^4.0.2
@@ -48,6 +48,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.14.2
+  derry: ^1.5.0
 
 flutter:
   uses-material-design: true
@@ -62,3 +63,11 @@ flutter_icons:
   image_path: "assets/icon.png"
   adaptive_icon_foreground: "assets/foreground.png"
   adaptive_icon_background: "#ffffff"
+
+scripts:
+  get:
+    - flutter pub get
+    - dart run tool/apply_patches.dart
+  run: flutter run
+  build: flutter build apk --release
+  clean: flutter clean

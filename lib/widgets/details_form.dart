@@ -199,6 +199,7 @@ class _DetailsFormState extends State<DetailsForm> {
                                 gutterStyle: GutterStyle.none,
                                 background: colorScheme.surface,
                                 expands: true,
+                                wrap: true,
                               ),
                             ),
                           ),
