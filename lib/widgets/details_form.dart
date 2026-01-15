@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_code_editor/flutter_code_editor.dart';
 import 'package:highlight/languages/markdown.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
+import 'package:keyboard_detection/keyboard_detection.dart';
 import 'package:notelytask/cubit/local_folder_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/local_folder_state.dart';
@@ -31,6 +31,7 @@ class DetailsForm extends StatefulWidget {
 }
 
 class _DetailsFormState extends State<DetailsForm> {
+  static KeyboardState keyboardState = KeyboardState.hidden;
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   late CodeController _codeController;
@@ -206,35 +207,35 @@ class _DetailsFormState extends State<DetailsForm> {
                     ),
                   ),
           ),
-          KeyboardVisibilityBuilder(
-            builder: (context, isKeyboardVisible) {
-              return Visibility(
-                visible: !isKeyboardVisible,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    border: Border(
-                      top: BorderSide(
-                        color: colorScheme.onSurface.withValues(alpha: 0.1),
-                      ),
+          KeyboardDetection(
+            controller: KeyboardDetectionController(
+                onChanged: (value) => setState(() => keyboardState = value)),
+            child: Visibility(
+              visible: keyboardState == KeyboardState.hidden,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  border: Border(
+                    top: BorderSide(
+                      color: colorScheme.onSurface.withValues(alpha: 0.1),
                     ),
                   ),
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.attach_file_rounded),
-                        tooltip: 'Upload File',
-                        onPressed: () => uploadFile(context, widget.note),
-                        color: colorScheme.onSurface,
-                      ),
-                      const Spacer(),
-                      FileList(noteId: widget.note.id),
-                    ],
-                  ),
                 ),
-              );
-            },
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.attach_file_rounded),
+                      tooltip: 'Upload File',
+                      onPressed: () => uploadFile(context, widget.note),
+                      color: colorScheme.onSurface,
+                    ),
+                    const Spacer(),
+                    FileList(noteId: widget.note.id),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
