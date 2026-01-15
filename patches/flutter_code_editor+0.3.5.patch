@@ -1,0 +1,22 @@
+--- a/lib/src/code_field/code_field.dart
++++ b/lib/src/code_field/code_field.dart
+@@ -367,7 +367,7 @@ class _CodeFieldState extends State<CodeField> {
+       controller: widget.controller,
+       undoController: widget.undoController,
+       minLines: widget.minLines,
+-      maxLines: widget.maxLines,
++      maxLines: widget.wrap ? null : widget.maxLines,
+       expands: widget.expands,
+       scrollController: _codeScroll,
+       decoration: const InputDecoration(
+@@ -396,6 +396,10 @@ class _CodeFieldState extends State<CodeField> {
+       child: LayoutBuilder(
+         builder: (BuildContext context, BoxConstraints constraints) {
+           // Control horizontal scrolling
++          if (widget.wrap) {
++            // When wrap is true, don't use horizontal scroll
++            return codeField;
++          }
+           return _wrapInScrollView(codeField, textStyle, constraints.maxWidth);
+         },
+       ),
