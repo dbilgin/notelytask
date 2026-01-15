@@ -13,9 +13,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .env file
-        run: echo "${{ secrets.ENV_FILE }}" > assets/.env
-
       - name: Setup Flutter SDK
         uses: flutter-actions/setup-flutter@v3
         with:

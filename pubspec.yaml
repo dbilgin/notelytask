@@ -21,8 +21,8 @@ dependencies:
   get_storage: ^2.1.1
   url_launcher: ^6.2.5
   equatable: ^2.0.5
-  flutter_dotenv: ^5.1.0
   home_widget: ^0.7.0
+  crypto: ^3.0.3
   get_it: ^8.0.3
 
   flutter_web_plugins:
@@ -55,7 +55,6 @@ flutter:
     - assets/icon.png
     - assets/foreground.png
     - assets/github.png
-    - assets/.env
 
 flutter_icons:
   android: "launcher_icon"
