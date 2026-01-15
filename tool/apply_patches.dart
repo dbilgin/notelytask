@@ -1,17 +1,16 @@
 #!/usr/bin/env dart
+// ignore_for_file: avoid_print
 // Script to apply patches to pub dependencies
-// Run with: dart run tool/apply_patches.dart
+// Run with: dart tool/apply_patches.dart
 
 import 'dart:io';
-
-import 'package:flutter/widgets.dart';
 
 void main() async {
   final homeDir = Platform.environment['HOME'] ?? '';
   final patchesDir = Directory('patches');
 
   if (!patchesDir.existsSync()) {
-    debugPrint('No patches directory found');
+    print('No patches directory found');
     return;
   }
 
@@ -29,11 +28,11 @@ void main() async {
           '$homeDir/.pub-cache/hosted/pub.dev/$packageName-$version';
 
       if (!Directory(packagePath).existsSync()) {
-        debugPrint('Package not found: $packagePath');
+        print('Package not found: $packagePath');
         continue;
       }
 
-      debugPrint('Applying patch to $packageName-$version...');
+      print('Applying patch to $packageName-$version...');
 
       final result = await Process.run(
         'patch',
@@ -42,7 +41,7 @@ void main() async {
       );
 
       if (result.exitCode == 0) {
-        debugPrint('✓ Successfully patched $packageName');
+        print('✓ Successfully patched $packageName');
       } else {
         // Check if already applied
         final reverseResult = await Process.run(
@@ -59,9 +58,9 @@ void main() async {
           runInShell: true,
         );
         if (reverseResult.exitCode == 0) {
-          debugPrint('✓ Patch already applied to $packageName');
+          print('✓ Patch already applied to $packageName');
         } else {
-          debugPrint('✗ Failed to patch $packageName: ${result.stderr}');
+          print('✗ Failed to patch $packageName: ${result.stderr}');
         }
       }
     }
