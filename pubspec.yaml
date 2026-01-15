@@ -67,7 +67,7 @@ flutter_icons:
 scripts:
   get:
     - flutter pub get
-    - dart run tool/apply_patches.dart
+    - dart tool/apply_patches.dart
   run: flutter run
   build: flutter build apk --release
   clean: flutter clean

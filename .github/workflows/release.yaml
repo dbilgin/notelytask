@@ -22,7 +22,7 @@ jobs:
         run: flutter pub get
 
       - name: Apply patches
-        run: dart run tool/apply_patches.dart
+        run: dart tool/apply_patches.dart
 
       - name: Run Flutter Analyzer
         run: flutter analyze
@@ -63,7 +63,7 @@ jobs:
         run: flutter pub get
 
       - name: Apply patches
-        run: dart run tool/apply_patches.dart
+        run: dart tool/apply_patches.dart
 
       - name: Build Linux release
         run: flutter build linux --release
@@ -119,7 +119,7 @@ jobs:
         run: flutter pub get
 
       - name: Apply patches
-        run: dart run tool/apply_patches.dart
+        run: dart tool/apply_patches.dart
 
       - name: Build APK
         run: flutter build apk --release --build-name=${{ steps.version.outputs.VERSION }} --build-number=${{ steps.version.outputs.BUILD_NUMBER }}
