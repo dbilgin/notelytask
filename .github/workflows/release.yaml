@@ -8,6 +8,8 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    env:
+      PUB_CACHE: ${{ github.workspace }}/.pub-cache
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,6 +32,8 @@ jobs:
   build-linux:
     needs: analyze
     runs-on: ubuntu-latest
+    env:
+      PUB_CACHE: ${{ github.workspace }}/.pub-cache
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -83,6 +87,8 @@ jobs:
   build-android:
     needs: analyze
     runs-on: ubuntu-latest
+    env:
+      PUB_CACHE: ${{ github.workspace }}/.pub-cache
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
