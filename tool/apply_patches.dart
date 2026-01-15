@@ -4,12 +4,14 @@
 
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
+
 void main() async {
   final homeDir = Platform.environment['HOME'] ?? '';
   final patchesDir = Directory('patches');
 
   if (!patchesDir.existsSync()) {
-    print('No patches directory found');
+    debugPrint('No patches directory found');
     return;
   }
 
@@ -27,11 +29,11 @@ void main() async {
           '$homeDir/.pub-cache/hosted/pub.dev/$packageName-$version';
 
       if (!Directory(packagePath).existsSync()) {
-        print('Package not found: $packagePath');
+        debugPrint('Package not found: $packagePath');
         continue;
       }
 
-      print('Applying patch to $packageName-$version...');
+      debugPrint('Applying patch to $packageName-$version...');
 
       final result = await Process.run(
         'patch',
@@ -40,7 +42,7 @@ void main() async {
       );
 
       if (result.exitCode == 0) {
-        print('✓ Successfully patched $packageName');
+        debugPrint('✓ Successfully patched $packageName');
       } else {
         // Check if already applied
         final reverseResult = await Process.run(
@@ -57,9 +59,9 @@ void main() async {
           runInShell: true,
         );
         if (reverseResult.exitCode == 0) {
-          print('✓ Patch already applied to $packageName');
+          debugPrint('✓ Patch already applied to $packageName');
         } else {
-          print('✗ Failed to patch $packageName: ${result.stderr}');
+          debugPrint('✗ Failed to patch $packageName: ${result.stderr}');
         }
       }
     }
