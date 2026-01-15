@@ -78,6 +78,9 @@ jobs:
       - name: Build .deb package
         run: flutter_to_debian
 
+      - name: Fix .deb permissions
+        run: chmod 644 build/linux/x64/release/debian/*.deb
+
       - name: Upload .deb artifact
         uses: actions/upload-artifact@v4
         with:
@@ -157,6 +160,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: android-apk
+
+      - name: Fix artifact permissions
+        run: |
+          chmod 644 *.deb 2>/dev/null || true
 
       - name: Rename APK with version
         run: mv app-release.apk notelytask_${{ steps.version.outputs.VERSION }}.apk
