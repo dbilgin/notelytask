@@ -138,8 +138,8 @@ class LocalFolderCubit extends Cubit<LocalFolderState> {
           isEncryptedString ? decrypt(content, encryptionKey!) : content;
 
       if (decrypted == null) {
-        reset(shouldError: true);
-        return GetNotesResult();
+        emit(state.copyWith(loading: false));
+        return GetNotesResult(decryptionFailed: true);
       }
 
       emit(state.copyWith(loading: false));
