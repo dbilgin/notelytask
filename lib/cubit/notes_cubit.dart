@@ -143,6 +143,13 @@ class NotesCubit extends HydratedCubit<NotesState> {
 
     final notesString = result.notesString;
 
+    if (result.decryptionFailed) {
+      // Wrong PIN - disconnect without touching local notes
+      localFolderCubit.reset(shouldError: true);
+      clearEncryptionKey();
+      return;
+    }
+
     if (result.pinNeeded && context.mounted) {
       final pinResult = await encryptionKeyDialog(
         context: context,
@@ -151,12 +158,13 @@ class NotesCubit extends HydratedCubit<NotesState> {
         isPinRequired: true,
       );
       if (pinResult == null) {
-        reset(shouldError: true);
+        // User cancelled - just disconnect, don't touch notes
+        localFolderCubit.reset(shouldError: true);
         return;
       }
 
       if (!context.mounted) {
-        reset(shouldError: true);
+        localFolderCubit.reset(shouldError: true);
         return;
       }
 
@@ -193,6 +201,10 @@ class NotesCubit extends HydratedCubit<NotesState> {
       encryptionKey: key,
     );
     emit(newState);
+  }
+
+  void clearEncryptionKey() {
+    setEncryptionKey(null);
   }
 
   void setNote(Note note) {
