@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,7 @@ import 'package:notelytask/cubit/models/remote_connection_result.dart';
 import 'package:notelytask/repository/local_folder_repository.dart';
 import 'package:notelytask/repository/models/get_notes_result.dart';
 import 'package:notelytask/utils.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class LocalFolderCubit extends Cubit<LocalFolderState> {
   LocalFolderCubit({
@@ -71,9 +73,38 @@ class LocalFolderCubit extends Cubit<LocalFolderState> {
     }
   }
 
+  /// Request storage permissions on Android
+  Future<bool> _requestStoragePermission() async {
+    if (!Platform.isAndroid) return true;
+
+    // For Android 11+ (API 30+), we need MANAGE_EXTERNAL_STORAGE
+    if (await Permission.manageExternalStorage.isGranted) {
+      return true;
+    }
+
+    // Try requesting manage external storage first (Android 11+)
+    var status = await Permission.manageExternalStorage.request();
+    if (status.isGranted) {
+      return true;
+    }
+
+    // Fall back to legacy storage permission for older Android
+    status = await Permission.storage.request();
+    return status.isGranted;
+  }
+
   /// Select a folder using file picker
   Future<String?> selectFolder() async {
     try {
+      // Request storage permission on Android first
+      if (Platform.isAndroid) {
+        final hasPermission = await _requestStoragePermission();
+        if (!hasPermission) {
+          debugPrint('Storage permission denied');
+          return null;
+        }
+      }
+
       final result = await FilePicker.platform.getDirectoryPath();
       return result;
     } catch (e) {
