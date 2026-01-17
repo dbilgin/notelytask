@@ -41,8 +41,6 @@ sudo dpkg -i notelytask_*_amd64.deb
 ## How does it look?
 
 <div>
-  <img src="https://github.com/user-attachments/assets/805b4752-c2d4-4505-8d6c-1ee377831051" width="300" />
-  <img src="https://github.com/user-attachments/assets/8b19d248-8596-49d9-ac3c-35d4b3701e43" width="300" />
-  <img src="https://github.com/user-attachments/assets/854ea8bd-ad51-40ac-b1c3-340e507f122a" width="300" />
-  <img src="https://github.com/user-attachments/assets/f596fe36-26b7-4f57-ab7b-8e684c58a6b6" width="300" />
+  <img width="300" src="https://github.com/user-attachments/assets/7498131f-9d42-456d-bf73-a759444711f7" />
+  <img width="300" src="https://github.com/user-attachments/assets/e412d497-5caf-41a9-a8e7-4c926ea0eefe" />
 </div>
