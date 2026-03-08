@@ -3,7 +3,7 @@ description: A simple notes application.
 
 publish_to: "none"
 
-version: 4.0.0
+version: 5.0.1
 
 environment:
   sdk: ">=3.3.3 <4.0.0"
@@ -37,6 +37,7 @@ dependencies:
   encrypt: ^5.0.3
   pinput: ^5.0.0
   flutter_quill: ^11.0.0
+  google_fonts: ^6.0.0
   flutter_widget_from_html: ^0.15.3
   http_parser: ^4.0.2
   flutter_secure_storage: ^9.2.2

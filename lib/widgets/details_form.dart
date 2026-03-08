@@ -56,7 +56,8 @@ class _DetailsFormState extends State<DetailsForm> {
   }
 
   void _onQuillChanged() {
-    final currentDelta = jsonEncode(_quillController.document.toDelta().toJson());
+    final currentDelta =
+        jsonEncode(_quillController.document.toDelta().toJson());
     if (currentDelta == _lastDelta) return;
     _lastDelta = currentDelta;
     _submit();
@@ -80,7 +81,6 @@ class _DetailsFormState extends State<DetailsForm> {
 
     if (_debounce?.isActive ?? false) _debounce?.cancel();
 
-    // Get the current note from state to ensure we have the latest file list
     final currentNote = context
         .read<NotesCubit>()
         .state
@@ -109,7 +109,7 @@ class _DetailsFormState extends State<DetailsForm> {
 
     final isDocumentEmpty =
         _quillController.document.toPlainText().trim().isEmpty;
-    var shouldHideForm = widget.isDeletedList &&
+    final shouldHideForm = widget.isDeletedList &&
         _titleController.text.isEmpty &&
         isDocumentEmpty;
 
@@ -131,7 +131,7 @@ class _DetailsFormState extends State<DetailsForm> {
                         Icon(
                           Icons.note_outlined,
                           size: 64,
-                          color: colorScheme.onSurfaceVariant,
+                          color: colorScheme.onSurface.withValues(alpha: 0.12),
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -145,39 +145,60 @@ class _DetailsFormState extends State<DetailsForm> {
                   )
                 : Form(
                     key: _formKey,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Title Field
-                          TextFormField(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title field — borderless, large
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                          child: TextFormField(
                             controller: _titleController,
-                            onChanged: (text) => _submit(),
+                            onChanged: (_) => _submit(),
                             textInputAction: TextInputAction.next,
                             style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.3,
                             ),
                             decoration: InputDecoration(
-                              hintText: 'Note title...',
-                              hintStyle: TextStyle(
-                                color: colorScheme.onSurfaceVariant,
+                              hintText: 'Untitled',
+                              hintStyle:
+                                  theme.textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.3,
+                                color: colorScheme.onSurface
+                                    .withValues(alpha: 0.2),
                               ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide.none,
-                              ),
-                              filled: true,
-                              fillColor: colorScheme.surface,
-                              contentPadding: const EdgeInsets.all(16),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
                             ),
                           ),
+                        ),
 
-                          const SizedBox(height: 8),
+                        const SizedBox(height: 4),
 
-                          // Quill toolbar (hidden for deleted notes)
-                          if (!widget.isDeletedList)
-                            QuillSimpleToolbar(
+                        // Subtle divider
+                        Divider(
+                          height: 1,
+                          thickness: 0.5,
+                          indent: 20,
+                          endIndent: 20,
+                          color:
+                              colorScheme.onSurface.withValues(alpha: 0.08),
+                        ),
+
+                        // Toolbar (hidden for deleted notes)
+                        if (!widget.isDeletedList) ...[
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: colorScheme.onSurface
+                                      .withValues(alpha: 0.06),
+                                  width: 0.5,
+                                ),
+                              ),
+                            ),
+                            child: QuillSimpleToolbar(
                               controller: _quillController,
                               config: const QuillSimpleToolbarConfig(
                                 showFontFamily: false,
@@ -190,42 +211,44 @@ class _DetailsFormState extends State<DetailsForm> {
                                 showBackgroundColorButton: false,
                               ),
                             ),
+                          ),
+                        ],
 
-                          const SizedBox(height: 8),
-
-                          // Quill editor
-                          Expanded(
-                            child: IgnorePointer(
-                              ignoring: widget.isDeletedList,
-                              child: QuillEditor.basic(
-                                controller: _quillController,
-                                focusNode: _editorFocusNode,
-                                config: QuillEditorConfig(
-                                  expands: true,
-                                  padding: EdgeInsets.zero,
-                                  autoFocus: false,
-                                  placeholder: 'Start writing...',
-                                  customStyles: DefaultStyles(
-                                    paragraph: DefaultTextBlockStyle(
-                                      theme.textTheme.bodyLarge?.copyWith(
-                                            height: 1.5,
-                                          ) ??
-                                          const TextStyle(),
-                                      const HorizontalSpacing(0, 0),
-                                      const VerticalSpacing(0, 0),
-                                      const VerticalSpacing(0, 0),
-                                      null,
-                                    ),
+                        // Quill editor
+                        Expanded(
+                          child: IgnorePointer(
+                            ignoring: widget.isDeletedList,
+                            child: QuillEditor.basic(
+                              controller: _quillController,
+                              focusNode: _editorFocusNode,
+                              config: QuillEditorConfig(
+                                expands: true,
+                                padding: const EdgeInsets.fromLTRB(
+                                    20, 12, 20, 16),
+                                autoFocus: false,
+                                placeholder: 'Start writing…',
+                                customStyles: DefaultStyles(
+                                  paragraph: DefaultTextBlockStyle(
+                                    (theme.textTheme.bodyLarge?.copyWith(
+                                          height: 1.7,
+                                        )) ??
+                                        const TextStyle(),
+                                    const HorizontalSpacing(0, 0),
+                                    const VerticalSpacing(0, 0),
+                                    const VerticalSpacing(0, 0),
+                                    null,
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
           ),
+
+          // Bottom action bar
           KeyboardDetection(
             controller: KeyboardDetectionController(
                 onChanged: (value) => setState(() => keyboardState = value)),
@@ -236,18 +259,27 @@ class _DetailsFormState extends State<DetailsForm> {
                   color: colorScheme.surface,
                   border: Border(
                     top: BorderSide(
-                      color: colorScheme.onSurface.withValues(alpha: 0.1),
+                      color: colorScheme.onSurface.withValues(alpha: 0.07),
+                      width: 0.5,
                     ),
                   ),
                 ),
-                padding: const EdgeInsets.all(16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.attach_file_rounded),
-                      tooltip: 'Upload File',
+                      icon: Icon(
+                        Icons.attach_file_rounded,
+                        size: 20,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      tooltip: 'Attach file',
                       onPressed: () => uploadFile(context, widget.note),
-                      color: colorScheme.onSurface,
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(36, 36),
+                        padding: const EdgeInsets.all(8),
+                      ),
                     ),
                     const Spacer(),
                     FileList(noteId: widget.note.id),

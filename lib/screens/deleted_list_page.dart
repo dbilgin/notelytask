@@ -21,36 +21,15 @@ class _DeletedListPageState extends State<DeletedListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
-          color: colorScheme.onSurface,
         ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.delete_rounded,
-              color: colorScheme.error,
-              size: 24,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Deleted Notes',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
+        title: const Text('Deleted Notes'),
         actions: [
           BlocBuilder<NotesCubit, dynamic>(
             builder: (context, state) {

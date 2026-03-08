@@ -49,48 +49,26 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        title: Row(
-          children: [
-            Image.asset(
-              'assets/foreground.png',
-              width: 40,
-              height: 40,
-              color: colorScheme.primary,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'NotelyTask',
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
+        title: const Text('NotelyTask'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_rounded),
+            icon: const Icon(Icons.delete_outline_rounded),
             tooltip: 'Deleted Notes',
             onPressed: _navigateToDeletedList,
-            color: colorScheme.onSurface,
           ),
           IconButton(
             icon: const Icon(Icons.settings_rounded),
             tooltip: 'Settings',
             onPressed: () => getIt<NavigationService>().pushNamed('/settings'),
-            color: colorScheme.onSurface,
           ),
+          const SizedBox(width: 4),
         ],
         bottom: const PreferredSize(
-          preferredSize: Size(double.infinity, 4),
+          preferredSize: Size(double.infinity, 2),
           child: StateLoader(),
         ),
       ),
