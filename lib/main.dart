@@ -14,6 +14,7 @@ import 'package:notelytask/screens/privacy_policy_page.dart';
 import 'package:notelytask/screens/settings_page.dart';
 import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/theme.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -72,6 +73,9 @@ class App extends StatelessWidget {
               return MaterialApp(
                 title: 'NotelyTask',
                 theme: getThemeData(settingsState.selectedTheme),
+                localizationsDelegates: const [
+                  FlutterQuillLocalizations.delegate,
+                ],
                 navigatorKey: getIt<NavigationService>().navigatorKey,
                 initialRoute: '/',
                 onGenerateRoute: (RouteSettings settings) {

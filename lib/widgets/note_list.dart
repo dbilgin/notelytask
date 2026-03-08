@@ -6,6 +6,7 @@ import 'package:notelytask/cubit/settings_cubit.dart';
 import 'package:notelytask/models/local_folder_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/util/quill_utils.dart';
 import 'package:notelytask/utils.dart';
 
 class NoteList extends StatefulWidget {
@@ -335,10 +336,10 @@ class _NoteListState extends State<NoteList> {
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (note.text.isNotEmpty) ...[
+                                    if (extractPlainTextFromDelta(note.text).isNotEmpty) ...[
                                       const SizedBox(height: 8),
                                       Text(
-                                        note.text,
+                                        extractPlainTextFromDelta(note.text),
                                         style: Theme.of(listContext)
                                             .textTheme
                                             .bodyMedium
