@@ -1,17 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
-import 'package:highlight/languages/markdown.dart';
-import 'package:flutter_highlight/themes/atom-one-dark.dart';
-import 'package:flutter_highlight/themes/atom-one-light.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:keyboard_detection/keyboard_detection.dart';
 import 'package:notelytask/cubit/local_folder_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/local_folder_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/util/quill_utils.dart';
 import 'package:notelytask/utils.dart';
 import 'package:notelytask/widgets/file_list.dart';
 
@@ -34,42 +33,32 @@ class _DetailsFormState extends State<DetailsForm> {
   static KeyboardState keyboardState = KeyboardState.hidden;
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
-  late CodeController _codeController;
+  late QuillController _quillController;
+  late FocusNode _editorFocusNode;
   Timer? _debounce;
-
-  Map<String, TextStyle> _buildCustomTheme(bool isDark) {
-    final baseTheme = isDark ? atomOneDarkTheme : atomOneLightTheme;
-    return {
-      ...baseTheme,
-      'section': TextStyle(
-        color: baseTheme['section']?.color ??
-            (isDark ? const Color(0xFFE06C75) : const Color(0xFFE45649)),
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-      ),
-      'strong': TextStyle(
-        color: baseTheme['strong']?.color,
-        fontWeight: FontWeight.bold,
-      ),
-      'emphasis': TextStyle(
-        color: baseTheme['emphasis']?.color,
-        fontStyle: FontStyle.italic,
-      ),
-    };
-  }
+  String _lastDelta = '';
 
   @override
   void initState() {
     _titleController.text = widget.note.title;
-    _codeController = CodeController(
-      text: widget.note.text,
-      language: markdown,
+    final deltaJson = ensureQuillDelta(widget.note.text);
+    _lastDelta = deltaJson;
+    final doc = Document.fromJson(
+      List<Map<String, dynamic>>.from(jsonDecode(deltaJson)),
     );
-    _codeController.addListener(_onCodeChanged);
+    _quillController = QuillController(
+      document: doc,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    _editorFocusNode = FocusNode();
+    _quillController.addListener(_onQuillChanged);
     super.initState();
   }
 
-  void _onCodeChanged() {
+  void _onQuillChanged() {
+    final currentDelta = jsonEncode(_quillController.document.toDelta().toJson());
+    if (currentDelta == _lastDelta) return;
+    _lastDelta = currentDelta;
     _submit();
   }
 
@@ -77,8 +66,9 @@ class _DetailsFormState extends State<DetailsForm> {
   void dispose() {
     _debounce?.cancel();
     _titleController.dispose();
-    _codeController.removeListener(_onCodeChanged);
-    _codeController.dispose();
+    _quillController.removeListener(_onQuillChanged);
+    _quillController.dispose();
+    _editorFocusNode.dispose();
     super.dispose();
   }
 
@@ -101,7 +91,7 @@ class _DetailsFormState extends State<DetailsForm> {
     var note = Note(
       id: widget.note.id,
       title: _titleController.text,
-      text: _codeController.text,
+      text: jsonEncode(_quillController.document.toDelta().toJson()),
       date: DateTime.now(),
       isDeleted: widget.note.isDeleted,
       fileDataList: currentNote?.fileDataList ?? widget.note.fileDataList,
@@ -116,11 +106,12 @@ class _DetailsFormState extends State<DetailsForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
 
+    final isDocumentEmpty =
+        _quillController.document.toPlainText().trim().isEmpty;
     var shouldHideForm = widget.isDeletedList &&
         _titleController.text.isEmpty &&
-        _codeController.text.isEmpty;
+        isDocumentEmpty;
 
     return BlocListener<LocalFolderCubit, LocalFolderState>(
       listener: (context, state) {
@@ -182,24 +173,51 @@ class _DetailsFormState extends State<DetailsForm> {
                             ),
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 8),
 
-                          // Content Field with live markdown syntax highlighting
-                          Expanded(
-                            child: CodeTheme(
-                              data: CodeThemeData(
-                                styles: _buildCustomTheme(isDark),
+                          // Quill toolbar (hidden for deleted notes)
+                          if (!widget.isDeletedList)
+                            QuillSimpleToolbar(
+                              controller: _quillController,
+                              config: const QuillSimpleToolbarConfig(
+                                showFontFamily: false,
+                                showFontSize: false,
+                                showInlineCode: false,
+                                showSubscript: false,
+                                showSuperscript: false,
+                                showSearchButton: false,
+                                showColorButton: false,
+                                showBackgroundColorButton: false,
                               ),
-                              child: CodeField(
-                                controller: _codeController,
-                                textStyle: theme.textTheme.bodyLarge?.copyWith(
-                                  fontFamily: 'sans',
-                                  height: 1.5,
+                            ),
+
+                          const SizedBox(height: 8),
+
+                          // Quill editor
+                          Expanded(
+                            child: IgnorePointer(
+                              ignoring: widget.isDeletedList,
+                              child: QuillEditor.basic(
+                                controller: _quillController,
+                                focusNode: _editorFocusNode,
+                                config: QuillEditorConfig(
+                                  expands: true,
+                                  padding: EdgeInsets.zero,
+                                  autoFocus: false,
+                                  placeholder: 'Start writing...',
+                                  customStyles: DefaultStyles(
+                                    paragraph: DefaultTextBlockStyle(
+                                      theme.textTheme.bodyLarge?.copyWith(
+                                            height: 1.5,
+                                          ) ??
+                                          const TextStyle(),
+                                      const HorizontalSpacing(0, 0),
+                                      const VerticalSpacing(0, 0),
+                                      const VerticalSpacing(0, 0),
+                                      null,
+                                    ),
+                                  ),
                                 ),
-                                gutterStyle: GutterStyle.none,
-                                background: colorScheme.surface,
-                                expands: true,
-                                wrap: true,
                               ),
                             ),
                           ),

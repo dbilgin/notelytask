@@ -36,13 +36,11 @@ dependencies:
   keyboard_detection: ^0.8.1
   encrypt: ^5.0.3
   pinput: ^5.0.0
-  flutter_code_editor: ^0.3.5
-  highlight: ^0.7.0
+  flutter_quill: ^11.0.0
   flutter_widget_from_html: ^0.15.3
   http_parser: ^4.0.2
   flutter_secure_storage: ^9.2.2
   package_info_plus: ^8.3.0
-  flutter_highlight: ^0.7.0
   permission_handler: ^11.3.1
 
 dev_dependencies:
