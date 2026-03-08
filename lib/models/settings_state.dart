@@ -14,7 +14,6 @@ class SettingsState extends Equatable {
 
   factory SettingsState.fromJson(Map<String, dynamic> json) {
     return SettingsState(
-      selectedNoteId: json['selectedNoteId'] as String?,
       selectedTheme: AppTheme.values.firstWhere(
         (theme) => theme.toString() == json['selectedTheme'],
         orElse: () => AppTheme.defaultDark,
@@ -23,7 +22,6 @@ class SettingsState extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'selectedNoteId': selectedNoteId,
         'selectedTheme': selectedTheme.toString(),
       };
 

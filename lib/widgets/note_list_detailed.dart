@@ -24,40 +24,39 @@ class NoteListDetailed extends StatefulWidget {
 class _NoteListDetailedState extends State<NoteListDetailed> {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 1,
-          child: NoteList(
-            notes: widget.notes,
-            isDeletedList: widget.isDeletedList,
-          ),
-        ),
-        BlocBuilder<SettingsCubit, SettingsState>(
-          builder: (context, SettingsState state) {
-            String? selectedNoteId = state.selectedNoteId;
-            Note? existingNote = selectedNoteId != null
-                ? context
-                    .read<NotesCubit>()
-                    .state
-                    .notes
-                    .firstWhereOrNull((n) => n.id == selectedNoteId)
-                : null;
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, SettingsState state) {
+        final selectedNoteId = state.selectedNoteId;
+        Note? existingNote = selectedNoteId != null
+            ? context
+                .read<NotesCubit>()
+                .state
+                .notes
+                .firstWhereOrNull((n) => n.id == selectedNoteId)
+            : null;
 
-            return Expanded(
-              key: Key(
-                existingNote?.id ?? '',
+        return Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: NoteList(
+                notes: widget.notes,
+                isDeletedList: widget.isDeletedList,
+                selectedNoteId: selectedNoteId,
               ),
+            ),
+            Expanded(
+              key: Key(existingNote?.id ?? ''),
               flex: 3,
               child: DetailsPage(
                 note: existingNote,
                 withAppBar: false,
                 isDeletedList: widget.isDeletedList,
               ),
-            );
-          },
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
