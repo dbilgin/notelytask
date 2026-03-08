@@ -6,7 +6,7 @@ flutter_app:
 
 control:
   Package: notelytask
-  Version: 4.0.0
+  Version: 5.0.1
   Architecture: amd64
   Priority: optional
   Depends: libgtk-3-0, libblkid1, liblzma5

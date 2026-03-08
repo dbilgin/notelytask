@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
 
 enum AppTheme {
@@ -328,108 +329,8 @@ ThemeData getThemeData(AppTheme theme) {
       break;
   }
 
-  return ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.dark,
-    colorScheme: ColorScheme.dark(
-      primary: colors['primary']!,
-      primaryContainer: colors['primaryVariant']!,
-      secondary: colors['secondary']!,
-      secondaryContainer: colors['secondaryVariant']!,
-      surface: colors['surface']!,
-      surfaceContainerHighest: colors['surfaceVariant']!,
-      onPrimary: colors['onPrimary']!,
-      onSurface: colors['onSurface']!,
-      onSurfaceVariant: colors['onSurfaceVariant']!,
-      error: colors['error']!,
-    ),
-    scaffoldBackgroundColor: colors['background']!,
-    appBarTheme: AppBarTheme(
-      backgroundColor: colors['surface']!,
-      foregroundColor: colors['onSurface']!,
-      elevation: 0,
-      scrolledUnderElevation: 1,
-      surfaceTintColor: colors['primary']!,
-      titleTextStyle: TextStyle(
-        color: colors['onSurface']!,
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-      ),
-      iconTheme: IconThemeData(
-        color: colors['onSurface']!,
-      ),
-    ),
-    cardTheme: CardThemeData(
-      color: colors['surface']!,
-      elevation: 2,
-      shadowColor: Colors.black.withValues(alpha: 0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: colors['primary']!,
-        foregroundColor: colors['onPrimary']!,
-        elevation: 2,
-        shadowColor: colors['primary']!.withValues(alpha: 0.3),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        textStyle: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
-        ),
-      ),
-    ),
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: colors['primary']!,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      ),
-    ),
-    iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(
-        foregroundColor: colors['onSurfaceVariant']!,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    ),
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: colors['primary']!,
-      foregroundColor: colors['onPrimary']!,
-      elevation: 4,
-      shape: const CircleBorder(),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: colors['surfaceVariant']!.withValues(alpha: 0.3),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: colors['border']!),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: colors['border']!),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: colors['primary']!, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: colors['error']!),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      hintStyle: TextStyle(color: colors['onSurfaceVariant']!),
-      labelStyle: TextStyle(color: colors['onSurfaceVariant']!),
-    ),
-    textTheme: TextTheme(
+  final interTextTheme = GoogleFonts.interTextTheme(
+    TextTheme(
       displayLarge: TextStyle(
         color: colors['onSurface']!,
         fontSize: 32,
@@ -446,115 +347,241 @@ ThemeData getThemeData(AppTheme theme) {
         color: colors['onSurface']!,
         fontSize: 24,
         fontWeight: FontWeight.w600,
+        letterSpacing: -0.25,
       ),
       headlineLarge: TextStyle(
         color: colors['onSurface']!,
         fontSize: 22,
         fontWeight: FontWeight.w600,
+        letterSpacing: -0.15,
       ),
       headlineMedium: TextStyle(
         color: colors['onSurface']!,
         fontSize: 20,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.1,
       ),
       headlineSmall: TextStyle(
         color: colors['onSurface']!,
         fontSize: 18,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
       ),
       titleLarge: TextStyle(
         color: colors['onSurface']!,
         fontSize: 16,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
       ),
       titleMedium: TextStyle(
         color: colors['onSurface']!,
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
       ),
       titleSmall: TextStyle(
         color: colors['onSurfaceVariant']!,
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
       ),
       bodyLarge: TextStyle(
         color: colors['onSurface']!,
         fontSize: 16,
         fontWeight: FontWeight.w400,
-        height: 1.5,
+        height: 1.6,
       ),
       bodyMedium: TextStyle(
         color: colors['onSurface']!,
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        height: 1.4,
+        height: 1.5,
       ),
       bodySmall: TextStyle(
         color: colors['onSurfaceVariant']!,
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: FontWeight.w400,
-        height: 1.3,
+        height: 1.4,
       ),
       labelLarge: TextStyle(
         color: colors['onSurface']!,
         fontSize: 14,
         fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
       ),
       labelMedium: TextStyle(
         color: colors['onSurfaceVariant']!,
         fontSize: 12,
         fontWeight: FontWeight.w500,
+        letterSpacing: 0.2,
       ),
       labelSmall: TextStyle(
         color: colors['onSurfaceVariant']!,
-        fontSize: 10,
+        fontSize: 11,
         fontWeight: FontWeight.w500,
+        letterSpacing: 0.3,
+      ),
+    ),
+  );
+
+  return ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    colorScheme: ColorScheme.dark(
+      primary: colors['primary']!,
+      primaryContainer: colors['primaryVariant']!,
+      secondary: colors['secondary']!,
+      secondaryContainer: colors['secondaryVariant']!,
+      surface: colors['surface']!,
+      surfaceContainerHighest: colors['surfaceVariant']!,
+      onPrimary: colors['onPrimary']!,
+      onSurface: colors['onSurface']!,
+      onSurfaceVariant: colors['onSurfaceVariant']!,
+      error: colors['error']!,
+    ),
+    scaffoldBackgroundColor: colors['background']!,
+    textTheme: interTextTheme,
+    appBarTheme: AppBarTheme(
+      backgroundColor: colors['background']!,
+      foregroundColor: colors['onSurface']!,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      titleTextStyle: GoogleFonts.inter(
+        color: colors['onSurface']!,
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.3,
+      ),
+      iconTheme: IconThemeData(
+        color: colors['onSurfaceVariant']!,
+        size: 22,
+      ),
+    ),
+    cardTheme: CardThemeData(
+      color: colors['surface']!,
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: colors['primary']!,
+        foregroundColor: colors['onPrimary']!,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        textStyle: GoogleFonts.inter(
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+          letterSpacing: 0.1,
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: colors['onSurface']!,
+        side: BorderSide(color: colors['border']!.withValues(alpha: 0.5)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        textStyle: GoogleFonts.inter(
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
+        ),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: colors['primary']!,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        textStyle: GoogleFonts.inter(
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
+        ),
+      ),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        foregroundColor: colors['onSurfaceVariant']!,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: colors['primary']!,
+      foregroundColor: colors['onPrimary']!,
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: false,
+      border: InputBorder.none,
+      enabledBorder: InputBorder.none,
+      focusedBorder: InputBorder.none,
+      errorBorder: InputBorder.none,
+      contentPadding: EdgeInsets.zero,
+      hintStyle: TextStyle(
+        color: colors['onSurfaceVariant']!.withValues(alpha: 0.5),
       ),
     ),
     dividerTheme: DividerThemeData(
-      color: colors['divider']!,
-      thickness: 1,
-      space: 1,
+      color: colors['onSurface']!.withValues(alpha: 0.08),
+      thickness: 0.5,
+      space: 0.5,
     ),
     snackBarTheme: SnackBarThemeData(
-      backgroundColor: colors['surface']!,
-      contentTextStyle: TextStyle(color: colors['onSurface']!),
+      backgroundColor: colors['surfaceVariant']!,
+      contentTextStyle: GoogleFonts.inter(
+        color: colors['onSurface']!,
+        fontSize: 14,
+      ),
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
       ),
       elevation: 4,
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: colors['surface']!,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
       ),
-      elevation: 8,
+      elevation: 0,
     ),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: colors['surface']!,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      elevation: 8,
+      elevation: 0,
     ),
     listTileTheme: ListTileThemeData(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      titleTextStyle: TextStyle(
+      titleTextStyle: GoogleFonts.inter(
         color: colors['onSurface']!,
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: FontWeight.w500,
       ),
-      subtitleTextStyle: TextStyle(
+      subtitleTextStyle: GoogleFonts.inter(
         color: colors['onSurfaceVariant']!,
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: FontWeight.w400,
       ),
     ),
     textSelectionTheme: TextSelectionThemeData(
       cursorColor: colors['primary']!,
-      selectionColor: colors['primary']!,
+      selectionColor: colors['primary']!.withValues(alpha: 0.3),
       selectionHandleColor: colors['primary']!,
     ),
   );
@@ -565,14 +592,14 @@ final themeData = getThemeData(AppTheme.defaultDark);
 final defaultPinTheme = PinTheme(
   width: 56,
   height: 56,
-  textStyle: const TextStyle(
+  textStyle: GoogleFonts.inter(
     fontSize: 20,
     color: AppColors.onSurface,
     fontWeight: FontWeight.w600,
   ),
   decoration: BoxDecoration(
     color: AppColors.surfaceVariant.withValues(alpha: 0.3),
-    border: Border.all(color: AppColors.border),
+    border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
     borderRadius: BorderRadius.circular(12),
   ),
 );
