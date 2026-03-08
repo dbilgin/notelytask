@@ -7,6 +7,7 @@ import 'package:notelytask/cubit/local_folder_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/models/notes_state.dart';
+import 'package:notelytask/util/quill_utils.dart';
 import 'package:notelytask/util/update_widget.dart';
 import 'package:notelytask/utils.dart';
 
@@ -211,7 +212,9 @@ class NotesCubit extends HydratedCubit<NotesState> {
     final index = state.notes.indexWhere((element) => element.id == note.id);
     List<Note> updatedNotes = List<Note>.from(state.notes);
 
-    if (note.title.isEmpty && note.text.isEmpty && note.fileDataList.isEmpty) {
+    if (note.title.isEmpty &&
+        note.fileDataList.isEmpty &&
+        extractPlainTextFromDelta(note.text).trim().isEmpty) {
       if (index != -1) {
         updatedNotes.removeAt(index);
         emit(state.copyWith(notes: updatedNotes));

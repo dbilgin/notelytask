@@ -21,7 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
   String version = '';
   Future<String> getVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
-    return '${packageInfo.version}+${packageInfo.buildNumber}';
+    return '${packageInfo.version}${packageInfo.buildNumber.isNotEmpty ? '+':''}${packageInfo.buildNumber}';
   }
 
   @override
@@ -62,20 +62,11 @@ class _SettingsPageState extends State<SettingsPage> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        title: Text(
-          'Settings',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
-          ),
-        ),
+        title: const Text('Settings'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
-          color: colorScheme.onSurface,
         ),
       ),
       body: SingleChildScrollView(
@@ -89,7 +80,6 @@ class _SettingsPageState extends State<SettingsPage> {
             BlocBuilder<LocalFolderCubit, LocalFolderState>(
               builder: (context, folderState) {
                 return Card(
-                  color: colorScheme.surface,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -248,7 +238,6 @@ class _SettingsPageState extends State<SettingsPage> {
             BlocBuilder<SettingsCubit, SettingsState>(
               builder: (context, settingsState) {
                 return Card(
-                  color: colorScheme.surface,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -443,13 +432,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildSectionHeader(BuildContext context, String title) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Text(
       title,
-      style: theme.textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w700,
-        color: colorScheme.onSurface,
+      style: theme.textTheme.titleSmall?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: theme.colorScheme.primary,
+        letterSpacing: 0.8,
       ),
     );
   }
