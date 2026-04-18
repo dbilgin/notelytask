@@ -52,7 +52,7 @@ jobs:
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev libsecret-1-dev
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev libsecret-1-dev rpm
 
       - name: Setup Flutter SDK
         uses: flutter-actions/setup-flutter@v3
@@ -81,11 +81,73 @@ jobs:
       - name: Fix .deb permissions
         run: chmod 644 build/linux/x64/release/debian/*.deb
 
+      - name: Create RPM build structure
+        run: |
+          RPM_ROOT="$GITHUB_WORKSPACE/rpmbuild"
+          SOURCE_DIR="${RPM_ROOT}/SOURCES/notelytask"
+
+          mkdir -p "${RPM_ROOT}/BUILD" "${RPM_ROOT}/BUILDROOT" "${RPM_ROOT}/RPMS" "${RPM_ROOT}/SOURCES" "${RPM_ROOT}/SPECS" "${RPM_ROOT}/SRPMS"
+          rm -rf "${SOURCE_DIR}"
+          mkdir -p "${SOURCE_DIR}/bundle" "${SOURCE_DIR}/desktop" "${SOURCE_DIR}/pixmaps"
+
+          cp -r build/linux/x64/release/bundle/* "${SOURCE_DIR}/bundle/"
+          chmod +x "${SOURCE_DIR}/bundle/notelytask"
+          cp assets/icon.png "${SOURCE_DIR}/pixmaps/notelytask.png"
+
+          printf "[Desktop Entry]\nName=NotelyTask\nComment=Task management app\nExec=/opt/notelytask/notelytask\nIcon=notelytask\nType=Application\nCategories=Office;Utility;\n" > "${SOURCE_DIR}/desktop/notelytask.desktop"
+          chmod 644 "${SOURCE_DIR}/desktop/notelytask.desktop"
+
+      - name: Build .rpm package
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          RPM_ROOT="$GITHUB_WORKSPACE/rpmbuild"
+
+          cat > "${RPM_ROOT}/SPECS/notelytask.spec" <<EOF
+          Name:           notelytask
+          Version:        ${VERSION}
+          Release:        1%{?dist}
+          Summary:        Task management app
+          License:        MIT
+          URL:            https://github.com/${{ github.repository }}
+          BuildArch:      x86_64
+          Requires:       gtk3
+
+          %description
+          NotelyTask is a task management application built with Flutter.
+
+          %install
+          mkdir -p %{buildroot}/opt/notelytask
+          mkdir -p %{buildroot}/usr/bin
+          mkdir -p %{buildroot}/usr/share/applications
+          mkdir -p %{buildroot}/usr/share/pixmaps
+          cp -a %{_sourcedir}/notelytask/bundle/. %{buildroot}/opt/notelytask/
+          chmod 755 %{buildroot}/opt/notelytask/notelytask
+          ln -s /opt/notelytask/notelytask %{buildroot}/usr/bin/notelytask
+          install -m 644 %{_sourcedir}/notelytask/desktop/notelytask.desktop %{buildroot}/usr/share/applications/notelytask.desktop
+          install -m 644 %{_sourcedir}/notelytask/pixmaps/notelytask.png %{buildroot}/usr/share/pixmaps/notelytask.png
+
+          %files
+          /opt/notelytask
+          /usr/bin/notelytask
+          /usr/share/applications/notelytask.desktop
+          /usr/share/pixmaps/notelytask.png
+          EOF
+
+          rpmbuild -bb "${RPM_ROOT}/SPECS/notelytask.spec" \
+            --define "_topdir ${RPM_ROOT}" \
+            --define "_build_id_links none"
+
       - name: Upload .deb artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-deb
           path: build/linux/x64/release/debian/notelytask_${{ steps.version.outputs.VERSION }}_amd64.deb
+
+      - name: Upload .rpm artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-rpm
+          path: rpmbuild/RPMS/x86_64/notelytask-${{ steps.version.outputs.VERSION }}-1.x86_64.rpm
 
   build-android:
     needs: analyze
@@ -156,6 +218,11 @@ jobs:
         with:
           name: linux-deb
 
+      - name: Download RPM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-rpm
+
       - name: Download Android artifact
         uses: actions/download-artifact@v4
         with:
@@ -164,6 +231,7 @@ jobs:
       - name: Fix artifact permissions
         run: |
           chmod 644 *.deb 2>/dev/null || true
+          chmod 644 *.rpm 2>/dev/null || true
 
       - name: Rename APK with version
         run: mv app-release.apk notelytask_${{ steps.version.outputs.VERSION }}.apk
@@ -178,4 +246,5 @@ jobs:
           prerelease: false
           files: |
             notelytask_${{ steps.version.outputs.VERSION }}_amd64.deb
+            notelytask-${{ steps.version.outputs.VERSION }}-1.x86_64.rpm
             notelytask_${{ steps.version.outputs.VERSION }}.apk
