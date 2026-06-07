@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notelytask/cubit/local_folder_cubit.dart';
+import 'package:notelytask/cubit/auth_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
-import 'package:notelytask/models/local_folder_state.dart';
+import 'package:notelytask/cubit/supabase_sync_cubit.dart';
+import 'package:notelytask/models/auth_state.dart';
 import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/models/settings_state.dart';
+import 'package:notelytask/models/sync_state.dart';
 import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/theme.dart';
 import 'package:notelytask/utils.dart';
@@ -13,29 +15,36 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
   String version = '';
+
   Future<String> getVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
-    return '${packageInfo.version}${packageInfo.buildNumber.isNotEmpty ? '+':''}${packageInfo.buildNumber}';
+    return '${packageInfo.version}${packageInfo.buildNumber.isNotEmpty ? '+' : ''}${packageInfo.buildNumber}';
   }
 
   @override
   void initState() {
     super.initState();
-    getVersion().then((value) => setState(() => version = value));
+    getVersion().then((value) {
+      if (mounted) {
+        setState(() => version = value);
+      }
+    });
   }
 
   Future<void> _onSubmitEncryption(String key) async {
-    context.read<NotesCubit>().setEncryptionKey(key);
-    await context.read<NotesCubit>().createOrUpdateRemoteNotes();
+    final notesCubit = context.read<NotesCubit>();
+    await notesCubit.setEncryptionKey(key);
+    await notesCubit.createOrUpdateRemoteNotes();
 
     if (!mounted) return;
-    await context.read<NotesCubit>().getAndUpdateLocalNotes(context: context);
+    await notesCubit.getAndUpdateLocalNotes(context: context);
     if (!mounted) return;
     showSnackBar(context, 'Encryption successful.');
   }
@@ -47,11 +56,12 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
 
-    context.read<NotesCubit>().setEncryptionKey(null);
-    await context.read<NotesCubit>().createOrUpdateRemoteNotes();
+    final notesCubit = context.read<NotesCubit>();
+    await notesCubit.setEncryptionKey(null);
+    await notesCubit.createOrUpdateRemoteNotes();
 
     if (!mounted) return;
-    await context.read<NotesCubit>().getAndUpdateLocalNotes(context: context);
+    await notesCubit.getAndUpdateLocalNotes(context: context);
     if (!mounted) return;
     showSnackBar(context, 'Decryption successful.');
   }
@@ -74,356 +84,147 @@ class _SettingsPageState extends State<SettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Local Storage Section
-            _buildSectionHeader(context, 'Local Storage'),
+            _buildSectionHeader(context, 'Cloud Sync'),
             const SizedBox(height: 12),
-            BlocBuilder<LocalFolderCubit, LocalFolderState>(
-              builder: (context, folderState) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.folder_rounded,
-                              size: 24,
-                              color: colorScheme.onSurface,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'Storage Folder',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        if (folderState.isConnected()) ...[
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: colorScheme.primary,
-                                child: Icon(
-                                  Icons.folder_rounded,
-                                  color: colorScheme.onPrimary,
-                                  size: 24,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Connected',
-                                      style:
-                                          theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    if (folderState.folderPath != null)
-                                      Text(
-                                        folderState.folderPath!,
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                          color: colorScheme.onSurfaceVariant,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              onPressed: () {
-                                context.read<LocalFolderCubit>().reset();
-                                showSnackBar(
-                                    context, 'Disconnected from folder');
-                              },
-                              icon: const Icon(Icons.logout_rounded),
-                              label: const Text('Disconnect'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: colorScheme.error,
-                                side: BorderSide(color: colorScheme.error),
-                              ),
-                            ),
-                          ),
-                          BlocBuilder<NotesCubit, NotesState>(
-                            builder: (notesContext, notesState) {
-                              if (folderState.isConnected()) {
-                                return Column(
-                                  children: [
-                                    const SizedBox(height: 16),
-                                    if (notesState.encryptionKey == null)
-                                      SizedBox(
-                                        width: double.infinity,
-                                        child: ElevatedButton.icon(
-                                          onPressed: () => encryptionKeyDialog(
-                                            context: context,
-                                            isPinRequired: false,
-                                            title: 'Enter Your Encryption Pin',
-                                            text:
-                                                'Do not lose this!\nThis will encrypt your notes.',
-                                            onSubmit: _onSubmitEncryption,
-                                          ),
-                                          icon: const Icon(Icons.lock_rounded),
-                                          label: const Text('Encrypt Notes'),
-                                        ),
-                                      ),
-                                    if (notesState.encryptionKey != null)
-                                      SizedBox(
-                                        width: double.infinity,
-                                        child: ElevatedButton.icon(
-                                          onPressed: () => encryptionKeyDialog(
-                                            context: context,
-                                            isPinRequired: false,
-                                            title: 'Enter Your Encryption Pin',
-                                            text:
-                                                'Decryption will fail if wrong key is entered.',
-                                            onSubmit: _onSubmitDecryption,
-                                          ),
-                                          icon: const Icon(
-                                              Icons.lock_open_rounded),
-                                          label: const Text('Decrypt Notes'),
-                                        ),
-                                      ),
-                                  ],
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ] else ...[
-                          Text(
-                            'Select a folder to store your notes locally.',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                getIt<NavigationService>()
-                                    .pushNamed('/folder_selection');
-                              },
-                              icon: const Icon(Icons.folder_open_rounded),
-                              label: const Text('Select Folder'),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-
+            _buildSyncCard(colorScheme: colorScheme),
             const SizedBox(height: 24),
-
-            // Theme Selection Section
             _buildSectionHeader(context, 'Appearance'),
             const SizedBox(height: 12),
-            BlocBuilder<SettingsCubit, SettingsState>(
-              builder: (context, settingsState) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.palette_rounded,
-                              color: colorScheme.onSurface,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'Theme',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 1.2,
-                          ),
-                          itemCount: AppTheme.values.length,
-                          itemBuilder: (context, index) {
-                            final themeOption = AppTheme.values[index];
-                            final isSelected =
-                                settingsState.selectedTheme == themeOption;
-                            final colors =
-                                ThemeHelper.getThemeColors(themeOption);
+            _ThemeCard(colorScheme: colorScheme),
+            const SizedBox(height: 24),
+            _buildSectionHeader(context, 'Privacy & Legal'),
+            const SizedBox(height: 12),
+            _PrivacyCard(colorScheme: colorScheme, version: version),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
 
-                            return Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  context
-                                      .read<SettingsCubit>()
-                                      .setTheme(themeOption);
-                                  showSnackBar(context,
-                                      'Theme changed to ${ThemeHelper.getThemeName(themeOption)}');
-                                },
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: colors['surface'],
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? colors['primary']!
-                                          : colorScheme.onSurface
-                                              .withValues(alpha: 0.2),
-                                      width: isSelected ? 2 : 1,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      // Color preview
-                                      Expanded(
-                                        flex: 2,
-                                        child: Container(
-                                          margin: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            gradient: LinearGradient(
-                                              colors: [
-                                                colors['primary']!,
-                                                colors['secondary']!,
-                                              ],
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                            ),
-                                          ),
-                                          child: isSelected
-                                              ? const Center(
-                                                  child: Icon(
-                                                    Icons.check_circle,
-                                                    color: Colors.white,
-                                                    size: 20,
-                                                  ),
-                                                )
-                                              : null,
-                                        ),
-                                      ),
-                                      // Theme name
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            8, 0, 8, 8),
-                                        child: Text(
-                                          ThemeHelper.getThemeName(themeOption),
-                                          style: theme.textTheme.labelSmall
-                                              ?.copyWith(
-                                            fontWeight: isSelected
-                                                ? FontWeight.w600
-                                                : FontWeight.w500,
-                                            color: isSelected
-                                                ? colors['primary']
-                                                : colorScheme.onSurface,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+  Widget _buildSyncCard({required ColorScheme colorScheme}) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BlocBuilder<AuthCubit, AuthState>(
+              builder: (context, authState) {
+                return Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: colorScheme.primary,
+                      child: Icon(
+                        Icons.cloud_done_rounded,
+                        color: colorScheme.onPrimary,
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            authState.user?.email ?? 'Signed in',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          BlocBuilder<SupabaseSyncCubit, SyncState>(
+                            builder: (context, syncState) {
+                              return Text(
+                                syncState.dirty
+                                    ? 'Local changes waiting to sync'
+                                    : 'Notes sync to the cloud',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
-
-            const SizedBox(height: 24),
-
-            // Privacy & Legal Section
-            _buildSectionHeader(context, 'Privacy & Legal'),
-            const SizedBox(height: 12),
-            Card(
-              color: colorScheme.surface,
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: Icon(
-                      Icons.privacy_tip_rounded,
-                      color: colorScheme.onSurface,
+            const SizedBox(height: 16),
+            BlocBuilder<NotesCubit, NotesState>(
+              builder: (context, notesState) {
+                return Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => context
+                            .read<NotesCubit>()
+                            .getAndUpdateLocalNotes(context: context),
+                        icon: const Icon(Icons.sync_rounded),
+                        label: const Text('Sync Now'),
+                      ),
                     ),
-                    title: const Text('Privacy Policy'),
-                    subtitle: const Text('Learn how we protect your data'),
-                    trailing: Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: colorScheme.onSurfaceVariant,
-                      size: 16,
-                    ),
-                    onTap: () {
-                      getIt<NavigationService>().pushNamed('/privacy_policy');
-                    },
-                  ),
-                  Divider(
-                    color: colorScheme.onSurface.withValues(alpha: 0.1),
-                    height: 1,
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      Icons.info_rounded,
-                      color: colorScheme.onSurface,
-                    ),
-                    title: const Text('About NotelyTask'),
-                    subtitle: Text('Version $version'),
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('About NotelyTask'),
-                          content: const Text(
-                            'NotelyTask is a modern note-taking app that helps you capture and organize your thoughts across all your devices.\n\nBuilt with Flutter for a seamless experience on web, mobile, and desktop.',
+                    const SizedBox(height: 8),
+                    if (notesState.encryptionKey == null)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () => encryptionKeyDialog(
+                            context: context,
+                            isPinRequired: false,
+                            title: 'Enter Your Encryption Pin',
+                            text:
+                                'Do not lose this. It encrypts your synced notes.',
+                            onSubmit: _onSubmitEncryption,
                           ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Close'),
-                            ),
-                          ],
+                          icon: const Icon(Icons.lock_rounded),
+                          label: const Text('Encrypt Notes'),
                         ),
-                      );
-                    },
-                  ),
-                ],
+                      ),
+                    if (notesState.encryptionKey != null)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () => encryptionKeyDialog(
+                            context: context,
+                            isPinRequired: false,
+                            title: 'Enter Your Encryption Pin',
+                            text:
+                                'Decryption will fail if the wrong key is entered.',
+                            onSubmit: _onSubmitDecryption,
+                          ),
+                          icon: const Icon(Icons.lock_open_rounded),
+                          label: const Text('Decrypt Notes'),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  await context.read<AuthCubit>().signOut();
+                  if (context.mounted) {
+                    getIt<NavigationService>().pushNamed('/');
+                  }
+                },
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text('Sign Out'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: colorScheme.error,
+                  side: BorderSide(color: colorScheme.error),
+                ),
               ),
             ),
-
-            const SizedBox(height: 32),
           ],
         ),
       ),
@@ -437,7 +238,173 @@ class _SettingsPageState extends State<SettingsPage> {
       style: theme.textTheme.titleSmall?.copyWith(
         fontWeight: FontWeight.w600,
         color: theme.colorScheme.primary,
-        letterSpacing: 0.8,
+      ),
+    );
+  }
+}
+
+class _ThemeCard extends StatelessWidget {
+  const _ThemeCard({required this.colorScheme});
+
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, settingsState) {
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.2,
+              ),
+              itemCount: AppTheme.values.length,
+              itemBuilder: (context, index) {
+                final themeOption = AppTheme.values[index];
+                final isSelected = settingsState.selectedTheme == themeOption;
+                final colors = ThemeHelper.getThemeColors(themeOption);
+
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      context.read<SettingsCubit>().setTheme(themeOption);
+                      showSnackBar(
+                        context,
+                        'Theme changed to ${ThemeHelper.getThemeName(themeOption)}',
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: colors['surface'],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? colors['primary']!
+                              : colorScheme.onSurface.withValues(alpha: 0.2),
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Container(
+                              margin: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                gradient: LinearGradient(
+                                  colors: [
+                                    colors['primary']!,
+                                    colors['secondary']!,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                              ),
+                              child: isSelected
+                                  ? const Center(
+                                      child: Icon(
+                                        Icons.check_circle,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                            child: Text(
+                              ThemeHelper.getThemeName(themeOption),
+                              style: Theme.of(context).textTheme.labelSmall,
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PrivacyCard extends StatelessWidget {
+  const _PrivacyCard({
+    required this.colorScheme,
+    required this.version,
+  });
+
+  final ColorScheme colorScheme;
+  final String version;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: colorScheme.surface,
+      child: Column(
+        children: [
+          ListTile(
+            leading: Icon(
+              Icons.privacy_tip_rounded,
+              color: colorScheme.onSurface,
+            ),
+            title: const Text('Privacy Policy'),
+            subtitle: const Text('Learn how your data is handled'),
+            trailing: Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: colorScheme.onSurfaceVariant,
+              size: 16,
+            ),
+            onTap: () {
+              getIt<NavigationService>().pushNamed('/privacy_policy');
+            },
+          ),
+          Divider(
+            color: colorScheme.onSurface.withValues(alpha: 0.1),
+            height: 1,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.info_rounded,
+              color: colorScheme.onSurface,
+            ),
+            title: const Text('About NotelyTask'),
+            subtitle: Text('Version $version'),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('About NotelyTask'),
+                  content: const Text(
+                    'NotelyTask is a note-taking app with cloud sync, email/password accounts, and an offline local cache.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

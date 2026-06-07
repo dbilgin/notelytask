@@ -13,5 +13,5 @@ control:
   Maintainer: dbilgin <dbilgindev@gmail.com>
   Description: A simple notes application
    NotelyTask is a cross-platform notes application built with Flutter.
-   It supports markdown editing, file attachments, GitHub synchronization,
+   It supports rich text editing, file attachments, Supabase synchronization,
    and provides a clean, modern interface for organizing your notes.

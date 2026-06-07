@@ -56,73 +56,55 @@ class PrivacyPolicyPage extends StatelessWidget {
                     _buildSection(
                       context,
                       'Introduction',
-                      'NotelyTask ("we", "our", or "us") is a privacy-first note-taking application. Unlike most apps, we do NOT collect, store, or process your personal data on our servers. This Privacy Policy explains our minimal data practices and your complete control over your information.',
+                      'NotelyTask ("we", "our", or "us") is a note-taking application that syncs your notes to your cloud account when you sign in. This Privacy Policy explains what data is processed for account access, note sync, and attachments.',
                     ),
                     _buildSection(
                       context,
-                      'What We DON\'T Collect',
-                      '''NotelyTask is designed with zero data collection:
+                      'What We Collect',
+                      '''NotelyTask keeps data collection limited to the app experience:
 
-• **No Server Storage**: We do not store any of your notes, content, or personal data on our servers
+• **Account Information**: Your account service stores your email address and password credentials for login
+• **Synced Notes**: Your notes are stored as one per-user note document in cloud storage
+• **Attachments**: Files you attach to notes are stored in private cloud storage
+• **Local Cache**: Notes are also cached locally on your device for offline use
 • **No Telemetry**: We do not collect usage analytics, crash reports, or behavioral data
 • **No Tracking**: We do not track your activity or use cookies for tracking
-• **No Personal Information**: We do not collect names, emails, or any identifying information
-• **No Device Data**: We do not collect device information or technical specifications
-
-**What Stays Local:**
-• All your notes and content remain on your device
-• App settings and preferences are stored locally
-• GitHub access tokens (when used) are stored securely on your device only''',
+• **No Advertising**: We do not use advertising networks''',
                     ),
                     _buildSection(
                       context,
                       'How Your Data Works',
-                      '''NotelyTask operates entirely on your device:
+                      '''NotelyTask uses a cloud sync service for account-based sync:
 
-• **Local Processing**: All note editing, searching, and organization happens locally
-• **No Cloud Dependency**: The app works completely offline
-• **Optional GitHub Sync**: You can optionally sync to YOUR GitHub repository (under your control)
-• **No Third-Party Services**: We don't use analytics, advertising, or tracking services
-
-**Our Backend Service:**
-Our open-source backend (github.com/dbilgin/notelytask-backend) only:
-• Facilitates GitHub OAuth login flow
-• Has no database or data storage
-• Processes no personal information
-• Is completely stateless''',
+• **Email Login**: You create and access your account with email and password
+• **Email Confirmation**: New accounts require email confirmation
+• **Password Reset**: Password reset links are sent by email
+• **Offline Editing**: Text notes are cached locally and can be edited while offline
+• **Cloud Sync**: Local note changes sync to your cloud account when the app can connect''',
                     ),
                     _buildSection(
                       context,
                       'Data Storage and Security',
-                      '''• **100% Local Storage**: Your notes are stored exclusively on your device
-• **No Server Storage**: We have no servers storing your personal data
-• **GitHub Integration**: Optional sync to YOUR GitHub repository (you maintain full control)
-• **Open Source**: Our backend is open source and auditable at github.com/dbilgin/notelytask-backend
-• **No Encryption Needed**: Since we don't store your data, there's no server-side data to encrypt
-• **Device Security**: Your data security depends on your device's security measures''',
+                      '''• **Account Security**: Passwords are handled by the account service, not stored directly by the app
+• **Access Controls**: Cloud database policies restrict each user to their own note document
+• **Private Storage**: Attachment storage is scoped to the signed-in user
+• **PIN Encryption**: When enabled, your note document is encrypted before it is synced
+• **Local Cache**: Your device keeps an offline copy of notes for app functionality
+• **Device Security**: Local cache security also depends on your device security''',
                     ),
                     _buildSection(
                       context,
-                      'GitHub Integration',
-                      '''When you choose to connect GitHub:
-
-• **Your Repository**: Notes sync to a repository YOU own and control
-• **Minimal Permissions**: We request only repository access permissions
-• **Local Token Storage**: GitHub access tokens are stored only on your device
-• **No Server Processing**: Our backend only facilitates the OAuth flow, no data processing
-• **Full Control**: You can revoke access anytime through GitHub settings
-• **GitHub's Policies**: GitHub interactions are subject to GitHub's privacy policies
-• **Open Source Backend**: Our OAuth service is open source and auditable''',
+                      'Cloud Services',
+                      '''NotelyTask uses a cloud provider for authentication, database storage, file storage, and email delivery for account flows. The provider processes the information required to provide these services, including account email, authentication metadata, note document storage, and attachment storage.''',
                     ),
                     _buildSection(
                       context,
                       'Data Retention',
-                      '''• **Device Storage**: Notes remain on your device until you delete them
-• **No Server Retention**: We retain no data on our servers (because we store none)
-• **Deleted Notes**: Deleted notes are moved to local "deleted" state and can be permanently removed
-• **GitHub Data**: Any synced data follows your GitHub repository settings
-• **Complete Removal**: Uninstalling the app removes all local data
-• **No Backup Concerns**: We have no server backups to worry about''',
+                      '''• **Account Data**: Account data remains in the cloud service while your account exists
+• **Synced Notes**: Synced notes remain until you delete them or your account data is removed
+• **Deleted Notes**: Deleted notes are moved to the app's deleted state and can be permanently removed
+• **Attachments**: Attachments remain in private storage until deleted
+• **Local Cache**: Uninstalling the app removes local device data, but not cloud data already synced to your account''',
                     ),
                     _buildSection(
                       context,
@@ -132,21 +114,20 @@ Our open-source backend (github.com/dbilgin/notelytask-backend) only:
 • Access all your data stored in the app
 • Export your notes at any time
 • Delete your notes and app data
-• Disconnect GitHub integration
+• Sign out of your cloud account
 • Request information about data processing
 • Contact us with privacy concerns''',
                     ),
                     _buildSection(
                       context,
                       'Third-Party Services',
-                      '''NotelyTask has minimal third-party integration:
+                      '''NotelyTask uses a small set of third-party services:
 
-• **GitHub**: Optional integration for note sync (direct to YOUR repository)
-• **Our Backend**: Open-source OAuth service (github.com/dbilgin/notelytask-backend)
+• **Cloud Sync Provider**: Authentication, database, storage, and account emails
 • **Flutter Framework**: App development framework by Google
 • **No Analytics**: We use no analytics services (Google Analytics, etc.)
 • **No Advertising**: We use no advertising networks or tracking
-• **No Data Sharing**: We have no data to share with third parties''',
+• **No Advertising Data Sharing**: We do not sell or share data for advertising''',
                     ),
                     _buildSection(
                       context,
@@ -164,10 +145,8 @@ Our open-source backend (github.com/dbilgin/notelytask-backend) only:
                       '''If you have questions about this Privacy Policy or our data practices:
 
 • **GitHub Issues**: Open an issue on our repository
-• **Source Code**: Review our open-source backend at github.com/dbilgin/notelytask-backend
-• **Transparency**: All our server code is public and auditable
-
-Since we collect no personal data, most privacy concerns don't apply to NotelyTask.''',
+• **Source Code**: Review the app source code
+• **Cloud Provider**: Review the cloud provider's privacy and security documentation for platform-level processing''',
                     ),
                     const SizedBox(height: 24),
                     Container(
@@ -189,7 +168,7 @@ Since we collect no personal data, most privacy concerns don't apply to NotelyTa
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'True Privacy: NotelyTask stores ZERO data on our servers. Your notes stay on your device or in your GitHub repository. No tracking, no telemetry, no data collection.',
+                              'NotelyTask syncs through your cloud account, keeps an offline local cache, supports PIN-encrypted note blobs, and does not use analytics, tracking, or advertising.',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: colorScheme.onSurface,
                                 fontWeight: FontWeight.w500,

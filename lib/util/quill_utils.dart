@@ -9,7 +9,9 @@ String ensureQuillDelta(String text) {
     if (decoded is List) return text;
   } catch (_) {}
   final content = text.endsWith('\n') ? text : '$text\n';
-  return jsonEncode([{'insert': content}]);
+  return jsonEncode([
+    {'insert': content}
+  ]);
 }
 
 /// Extracts plain text from a Quill Delta JSON string for preview use.
