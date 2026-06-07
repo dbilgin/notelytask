@@ -18,7 +18,7 @@ jobs:
         uses: flutter-actions/setup-flutter@v3
         with:
           channel: stable
-          version: 3.35.2
+          version: 3.44.1
 
       - name: Install dependencies
         run: flutter pub get
@@ -58,7 +58,7 @@ jobs:
         uses: flutter-actions/setup-flutter@v3
         with:
           channel: stable
-          version: 3.35.2
+          version: 3.44.1
 
       - name: Enable Linux desktop
         run: flutter config --enable-linux-desktop
@@ -184,7 +184,7 @@ jobs:
         uses: flutter-actions/setup-flutter@v3
         with:
           channel: stable
-          version: 3.35.2
+          version: 3.44.1
 
       - name: Install dependencies
         run: flutter pub get
