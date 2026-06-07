@@ -4,6 +4,7 @@ import 'package:notelytask/cubit/auth_cubit.dart';
 import 'package:notelytask/models/auth_state.dart';
 import 'package:notelytask/screens/auth_page.dart';
 import 'package:notelytask/screens/home_page.dart';
+import 'package:notelytask/screens/mfa_page.dart';
 
 class AuthCallbackPage extends StatelessWidget {
   const AuthCallbackPage({super.key});
@@ -18,6 +19,11 @@ class AuthCallbackPage extends StatelessWidget {
 
         if (state.status == AuthStatus.passwordRecovery) {
           return const AuthPage();
+        }
+
+        if (state.status == AuthStatus.mfaEnrollmentRequired ||
+            state.status == AuthStatus.mfaVerificationRequired) {
+          return const MfaPage();
         }
 
         if (state.status == AuthStatus.unauthenticated ||

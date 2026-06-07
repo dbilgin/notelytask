@@ -2,11 +2,11 @@
 
 ## What's this?
 
-NotelyTask is an easy to use note-taking application with email/password accounts, Supabase sync, attachments, and an offline local cache. Just open it, sign in, and start taking notes.
+NotelyTask is an easy to use note-taking application with email/password accounts, mandatory authenticator-app two-factor authentication, Supabase sync, attachments, and an offline local cache. Just open it, sign in, and start taking notes.
 
 ## How does it work?
 
-NotelyTask uses [hydrated_bloc](https://pub.dev/packages/hydrated_bloc) to keep a local offline cache of your notes. When you are signed in, the app syncs your note document to Supabase.
+NotelyTask uses [hydrated_bloc](https://pub.dev/packages/hydrated_bloc) to keep a local offline cache of your notes. When you are signed in and have completed two-factor authentication, the app syncs your note document to Supabase.
 
 The Supabase backend stores one note blob per user instead of splitting every note into separate relational rows. Attachments are stored separately in private Supabase Storage and referenced from the note blob metadata.
 
@@ -32,13 +32,16 @@ The remote backend schema lives in `supabase/migrations` and is pushed to the ho
 
 ### Authentication
 
-The initial auth flow supports:
+The auth flow supports:
 
 - Email/password signup
 - Email confirmation
 - Email/password login
+- Required authenticator-app two-factor authentication
 - Password reset by email
 - Sign out
+
+Cloud note and attachment access requires an `aal2` Supabase session. After email/password login, existing users must verify a TOTP code or set up an authenticator app before cloud sync starts.
 
 ### Encryption
 

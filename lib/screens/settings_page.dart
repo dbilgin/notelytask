@@ -9,6 +9,7 @@ import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/models/settings_state.dart';
 import 'package:notelytask/models/sync_state.dart';
 import 'package:notelytask/service/navigation_service.dart';
+import 'package:notelytask/screens/mfa_page.dart';
 import 'package:notelytask/theme.dart';
 import 'package:notelytask/utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -22,6 +23,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   String version = '';
+  bool _mfaBusy = false;
 
   Future<String> getVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
@@ -88,6 +90,10 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 12),
             _buildSyncCard(colorScheme: colorScheme),
             const SizedBox(height: 24),
+            _buildSectionHeader(context, 'Security'),
+            const SizedBox(height: 12),
+            _buildSecurityCard(colorScheme: colorScheme),
+            const SizedBox(height: 24),
             _buildSectionHeader(context, 'Appearance'),
             const SizedBox(height: 12),
             _ThemeCard(colorScheme: colorScheme),
@@ -100,6 +106,84 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _addAuthenticator() async {
+    final authCubit = context.read<AuthCubit>();
+    setState(() => _mfaBusy = true);
+    AuthMfaEnrollment? enrollment;
+    try {
+      enrollment = await authCubit.createTotpEnrollment();
+      if (!mounted) return;
+      final verified = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => MfaEnrollmentDialog(enrollment: enrollment!),
+      );
+      if (verified != true) {
+        await authCubit.cancelTotpEnrollment(enrollment);
+      }
+      if (!mounted) return;
+      if (verified == true) {
+        showSnackBar(context, 'Authenticator added.');
+      }
+    } catch (error) {
+      if (!mounted) return;
+      showSnackBar(context, error.toString());
+      if (enrollment != null) {
+        await authCubit.cancelTotpEnrollment(enrollment);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _mfaBusy = false);
+      }
+    }
+  }
+
+  Future<void> _removeAuthenticator(String factorId) async {
+    final authCubit = context.read<AuthCubit>();
+    if (authCubit.state.mfaFactors.length <= 1) {
+      showSnackBar(
+        context,
+        'Add another authenticator before removing this one.',
+      );
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove authenticator?'),
+        content: const Text(
+          'This authenticator will no longer work for sign-in codes.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) {
+      return;
+    }
+    setState(() => _mfaBusy = true);
+    try {
+      await authCubit.unenrollFactor(factorId);
+      if (!mounted) return;
+      showSnackBar(context, 'Authenticator removed.');
+    } catch (error) {
+      if (!mounted) return;
+      showSnackBar(context, error.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _mfaBusy = false);
+      }
+    }
   }
 
   Widget _buildSyncCard({required ColorScheme colorScheme}) {
@@ -228,6 +312,102 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSecurityCard({required ColorScheme colorScheme}) {
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, authState) {
+        final factors = authState.mfaFactors;
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: colorScheme.secondary,
+                      child: Icon(
+                        Icons.verified_user_rounded,
+                        color: colorScheme.onSecondary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Two-factor authentication',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            'Required for cloud notes and attachments',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (factors.isEmpty)
+                  const Text('No verified authenticator is available.')
+                else
+                  ...factors.map(
+                    (factor) => ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.password_rounded),
+                      title: Text(
+                        factor.friendlyName?.isNotEmpty == true
+                            ? factor.friendlyName!
+                            : 'Authenticator app',
+                      ),
+                      subtitle: Text(
+                        'Added ${factor.createdAt.toLocal().toString().split(".").first}',
+                      ),
+                      trailing: IconButton(
+                        tooltip: factors.length <= 1
+                            ? 'Add another authenticator before removing this one'
+                            : 'Remove authenticator',
+                        onPressed: _mfaBusy || factors.length <= 1
+                            ? null
+                            : () => _removeAuthenticator(factor.id),
+                        icon: const Icon(Icons.delete_outline_rounded),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _mfaBusy ? null : _addAuthenticator,
+                    icon: _mfaBusy
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.add_moderator_outlined),
+                    label: const Text('Add Authenticator'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/cubit/auth_cubit.dart';
 import 'package:notelytask/models/auth_state.dart';
+import 'package:notelytask/screens/mfa_page.dart';
 
 enum AuthFormMode { signIn, signUp, resetRequest, updatePassword }
 
@@ -38,6 +39,10 @@ class _AuthPageState extends State<AuthPage> {
       builder: (context, state) {
         if (state.status == AuthStatus.unconfigured) {
           return const _CloudConfigMissing();
+        }
+        if (state.status == AuthStatus.mfaEnrollmentRequired ||
+            state.status == AuthStatus.mfaVerificationRequired) {
+          return const MfaPage();
         }
 
         final theme = Theme.of(context);
