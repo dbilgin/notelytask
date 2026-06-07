@@ -34,7 +34,7 @@ class WidgetRemoteViewsFactory(applicationContext: Context, intent: Intent) :
 
             val id = note["id"].toString()
             val title = note["title"].toString()
-            val text = note["text"].toString()
+            val text = extractPlainTextFromDelta(note["text"].toString())
 
             notesList.add(mapOf("id" to id, "title" to title, "text" to text))
         }
@@ -81,6 +81,25 @@ class WidgetRemoteViewsFactory(applicationContext: Context, intent: Intent) :
 
     override fun hasStableIds(): Boolean {
         return true
+    }
+
+    private fun extractPlainTextFromDelta(text: String): String {
+        if (text.isEmpty()) return ""
+
+        return try {
+            val delta = JSONArray(text)
+            val plainText = StringBuilder()
+            for (i in 0 until delta.length()) {
+                val operation = delta.optJSONObject(i) ?: continue
+                val insert = operation.opt("insert")
+                if (insert is String) {
+                    plainText.append(insert)
+                }
+            }
+            plainText.toString().removeSuffix("\n")
+        } catch (_: Exception) {
+            text
+        }
     }
 
 }

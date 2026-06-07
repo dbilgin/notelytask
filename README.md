@@ -2,23 +2,47 @@
 
 ## What's this?
 
-NotelyTask is an easy to use note-taking application. Just open it and start taking notes. It supports local folder synchronization to keep your notes backed up and synced across devices. You can get builds from [Releases](https://github.com/dbilgin/notelytask/releases) or build the app yourself.
+NotelyTask is an easy to use note-taking application with email/password accounts, Supabase sync, attachments, and an offline local cache. Just open it, sign in, and start taking notes.
 
 ## How does it work?
 
-NotelyTask uses [hydrated_bloc](https://pub.dev/packages/hydrated_bloc) for immediately preserving user data. Your notes are stored locally and the app has no tracking whatsoever.
+NotelyTask uses [hydrated_bloc](https://pub.dev/packages/hydrated_bloc) to keep a local offline cache of your notes. When you are signed in, the app syncs your note document to Supabase.
 
-### Local Folder Sync
+The Supabase backend stores one note blob per user instead of splitting every note into separate relational rows. Attachments are stored separately in private Supabase Storage and referenced from the note blob metadata.
 
-You can select a local folder (or a synced folder like Dropbox, Google Drive, Nextcloud, etc.) to store your notes. The app saves your notes as a `notes.json` file in the selected folder, allowing you to:
+### Supabase Sync
 
-- Back up your notes automatically
-- Sync across devices using any cloud storage service
-- Keep full control of your data
+The app ships with public Supabase client config in `assets/env/notelytask.env`, so normal local runs and Xcode launches do not need manual flags:
+
+```bash
+flutter run
+```
+
+Dart defines can still override those values for CI or alternate environments:
+
+```bash
+flutter run \
+  --dart-define=SUPABASE_URL=https://lccgvjrcsklmvyhvdkde.supabase.co \
+  --dart-define=SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+```
+
+The production web app is hosted with Firebase Hosting at `https://notelytask.dbilgin.com`. The web auth callback route is `/auth-callback`, and native auth callbacks use `com.omedacore.notelytask://auth-callback`.
+
+The remote backend schema lives in `supabase/migrations` and is pushed to the hosted Supabase project with the Supabase CLI. Do not use a local Supabase stack for this project unless that workflow is explicitly reintroduced.
+
+### Authentication
+
+The initial auth flow supports:
+
+- Email/password signup
+- Email confirmation
+- Email/password login
+- Password reset by email
+- Sign out
 
 ### Encryption
 
-NotelyTask supports optional PIN-based encryption for your notes. When enabled, your notes are encrypted before being saved to the sync folder.
+NotelyTask supports optional PIN-based encryption for your synced note blob. When enabled, the note document is encrypted before it is saved to Supabase. Attachments are stored in private user-scoped Supabase Storage.
 
 ## Building for Linux (Ubuntu/Debian)
 
