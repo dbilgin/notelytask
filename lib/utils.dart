@@ -11,6 +11,8 @@ import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/theme.dart';
+import 'package:notelytask/util/file_download_stub.dart'
+    if (dart.library.html) 'package:notelytask/util/file_download_web.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pinput/pinput.dart';
@@ -45,56 +47,68 @@ void navigateToDetails({
   context.read<SettingsCubit>().setSelectedNoteId(note?.id);
 }
 
-void saveToFolderAlert({
+enum SyncConflictChoice { keepLocal, useCloud, cancel }
+
+Future<bool?> syncUploadLocalDialog({
   required BuildContext context,
-  required Function(bool keepLocal) onPressed,
-}) {
-  showDialog(
+}) async {
+  return showDialog<bool>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: const Color(0xff2a2a31),
-        title: Text(
-          'Folder Connection Warning',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        content: Text(
-          '''Warning! This action will make changes to your local folder!
-Would you like to keep your current data and overwrite the folder?''',
-          style: Theme.of(context).textTheme.bodyLarge,
+        title: const Text('Upload local notes?'),
+        content: const Text(
+          'Your cloud account has no notes yet. Upload the notes saved on this device?',
         ),
         actions: [
           TextButton(
-            child: Text(
-              'Yes',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            onPressed: () {
-              getIt<NavigationService>().pop();
-              onPressed(true);
-            },
+            child: const Text('Not now'),
+            onPressed: () => Navigator.of(context).pop(false),
           ),
           TextButton(
-            child: Text(
-              'No',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            onPressed: () {
-              getIt<NavigationService>().pop();
-              onPressed(false);
-            },
-          ),
-          TextButton(
-            child: Text(
-              'Cancel',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            onPressed: () => getIt<NavigationService>().pop(),
+            child: const Text('Upload'),
+            onPressed: () => Navigator.of(context).pop(true),
           ),
         ],
       );
     },
   );
+}
+
+Future<SyncConflictChoice> syncConflictDialog({
+  required BuildContext context,
+}) async {
+  final result = await showDialog<SyncConflictChoice>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Choose notes source'),
+        content: const Text(
+          'This device and your cloud account both have notes. Which version should be kept?',
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () =>
+                Navigator.of(context).pop(SyncConflictChoice.cancel),
+          ),
+          TextButton(
+            child: const Text('Use Cloud'),
+            onPressed: () =>
+                Navigator.of(context).pop(SyncConflictChoice.useCloud),
+          ),
+          TextButton(
+            child: const Text('Keep Local'),
+            onPressed: () =>
+                Navigator.of(context).pop(SyncConflictChoice.keepLocal),
+          ),
+        ],
+      );
+    },
+  );
+
+  return result ?? SyncConflictChoice.cancel;
 }
 
 IconData getFileIcon(String fileName) {
@@ -204,6 +218,19 @@ Future<void> openFile(BuildContext context, FileData file) async {
 
 Future<void> _openFileWithData(BuildContext context, FileData file) async {
   try {
+    if (kIsWeb) {
+      final bytes = await context.read<NotesCubit>().getFileBytes(file);
+      if (!context.mounted) return;
+
+      if (bytes == null) {
+        showSnackBar(context, 'File could not be downloaded.');
+        return;
+      }
+
+      await downloadFileBytes(fileName: file.name, bytes: bytes);
+      return;
+    }
+
     final filePath = await context.read<NotesCubit>().getFileLocalPath(file);
 
     if (filePath != null) {
@@ -215,7 +242,7 @@ Future<void> _openFileWithData(BuildContext context, FileData file) async {
       }
     } else {
       if (!context.mounted) return;
-      showSnackBar(context, 'File not found. Please select a folder first.');
+      showSnackBar(context, 'File could not be downloaded.');
     }
   } catch (e) {
     if (!context.mounted) return;
@@ -226,7 +253,7 @@ Future<void> _openFileWithData(BuildContext context, FileData file) async {
 Future<void> uploadFile(BuildContext context, Note note) async {
   final isConnected = context.read<NotesCubit>().isConnected();
   if (!isConnected) {
-    showSnackBar(context, 'Please select a folder to upload files.');
+    showSnackBar(context, 'Please sign in to upload files.');
     return;
   }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notelytask/cubit/local_folder_cubit.dart';
-import 'package:notelytask/models/local_folder_state.dart';
+import 'package:notelytask/cubit/supabase_sync_cubit.dart';
+import 'package:notelytask/models/sync_state.dart';
 
 class StateLoader extends StatelessWidget {
   const StateLoader({super.key});
@@ -10,7 +10,7 @@ class StateLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return BlocBuilder<LocalFolderCubit, LocalFolderState>(
+    return BlocBuilder<SupabaseSyncCubit, SyncState>(
       builder: (context, state) {
         if (!state.loading) {
           return const SizedBox.shrink();

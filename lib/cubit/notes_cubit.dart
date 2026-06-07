@@ -1,21 +1,32 @@
 import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:notelytask/cubit/local_folder_cubit.dart';
+import 'package:notelytask/cubit/supabase_sync_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:notelytask/models/notes_state.dart';
 import 'package:notelytask/util/quill_utils.dart';
 import 'package:notelytask/util/update_widget.dart';
 import 'package:notelytask/utils.dart';
+import 'package:path_provider/path_provider.dart';
 
 class NotesCubit extends HydratedCubit<NotesState> {
   NotesCubit({
-    required this.localFolderCubit,
+    required this.supabaseSyncCubit,
   }) : super(const NotesState());
-  final LocalFolderCubit localFolderCubit;
+  final SupabaseSyncCubit supabaseSyncCubit;
+  Future<String?>? _missingEncryptionPinPrompt;
+  static const _secureStorage = FlutterSecureStorage(
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.first_unlock_this_device,
+    ),
+  );
+  static const _legacyFolderPathKey = 'local_folder_path';
+  static const _encryptionKeyStoragePrefix = 'supabase_encryption_key';
 
   @override
   void onChange(Change<NotesState> change) {
@@ -24,23 +35,25 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   void invalidateError() {
-    localFolderCubit.invalidateError();
+    supabaseSyncCubit.invalidateError();
   }
 
   Future<void> createOrUpdateRemoteNotes({
-    bool shouldResetIfError = true,
+    bool shouldResetIfError = false,
   }) async {
     final jsonMap = state.toJson();
+    final stringifiedContent = json.encode(jsonMap);
 
-    return await localFolderCubit.createOrUpdateRemoteNotes(
+    return await supabaseSyncCubit.createOrUpdateRemoteNotes(
       shouldResetIfError: shouldResetIfError,
       encryptionKey: state.encryptionKey,
       notesJSONMap: jsonMap,
+      stringifiedContent: stringifiedContent,
     );
   }
 
   Future<bool> deleteFileAndUpdate(String noteId, FileData fileData) async {
-    final remoteDeleteResult = await localFolderCubit.deleteFile(fileData);
+    final remoteDeleteResult = await supabaseSyncCubit.deleteFile(fileData);
     if (!remoteDeleteResult) return false;
     _deleteNoteFileData(
       noteId,
@@ -51,7 +64,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   Future<bool> deleteFile(FileData fileData) async {
-    return await localFolderCubit.deleteFile(fileData);
+    return await supabaseSyncCubit.deleteFile(fileData);
   }
 
   Future<void> uploadNewFileAndNotes(
@@ -64,7 +77,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
       notes: state.notes,
     );
 
-    final fileData = await localFolderCubit.uploadNewFile(
+    final fileData = await supabaseSyncCubit.uploadNewFile(
       safeFileName,
       data,
     );
@@ -82,47 +95,12 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   bool isConnected() {
-    return localFolderCubit.state.isConnected();
-  }
-
-  Future<bool> setRemoteConnection({
-    required bool keepLocal,
-    required Future<String?> Function() enterEncryptionKeyDialog,
-    String? folderPath,
-  }) async {
-    final connectionResult = folderPath != null
-        ? await localFolderCubit.setFolderUrl(
-            folderPath,
-            keepLocal,
-            enterEncryptionKeyDialog,
-          )
-        : null;
-
-    if (connectionResult == null) {
-      return false;
-    }
-
-    if (connectionResult.shouldCreateRemote) {
-      await createOrUpdateRemoteNotes(shouldResetIfError: false);
-      return true;
-    }
-
-    final content = connectionResult.content;
-
-    if (content != null) {
-      final finalContent = json.decode(content);
-      final notes = fromJson(finalContent);
-      emit(notes);
-      return true;
-    }
-    return false;
+    return supabaseSyncCubit.isConnected();
   }
 
   void reset({
     bool shouldError = false,
   }) {
-    localFolderCubit.reset(shouldError: shouldError);
-
     const newState = NotesState(
       encryptionKey: null,
       notes: [],
@@ -133,56 +111,88 @@ class NotesCubit extends HydratedCubit<NotesState> {
   Future<void> getAndUpdateLocalNotes({
     required BuildContext context,
   }) async {
-    if (!localFolderCubit.state.isConnected()) {
+    if (!supabaseSyncCubit.isConnected()) {
       return;
     }
 
-    final result = await localFolderCubit.getRemoteNotes(
-      context: context,
-      encryptionKey: state.encryptionKey,
+    await _loadStoredEncryptionKeyIfNeeded();
+    final encryptionKeyUsed = state.encryptionKey;
+
+    final result = await supabaseSyncCubit.getRemoteNotes(
+      encryptionKey: encryptionKeyUsed,
     );
 
     final notesString = result.notesString;
 
     if (result.decryptionFailed) {
-      // Wrong PIN - disconnect without touching local notes
-      localFolderCubit.reset(shouldError: true);
-      clearEncryptionKey();
+      await clearEncryptionKey();
       return;
     }
 
     if (result.pinNeeded && context.mounted) {
-      final pinResult = await encryptionKeyDialog(
-        context: context,
-        title: 'Encryption Pin Missing',
-        text: 'Your notes are encrypted but you have no pin saved locally.',
-        isPinRequired: true,
-      );
+      final pinResult = await _requestMissingEncryptionPin(context);
       if (pinResult == null) {
-        // User cancelled - just disconnect, don't touch notes
-        localFolderCubit.reset(shouldError: true);
         return;
       }
 
       if (!context.mounted) {
-        localFolderCubit.reset(shouldError: true);
         return;
       }
 
-      setEncryptionKey(pinResult);
+      await setEncryptionKey(pinResult);
+      if (!context.mounted) {
+        return;
+      }
       return getAndUpdateLocalNotes(
         context: context,
       );
     }
 
     if (notesString == null) {
-      // No notes file yet is not an error for local folder
+      if (state.notes.isEmpty || !context.mounted) {
+        return;
+      }
+      final shouldUploadLocal = await syncUploadLocalDialog(
+        context: context,
+      );
+      if (shouldUploadLocal == true) {
+        await _importLegacyAttachments();
+        await createOrUpdateRemoteNotes();
+      }
       return;
-    } else {
-      final finalContent = json.decode(notesString);
-      final list = fromJson(finalContent);
-      emit(list);
     }
+
+    final finalContent = json.decode(notesString);
+    final remoteNotes = fromJson(finalContent);
+    final notesToStore =
+        remoteNotes.encryptionKey == null && encryptionKeyUsed != null
+            ? NotesState(
+                notes: remoteNotes.notes,
+                encryptionKey: encryptionKeyUsed,
+              )
+            : remoteNotes;
+    final localNotesContent = json.encode(
+      state.notes.map((note) => note.toJson()).toList(),
+    );
+    final remoteNotesContent = json.encode(
+      remoteNotes.notes.map((note) => note.toJson()).toList(),
+    );
+
+    if (state.notes.isNotEmpty &&
+        localNotesContent != remoteNotesContent &&
+        context.mounted) {
+      final choice = await syncConflictDialog(context: context);
+      if (choice == SyncConflictChoice.keepLocal) {
+        await _importLegacyAttachments();
+        await createOrUpdateRemoteNotes();
+        return;
+      }
+      if (choice == SyncConflictChoice.cancel) {
+        return;
+      }
+    }
+
+    emit(notesToStore);
   }
 
   Future<Note?> getNoteById(String noteId) async {
@@ -190,13 +200,39 @@ class NotesCubit extends HydratedCubit<NotesState> {
   }
 
   Future<String?> getFileLocalPath(FileData fileData) async {
-    if (localFolderCubit.state.isConnected()) {
-      return await localFolderCubit.getFileLocalPath(fileData.name);
+    if (kIsWeb || !supabaseSyncCubit.isConnected()) {
+      return null;
     }
-    return null;
+
+    final bytes = await getFileBytes(fileData);
+    if (bytes == null) {
+      return null;
+    }
+
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/${fileData.name}');
+    await file.writeAsBytes(bytes, mode: FileMode.write);
+    return file.path;
   }
 
-  void setEncryptionKey(String? key) {
+  Future<Uint8List?> getFileBytes(FileData fileData) async {
+    if (!supabaseSyncCubit.isConnected()) {
+      return null;
+    }
+
+    return await supabaseSyncCubit.downloadFile(fileData);
+  }
+
+  Future<void> setEncryptionKey(String? key) async {
+    final storageKey = _encryptionKeyStorageKey;
+    if (storageKey != null) {
+      if (key == null) {
+        await _secureStorage.delete(key: storageKey);
+      } else {
+        await _secureStorage.write(key: storageKey, value: key);
+      }
+    }
+
     final newState = NotesState(
       notes: state.notes,
       encryptionKey: key,
@@ -204,8 +240,111 @@ class NotesCubit extends HydratedCubit<NotesState> {
     emit(newState);
   }
 
-  void clearEncryptionKey() {
-    setEncryptionKey(null);
+  Future<void> _loadStoredEncryptionKeyIfNeeded() async {
+    if (state.encryptionKey != null) {
+      return;
+    }
+
+    final storageKey = _encryptionKeyStorageKey;
+    if (storageKey == null) {
+      return;
+    }
+
+    final storedKey = await _secureStorage.read(key: storageKey);
+    if (storedKey == null || storedKey.isEmpty) {
+      return;
+    }
+
+    emit(
+      NotesState(
+        notes: state.notes,
+        encryptionKey: storedKey,
+      ),
+    );
+  }
+
+  Future<String?> _requestMissingEncryptionPin(BuildContext context) {
+    final existingPrompt = _missingEncryptionPinPrompt;
+    if (existingPrompt != null) {
+      return existingPrompt;
+    }
+
+    if (!context.mounted) {
+      return Future.value(null);
+    }
+
+    final prompt = encryptionKeyDialog(
+      context: context,
+      title: 'Encryption Pin Missing',
+      text: 'Your notes are encrypted but you have no pin saved locally.',
+      isPinRequired: true,
+    );
+    _missingEncryptionPinPrompt = prompt;
+    prompt.whenComplete(() {
+      if (identical(_missingEncryptionPinPrompt, prompt)) {
+        _missingEncryptionPinPrompt = null;
+      }
+    });
+    return prompt;
+  }
+
+  String? get _encryptionKeyStorageKey {
+    final userId = supabaseSyncCubit.currentUserId;
+    if (userId == null) {
+      return null;
+    }
+    return '${_encryptionKeyStoragePrefix}_$userId';
+  }
+
+  Future<void> _importLegacyAttachments() async {
+    if (kIsWeb || state.notes.isEmpty || !supabaseSyncCubit.isConnected()) {
+      return;
+    }
+
+    final folderPath = await _secureStorage.read(key: _legacyFolderPathKey);
+    if (folderPath == null || folderPath.isEmpty) {
+      return;
+    }
+
+    final folder = Directory(folderPath);
+    if (!await folder.exists()) {
+      return;
+    }
+
+    var changed = false;
+    final updatedNotes = <Note>[];
+
+    for (final note in state.notes) {
+      final updatedFiles = <FileData>[];
+      for (final fileData in note.fileDataList) {
+        if (fileData.id.contains('/')) {
+          updatedFiles.add(fileData);
+          continue;
+        }
+
+        final legacyFile = File('${folder.path}/${fileData.name}');
+        if (!await legacyFile.exists()) {
+          updatedFiles.add(fileData);
+          continue;
+        }
+
+        final uploaded = await supabaseSyncCubit.uploadNewFile(
+          fileData.name,
+          await legacyFile.readAsBytes(),
+        );
+        updatedFiles.add(uploaded ?? fileData);
+        changed = changed || uploaded != null;
+      }
+      updatedNotes.add(note.copyWith(fileDataList: updatedFiles));
+    }
+
+    if (changed) {
+      emit(state.copyWith(notes: updatedNotes));
+    }
+  }
+
+  Future<void> clearEncryptionKey() async {
+    await setEncryptionKey(null);
   }
 
   void setNote(Note note) {
