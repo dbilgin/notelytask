@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "deniz-bilgin"
+  },
+  "targets": {
+    "deniz-bilgin": {
+      "hosting": {
+        "notelytask": [
+          "notelytask-edd7f"
+        ]
+      }
+    }
+  }
+}

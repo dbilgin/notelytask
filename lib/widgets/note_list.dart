@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:notelytask/cubit/local_folder_cubit.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:notelytask/cubit/settings_cubit.dart';
-import 'package:notelytask/models/local_folder_state.dart';
 import 'package:notelytask/models/note.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notelytask/util/quill_utils.dart';
@@ -145,53 +143,43 @@ class _NoteListState extends State<NoteList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<LocalFolderCubit, LocalFolderState>(
-      listener: (context, state) {
-        if (state.error) {
-          showSnackBar(context, 'Error with local folder.');
-          context.read<NotesCubit>().invalidateError();
-        }
-      },
-      child: Column(
-        children: [
-          if ((kIsWeb || isDesktop) && !widget.isDeletedList)
-            _NewNoteButton(
-              onTap: () => navigateToDetails(
-                context: context,
-                isDeletedList: widget.isDeletedList,
-              ),
+    return Column(
+      children: [
+        if ((kIsWeb || isDesktop) && !widget.isDeletedList)
+          _NewNoteButton(
+            onTap: () => navigateToDetails(
+              context: context,
+              isDeletedList: widget.isDeletedList,
             ),
-          Expanded(
-            child: widget.notes.isEmpty
-                ? _EmptyState(isDeletedList: widget.isDeletedList)
-                : ListView.separated(
-                    padding: EdgeInsets.zero,
-                    itemBuilder: (listContext, index) {
-                      final note = widget.notes[index];
-                      return _NoteCard(
+          ),
+        Expanded(
+          child: widget.notes.isEmpty
+              ? _EmptyState(isDeletedList: widget.isDeletedList)
+              : ListView.separated(
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (listContext, index) {
+                    final note = widget.notes[index];
+                    return _NoteCard(
+                      note: note,
+                      isDeletedList: widget.isDeletedList,
+                      isSelected: note.id == widget.selectedNoteId,
+                      onTap: () => navigateToDetails(
+                        context: listContext,
                         note: note,
                         isDeletedList: widget.isDeletedList,
-                        isSelected: note.id == widget.selectedNoteId,
-                        onTap: () => navigateToDetails(
-                          context: listContext,
-                          note: note,
-                          isDeletedList: widget.isDeletedList,
-                        ),
-                        onDismissed: (direction) =>
-                            _dismissed(direction, note),
-                        onContextMenu: (position) =>
-                            _showContextMenu(listContext, position, note),
-                        onLongPress: () =>
-                            _showContextMenu(listContext, null, note),
-                      );
-                    },
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: 10),
-                    itemCount: widget.notes.length,
-                  ),
-          ),
-        ],
-      ),
+                      ),
+                      onDismissed: (direction) => _dismissed(direction, note),
+                      onContextMenu: (position) =>
+                          _showContextMenu(listContext, position, note),
+                      onLongPress: () =>
+                          _showContextMenu(listContext, null, note),
+                    );
+                  },
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemCount: widget.notes.length,
+                ),
+        ),
+      ],
     );
   }
 }
@@ -396,8 +384,8 @@ class _NoteCard extends StatelessWidget {
                                       note.title.isEmpty
                                           ? 'Untitled'
                                           : note.title,
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(
+                                      style:
+                                          theme.textTheme.titleMedium?.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: note.title.isEmpty
                                             ? colorScheme.onSurfaceVariant
@@ -410,8 +398,7 @@ class _NoteCard extends StatelessWidget {
                                   const SizedBox(width: 8),
                                   Text(
                                     _formatDate(note.date),
-                                    style: theme.textTheme.labelSmall
-                                        ?.copyWith(
+                                    style: theme.textTheme.labelSmall?.copyWith(
                                       color: colorScheme.onSurfaceVariant
                                           .withValues(alpha: 0.7),
                                     ),
@@ -443,8 +430,7 @@ class _NoteCard extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         color: colorScheme.primary
                                             .withValues(alpha: 0.12),
-                                        borderRadius:
-                                            BorderRadius.circular(6),
+                                        borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
