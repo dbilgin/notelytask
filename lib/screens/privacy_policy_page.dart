@@ -64,6 +64,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                       '''NotelyTask keeps data collection limited to the app experience:
 
 • **Account Information**: Your account service stores your email address and password credentials for login
+• **Two-Factor Authentication**: Your account service stores authenticator-app factor metadata for required sign-in verification
 • **Synced Notes**: Your notes are stored as one per-user note document in cloud storage
 • **Attachments**: Files you attach to notes are stored in private cloud storage
 • **Local Cache**: Notes are also cached locally on your device for offline use
@@ -78,6 +79,7 @@ class PrivacyPolicyPage extends StatelessWidget {
 
 • **Email Login**: You create and access your account with email and password
 • **Email Confirmation**: New accounts require email confirmation
+• **Two-Factor Authentication**: Cloud notes and attachments require an authenticator-app code after login
 • **Password Reset**: Password reset links are sent by email
 • **Offline Editing**: Text notes are cached locally and can be edited while offline
 • **Cloud Sync**: Local note changes sync to your cloud account when the app can connect''',
@@ -86,8 +88,8 @@ class PrivacyPolicyPage extends StatelessWidget {
                       context,
                       'Data Storage and Security',
                       '''• **Account Security**: Passwords are handled by the account service, not stored directly by the app
-• **Access Controls**: Cloud database policies restrict each user to their own note document
-• **Private Storage**: Attachment storage is scoped to the signed-in user
+• **Access Controls**: Cloud database policies restrict each user to their own note document and require completed two-factor authentication
+• **Private Storage**: Attachment storage is scoped to the signed-in user and requires completed two-factor authentication
 • **PIN Encryption**: When enabled, your note document is encrypted before it is synced
 • **Local Cache**: Your device keeps an offline copy of notes for app functionality
 • **Device Security**: Local cache security also depends on your device security''',
@@ -95,7 +97,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                     _buildSection(
                       context,
                       'Cloud Services',
-                      '''NotelyTask uses a cloud provider for authentication, database storage, file storage, and email delivery for account flows. The provider processes the information required to provide these services, including account email, authentication metadata, note document storage, and attachment storage.''',
+                      '''NotelyTask uses a cloud provider for authentication, two-factor authentication, database storage, file storage, and email delivery for account flows. The provider processes the information required to provide these services, including account email, authentication metadata, note document storage, and attachment storage.''',
                     ),
                     _buildSection(
                       context,
