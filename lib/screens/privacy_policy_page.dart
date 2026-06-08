@@ -144,11 +144,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                     _buildSection(
                       context,
                       'Contact Us',
-                      '''If you have questions about this Privacy Policy or our data practices:
-
-• **GitHub Issues**: Open an issue on our repository
-• **Source Code**: Review the app source code
-• **Cloud Provider**: Review the cloud provider's privacy and security documentation for platform-level processing''',
+                      '''If you have questions about this Privacy Policy or our data practices: support@omedacore.com''',
                     ),
                     const SizedBox(height: 24),
                     Container(
