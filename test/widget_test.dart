@@ -14,12 +14,26 @@ void main() {
     }
   });
 
-  testWidgets('shows cloud sync configuration message when not configured',
+  testWidgets('shows landing page when logged out',
       (WidgetTester tester) async {
     await tester.pumpWidget(const App());
     await tester.pump();
 
-    expect(find.text('NotelyTask'), findsOneWidget);
+    expect(find.text('NotelyTask'), findsWidgets);
+    expect(
+      find.textContaining('Private notes'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('shows cloud sync configuration message on auth route',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const App());
+    await tester.pump();
+
+    await tester.tap(find.text('Sign in').first);
+    await tester.pumpAndSettle();
+
     expect(
       find.textContaining('Cloud sync is not configured'),
       findsOneWidget,
