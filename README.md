@@ -12,7 +12,13 @@ The Supabase backend stores one note blob per user instead of splitting every no
 
 ### Supabase Sync
 
-The app ships with public Supabase client config in `assets/env/notelytask.env`, so normal local runs and Xcode launches do not need manual flags:
+Create a local env file for normal local runs and Xcode launches:
+
+```bash
+cp assets/env/notelytask.env.example assets/env/notelytask.env
+```
+
+Then run:
 
 ```bash
 flutter run

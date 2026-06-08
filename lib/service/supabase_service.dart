@@ -13,7 +13,10 @@ class SupabaseConfig {
       'com.omedacore.notelytask://auth-callback';
 
   static Future<void> loadEnv() async {
-    await dotenv.load(fileName: 'assets/env/notelytask.env');
+    await dotenv.load(
+      fileName: 'assets/env/notelytask.env',
+      isOptional: true,
+    );
   }
 
   static String get url => _value(

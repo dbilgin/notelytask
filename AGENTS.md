@@ -78,7 +78,7 @@ The app does not use the old local-folder sync backend anymore. Notes sync to Su
 - Do not hand-edit generated JSON serialization files. Regenerate them with build runner after changing annotated models.
 - Common setup command: `flutter pub get`.
 - CI is pinned to Flutter 3.44.1 because the resolved dependency graph, including `app_links`, requires the newer Dart/Flutter SDK line.
-- Public Supabase client config lives in `assets/env/notelytask.env` so normal local runs and Xcode launches work without manual flags. Dart defines may override those values for CI or alternate environments.
+- Public Supabase client config may live in an untracked local `assets/env/notelytask.env` copied from `assets/env/notelytask.env.example`. Do not commit the real env file. Dart defines may provide or override those values for CI, production, or alternate environments.
 - Web builds may override `SUPABASE_WEB_AUTH_CALLBACK_URL`, defaulting to `https://notelytask.dbilgin.com/auth-callback`.
 - After model serialization changes, use `dart run build_runner build --delete-conflicting-outputs`.
 - Use `flutter analyze` for static checks and focused `flutter test` for behavior.
