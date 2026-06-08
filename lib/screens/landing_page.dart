@@ -2,9 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:notelytask/theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
+
+  static final Uri _latestReleaseUrl = Uri.parse(
+    'https://github.com/dbilgin/notelytask/releases/latest',
+  );
 
   void _openLogin(BuildContext context) =>
       Navigator.of(context).pushNamed('/login');
@@ -12,6 +17,12 @@ class LandingPage extends StatelessWidget {
       Navigator.of(context).pushNamed('/signup');
   void _openPrivacy(BuildContext context) =>
       Navigator.of(context).pushNamed('/privacy_policy');
+  Future<void> _openLatestRelease() async {
+    await launchUrl(
+      _latestReleaseUrl,
+      mode: LaunchMode.externalApplication,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +47,7 @@ class LandingPage extends StatelessWidget {
                   onLogin: () => _openLogin(context),
                   onSignup: () => _openSignup(context),
                   onPrivacy: () => _openPrivacy(context),
+                  onLatestRelease: _openLatestRelease,
                 ),
                 _FeatureBand(isCompact: isCompact),
                 _SecurityBand(isCompact: isCompact),
@@ -44,6 +56,7 @@ class LandingPage extends StatelessWidget {
                   onLogin: () => _openLogin(context),
                   onSignup: () => _openSignup(context),
                   onPrivacy: () => _openPrivacy(context),
+                  onLatestRelease: _openLatestRelease,
                 ),
               ],
             ),
@@ -61,6 +74,7 @@ class _HeroSection extends StatelessWidget {
     required this.onLogin,
     required this.onSignup,
     required this.onPrivacy,
+    required this.onLatestRelease,
   });
 
   final double height;
@@ -68,6 +82,7 @@ class _HeroSection extends StatelessWidget {
   final VoidCallback onLogin;
   final VoidCallback onSignup;
   final VoidCallback onPrivacy;
+  final VoidCallback onLatestRelease;
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +172,11 @@ class _HeroSection extends StatelessWidget {
                                 onPressed: onLogin,
                                 icon: const Icon(Icons.login_rounded),
                                 label: const Text('Sign in'),
+                              ),
+                              TextButton.icon(
+                                onPressed: onLatestRelease,
+                                icon: const Icon(Icons.download_rounded),
+                                label: const Text('Latest release'),
                               ),
                             ],
                           ),
@@ -623,10 +643,6 @@ class _SecurityList extends StatelessWidget {
           icon: Icons.lock_rounded,
           title: 'Optional PIN-encrypted sync',
         ),
-        _SecurityRow(
-          icon: Icons.folder_off_rounded,
-          title: 'No folder selection required',
-        ),
       ],
     );
   }
@@ -638,12 +654,14 @@ class _Footer extends StatelessWidget {
     required this.onLogin,
     required this.onSignup,
     required this.onPrivacy,
+    required this.onLatestRelease,
   });
 
   final ThemeData theme;
   final VoidCallback onLogin;
   final VoidCallback onSignup;
   final VoidCallback onPrivacy;
+  final VoidCallback onLatestRelease;
 
   @override
   Widget build(BuildContext context) {
@@ -664,6 +682,10 @@ class _Footer extends StatelessWidget {
               ),
             ),
             TextButton(onPressed: onPrivacy, child: const Text('Privacy')),
+            TextButton(
+              onPressed: onLatestRelease,
+              child: const Text('Latest release'),
+            ),
             TextButton(onPressed: onLogin, child: const Text('Sign in')),
             FilledButton(
               onPressed: onSignup,

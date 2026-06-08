@@ -39,6 +39,7 @@ The app does not use the old local-folder sync backend anymore. Notes sync to Su
 
 - Logged-out `/` shows the cross-platform landing page. Do not route logged-out users directly to the auth form from `/`.
 - `/login` and `/signup` are the dedicated auth entry routes and set the initial auth form mode.
+- The landing page links to the latest GitHub release at `https://github.com/dbilgin/notelytask/releases/latest`.
 - Authenticated users bypass the landing page and go straight to notes; MFA-required and password-recovery sessions continue through their dedicated auth/MFA flows.
 - `/auth-callback` remains reserved for email confirmation, password reset, and Supabase auth callback handling.
 
