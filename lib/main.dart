@@ -11,6 +11,7 @@ import 'package:notelytask/screens/auth_callback_page.dart';
 import 'package:notelytask/screens/auth_page.dart';
 import 'package:notelytask/screens/details_page.dart';
 import 'package:notelytask/screens/home_page.dart';
+import 'package:notelytask/screens/landing_page.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:notelytask/screens/privacy_policy_page.dart';
@@ -91,6 +92,12 @@ class App extends StatelessWidget {
 
               var routes = <String, WidgetBuilder>{
                 '/': (context) => const AuthGate(),
+                '/login': (context) => const AuthEntryGate(
+                      initialMode: AuthFormMode.signIn,
+                    ),
+                '/signup': (context) => const AuthEntryGate(
+                      initialMode: AuthFormMode.signUp,
+                    ),
                 '/auth-callback': (context) => const AuthCallbackPage(),
                 '/deleted_list': (context) => const DeletedListPage(),
                 '/details': (context) => Scaffold(
@@ -154,7 +161,46 @@ class AuthGate extends StatelessWidget {
           return const HomePage();
         }
 
-        return const AuthPage();
+        if (state.status == AuthStatus.mfaEnrollmentRequired ||
+            state.status == AuthStatus.mfaVerificationRequired ||
+            state.status == AuthStatus.passwordRecovery) {
+          return const AuthPage();
+        }
+
+        return const LandingPage();
+      },
+    );
+  }
+}
+
+class AuthEntryGate extends StatelessWidget {
+  const AuthEntryGate({
+    super.key,
+    required this.initialMode,
+  });
+
+  final AuthFormMode initialMode;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          context.read<NotesCubit>().getAndUpdateLocalNotes(context: context);
+        }
+      },
+      builder: (context, state) {
+        if (state.status == AuthStatus.loading) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (state.status == AuthStatus.authenticated) {
+          return const HomePage();
+        }
+
+        return AuthPage(initialMode: initialMode);
       },
     );
   }

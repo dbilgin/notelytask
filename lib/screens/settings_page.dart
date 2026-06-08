@@ -24,6 +24,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   String version = '';
   bool _mfaBusy = false;
+  bool _deleteAccountBusy = false;
 
   Future<String> getVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
@@ -94,6 +95,10 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 12),
             _buildSecurityCard(colorScheme: colorScheme),
             const SizedBox(height: 24),
+            _buildSectionHeader(context, 'Account'),
+            const SizedBox(height: 12),
+            _buildAccountCard(colorScheme: colorScheme),
+            const SizedBox(height: 24),
             _buildSectionHeader(context, 'Appearance'),
             const SizedBox(height: 12),
             _ThemeCard(colorScheme: colorScheme),
@@ -138,6 +143,64 @@ class _SettingsPageState extends State<SettingsPage> {
         setState(() => _mfaBusy = false);
       }
     }
+  }
+
+  Future<void> _deleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: const Text(
+          'This permanently deletes your account, synced notes, attachments, '
+          'and local cached notes on this device. This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete account'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
+
+    final syncCubit = context.read<SupabaseSyncCubit>();
+    final notesCubit = context.read<NotesCubit>();
+    final settingsCubit = context.read<SettingsCubit>();
+    final authCubit = context.read<AuthCubit>();
+
+    setState(() => _deleteAccountBusy = true);
+    final deleted = await syncCubit.deleteAccountData();
+    if (!mounted) {
+      return;
+    }
+
+    if (!deleted) {
+      setState(() => _deleteAccountBusy = false);
+      showSnackBar(context, 'Account deletion failed. Please try again.');
+      return;
+    }
+
+    await notesCubit.clearEncryptionKey();
+    notesCubit.reset();
+    settingsCubit.setSelectedNoteId(null);
+    await authCubit.clearDeletedAccountSession();
+
+    if (!mounted) {
+      return;
+    }
+    setState(() => _deleteAccountBusy = false);
+    getIt<NavigationService>().pushNamed('/');
   }
 
   Future<void> _removeAuthenticator(String factorId) async {
@@ -408,6 +471,68 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildAccountCard({required ColorScheme colorScheme}) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: colorScheme.errorContainer,
+                  child: Icon(
+                    Icons.delete_forever_rounded,
+                    color: colorScheme.onErrorContainer,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Delete account',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        'Permanently remove your account, notes, and files',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: _deleteAccountBusy ? null : _deleteAccount,
+              icon: _deleteAccountBusy
+                  ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.delete_outline_rounded),
+              label: const Text('Delete Account'),
+              style: FilledButton.styleFrom(
+                backgroundColor: colorScheme.error,
+                foregroundColor: colorScheme.onError,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

@@ -176,6 +176,36 @@ class SupabaseSyncCubit extends Cubit<SyncState> {
     }
   }
 
+  Future<bool> deleteAccountData() async {
+    if (!isConnected()) {
+      emit(
+        state.copyWith(
+          loading: false,
+          error: true,
+          message: 'Sign in before deleting your account.',
+        ),
+      );
+      return false;
+    }
+
+    emit(state.copyWith(loading: true, error: false, clearMessage: true));
+    try {
+      await syncRepository!.deleteAllAttachments();
+      await syncRepository!.deleteAccountData();
+      emit(state.copyWith(loading: false, error: false, dirty: false));
+      return true;
+    } catch (error) {
+      emit(
+        state.copyWith(
+          loading: false,
+          error: true,
+          message: error.toString(),
+        ),
+      );
+      return false;
+    }
+  }
+
   void markDirty() {
     emit(state.copyWith(dirty: true));
   }
