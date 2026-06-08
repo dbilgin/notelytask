@@ -34,6 +34,13 @@ The app does not use the old local-folder sync backend anymore. Notes sync to Su
 - First login/sync must preserve the local-versus-cloud conflict prompt instead of silently overwriting either side.
 - The missing-PIN decrypt prompt in `NotesCubit` must remain single-flight. Auth, home mount, settings, and native/widget paths can overlap sync requests, and only one decrypt dialog should appear.
 
+## Auth and Entry Routes
+
+- Logged-out `/` shows the cross-platform landing page. Do not route logged-out users directly to the auth form from `/`.
+- `/login` and `/signup` are the dedicated auth entry routes and set the initial auth form mode.
+- Authenticated users bypass the landing page and go straight to notes; MFA-required and password-recovery sessions continue through their dedicated auth/MFA flows.
+- `/auth-callback` remains reserved for email confirmation, password reset, and Supabase auth callback handling.
+
 ## Encryption Rules
 
 - PIN encryption is still supported for the synced note blob.

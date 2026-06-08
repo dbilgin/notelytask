@@ -7,7 +7,12 @@ import 'package:notelytask/screens/mfa_page.dart';
 enum AuthFormMode { signIn, signUp, resetRequest, updatePassword }
 
 class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
+  const AuthPage({
+    super.key,
+    this.initialMode = AuthFormMode.signIn,
+  });
+
+  final AuthFormMode initialMode;
 
   @override
   State<AuthPage> createState() => _AuthPageState();
@@ -18,7 +23,21 @@ class _AuthPageState extends State<AuthPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  AuthFormMode _mode = AuthFormMode.signIn;
+  late AuthFormMode _mode;
+
+  @override
+  void initState() {
+    super.initState();
+    _mode = widget.initialMode;
+  }
+
+  @override
+  void didUpdateWidget(AuthPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialMode != oldWidget.initialMode) {
+      _mode = widget.initialMode;
+    }
+  }
 
   @override
   void dispose() {
