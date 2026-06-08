@@ -81,6 +81,15 @@ class AuthCubit extends Cubit<AuthState> {
     });
   }
 
+  Future<void> clearDeletedAccountSession() async {
+    try {
+      await _requireClient().auth.signOut();
+    } catch (_) {
+      // The auth user has already been removed server-side.
+    }
+    emit(const AuthState.unauthenticated(message: 'Account deleted.'));
+  }
+
   Future<void> sendPasswordReset(String email) async {
     await _runAuthAction(() async {
       await _requireClient().auth.resetPasswordForEmail(

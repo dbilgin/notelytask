@@ -87,4 +87,26 @@ class SupabaseSyncRepository {
   Future<void> deleteAttachment(String path) async {
     await client.storage.from(attachmentBucket).remove([path]);
   }
+
+  Future<void> deleteAllAttachments() async {
+    final storage = client.storage.from(attachmentBucket);
+
+    while (true) {
+      final files = await storage.list(
+        path: _userId,
+        searchOptions: const SearchOptions(limit: 100),
+      );
+      if (files.isEmpty) {
+        return;
+      }
+
+      await storage.remove(
+        files.map((file) => '$_userId/${file.name}').toList(),
+      );
+    }
+  }
+
+  Future<void> deleteAccountData() async {
+    await client.rpc('delete_current_user_account');
+  }
 }

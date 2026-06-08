@@ -103,9 +103,9 @@ class PrivacyPolicyPage extends StatelessWidget {
                       context,
                       'Data Retention',
                       '''• **Account Data**: Account data remains in the cloud service while your account exists
-• **Synced Notes**: Synced notes remain until you delete them or your account data is removed
+• **Synced Notes**: Synced notes remain until you delete them or delete your account
 • **Deleted Notes**: Deleted notes are moved to the app's deleted state and can be permanently removed
-• **Attachments**: Attachments remain in private storage until deleted
+• **Attachments**: Attachments remain in private storage until deleted or your account is deleted
 • **Local Cache**: Uninstalling the app removes local device data, but not cloud data already synced to your account''',
                     ),
                     _buildSection(
@@ -116,6 +116,7 @@ class PrivacyPolicyPage extends StatelessWidget {
 • Access all your data stored in the app
 • Export your notes at any time
 • Delete your notes and app data
+• Delete your account and synced cloud data from Settings
 • Sign out of your cloud account
 • Request information about data processing
 • Contact us with privacy concerns''',

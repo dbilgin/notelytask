@@ -40,8 +40,11 @@ The auth flow supports:
 - Required authenticator-app two-factor authentication
 - Password reset by email
 - Sign out
+- Account deletion from Settings
 
 Cloud note and attachment access requires an `aal2` Supabase session. After email/password login, existing users must verify a TOTP code or set up an authenticator app before cloud sync starts.
+
+Deleting an account removes the user's synced note document, private attachment files, auth account, local note cache, and remembered local encryption PIN on that device.
 
 ### Encryption
 
