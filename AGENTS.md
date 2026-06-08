@@ -29,6 +29,7 @@ The app does not use the old local-folder sync backend anymore. Notes sync to Su
 - Do not split notes into relational rows unless the product direction explicitly changes.
 - Supabase Storage bucket `note-attachments` stores attachment bytes under the signed-in user's id prefix.
 - Attachment metadata remains inside the note blob.
+- Account deletion is initiated from Settings. It must remove the user's Storage attachments, note document, Supabase auth user, local note cache, selected-note state, and remembered local PIN.
 - Local text edits should update immediately and mark remote sync dirty if Supabase write fails.
 - Cloud note and attachment access requires a Supabase `aal2` session; email/password-only `aal1` sessions must stay in the MFA gate and must not trigger sync.
 - First login/sync must preserve the local-versus-cloud conflict prompt instead of silently overwriting either side.
@@ -58,6 +59,7 @@ The app does not use the old local-folder sync backend anymore. Notes sync to Su
 - The Supabase CLI uses `SUPABASE_ACCESS_TOKEN` in the user's shell for remote operations.
 - Apply migrations only after linking the intended project; never commit service-role keys.
 - TOTP MFA must stay enabled in Supabase config, and note/document Storage RLS must keep requiring `auth.jwt()->>'aal' = 'aal2'` for the app's private data surfaces.
+- `delete_current_user_account` is a security-definer RPC for account deletion. It requires an authenticated `aal2` session and deletes only the current user's private app data before removing the auth user.
 - Email confirmation and password reset require Supabase Auth redirect URLs for `https://notelytask.dbilgin.com/auth-callback` and `com.omedacore.notelytask://auth-callback`.
 - Firebase Hosting uses project `deniz-bilgin`, hosting target `notelytask`, and site `notelytask-edd7f`.
 
