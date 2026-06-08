@@ -139,8 +139,7 @@ class AuthGate extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state.status == AuthStatus.authenticated ||
-            state.status == AuthStatus.passwordRecovery) {
+        if (state.status == AuthStatus.authenticated) {
           context.read<NotesCubit>().getAndUpdateLocalNotes(context: context);
         }
       },
