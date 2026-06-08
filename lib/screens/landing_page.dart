@@ -88,6 +88,10 @@ class _HeroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final heroActionTextStyle = theme.textTheme.labelLarge?.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w800,
+    );
 
     return SizedBox(
       height: height,
@@ -172,11 +176,20 @@ class _HeroSection extends StatelessWidget {
                                 onPressed: onLogin,
                                 icon: const Icon(Icons.login_rounded),
                                 label: const Text('Sign in'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  side: const BorderSide(color: Colors.white),
+                                  textStyle: heroActionTextStyle,
+                                ),
                               ),
                               TextButton.icon(
                                 onPressed: onLatestRelease,
                                 icon: const Icon(Icons.download_rounded),
                                 label: const Text('Latest release'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  textStyle: heroActionTextStyle,
+                                ),
                               ),
                             ],
                           ),
@@ -352,6 +365,10 @@ class _LandingNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final navTextStyle = theme.textTheme.labelLarge?.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w800,
+    );
 
     return Row(
       children: [
@@ -372,11 +389,19 @@ class _LandingNav extends StatelessWidget {
         if (!isCompact)
           TextButton(
             onPressed: onPrivacy,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              textStyle: navTextStyle,
+            ),
             child: const Text('Privacy'),
           ),
         const SizedBox(width: 4),
         TextButton(
           onPressed: onLogin,
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            textStyle: navTextStyle,
+          ),
           child: const Text('Sign in'),
         ),
         if (!isCompact) ...[
