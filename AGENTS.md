@@ -8,14 +8,14 @@ Whenever you make or discover a relevant app change, update this file in the sam
 
 ## Project Shape
 
-NotelyTask is a Flutter/Dart notes app with Supabase-backed email/password accounts, Supabase sync, attachments, and a HydratedBloc offline cache.
+NotelyTask is a Flutter/Dart notes app with Supabase-backed email/password accounts, mandatory authenticator-app two-factor authentication, Supabase sync, attachments, and a HydratedBloc offline cache.
 
 The app does not use the old local-folder sync backend anymore. Notes sync to Supabase as one per-user note document/blob, not as one row per note. Attachments are stored separately in private Supabase Storage.
 
 ## Architecture Map
 
 - `lib/main.dart` initializes Flutter, optional Supabase config, HydratedBloc, app cubits, routes, and theme.
-- `AuthCubit` owns Supabase Auth session state, signup, login, logout, reset email, and password update.
+- `AuthCubit` owns Supabase Auth session state, signup, login, logout, reset email, password update, mandatory TOTP enrollment, and MFA verification.
 - `NotesCubit` owns local note mutations, HydratedBloc serialization, conflict prompts, encryption decisions, and requests to sync the note blob.
 - `SupabaseSyncCubit` owns sync loading/error/dirty state and calls the Supabase repository.
 - `SupabaseSyncRepository` is the low-level Supabase database and Storage access layer.
@@ -30,6 +30,7 @@ The app does not use the old local-folder sync backend anymore. Notes sync to Su
 - Supabase Storage bucket `note-attachments` stores attachment bytes under the signed-in user's id prefix.
 - Attachment metadata remains inside the note blob.
 - Local text edits should update immediately and mark remote sync dirty if Supabase write fails.
+- Cloud note and attachment access requires a Supabase `aal2` session; email/password-only `aal1` sessions must stay in the MFA gate and must not trigger sync.
 - First login/sync must preserve the local-versus-cloud conflict prompt instead of silently overwriting either side.
 - The missing-PIN decrypt prompt in `NotesCubit` must remain single-flight. Auth, home mount, settings, and native/widget paths can overlap sync requests, and only one decrypt dialog should appear.
 
@@ -49,6 +50,7 @@ The app does not use the old local-folder sync backend anymore. Notes sync to Su
 - Use the hosted Supabase project for backend work. Do not start or rely on a local Supabase stack unless the user explicitly changes this preference.
 - The Supabase CLI uses `SUPABASE_ACCESS_TOKEN` in the user's shell for remote operations.
 - Apply migrations only after linking the intended project; never commit service-role keys.
+- TOTP MFA must stay enabled in Supabase config, and note/document Storage RLS must keep requiring `auth.jwt()->>'aal' = 'aal2'` for the app's private data surfaces.
 - Email confirmation and password reset require Supabase Auth redirect URLs for `https://notelytask.dbilgin.com/auth-callback` and `com.omedacore.notelytask://auth-callback`.
 - Firebase Hosting uses project `deniz-bilgin`, hosting target `notelytask`, and site `notelytask-edd7f`.
 

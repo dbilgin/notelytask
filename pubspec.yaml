@@ -38,6 +38,7 @@ dependencies:
   pinput: ^5.0.0
   flutter_quill: ^11.5.1
   google_fonts: ^6.0.0
+  flutter_svg: ^2.2.3
   flutter_widget_from_html: ^0.15.3
   http_parser: ^4.0.2
   flutter_secure_storage: ^10.3.1
