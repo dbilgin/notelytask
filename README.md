@@ -10,6 +10,8 @@ NotelyTask uses [hydrated_bloc](https://pub.dev/packages/hydrated_bloc) to keep 
 
 The Supabase backend stores one note blob per user instead of splitting every note into separate relational rows. Attachments are stored separately in private Supabase Storage and referenced from the note blob metadata.
 
+Attachments are limited to 10 MB per file and 250 MB total per user.
+
 ### Supabase Sync
 
 Create a local env file for normal local runs and Xcode launches:

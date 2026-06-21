@@ -67,7 +67,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
     return await supabaseSyncCubit.deleteFile(fileData);
   }
 
-  Future<void> uploadNewFileAndNotes(
+  Future<bool> uploadNewFileAndNotes(
     String noteId,
     String fileName,
     Uint8List data,
@@ -83,7 +83,7 @@ class NotesCubit extends HydratedCubit<NotesState> {
     );
 
     if (fileData == null) {
-      return;
+      return false;
     }
     _addNoteFileData(
       noteId: noteId,
@@ -91,7 +91,8 @@ class NotesCubit extends HydratedCubit<NotesState> {
       fileId: fileData.id,
     );
 
-    return await createOrUpdateRemoteNotes();
+    await createOrUpdateRemoteNotes();
+    return true;
   }
 
   bool isConnected() {

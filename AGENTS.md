@@ -29,6 +29,7 @@ The app does not use the old local-folder sync backend anymore. Notes sync to Su
 - Do not split notes into relational rows unless the product direction explicitly changes.
 - Supabase Storage bucket `note-attachments` stores attachment bytes under the signed-in user's id prefix.
 - Attachment metadata remains inside the note blob.
+- Attachments are capped at 10 MB per file and 250 MB total per user. Keep client checks and Supabase Storage trigger/bucket enforcement in sync.
 - Account deletion is initiated from Settings. It must remove the user's Storage attachments, note document, Supabase auth user, local note cache, selected-note state, and remembered local PIN.
 - Local text edits should update immediately and mark remote sync dirty if Supabase write fails.
 - Cloud note and attachment access requires a Supabase `aal2` session; email/password-only `aal1` sessions must stay in the MFA gate and must not trigger sync.

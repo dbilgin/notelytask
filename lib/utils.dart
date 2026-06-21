@@ -6,8 +6,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/constants/attachment_limits.dart';
 import 'package:get_it/get_it.dart';
 import 'package:notelytask/cubit/notes_cubit.dart';
+import 'package:notelytask/cubit/supabase_sync_cubit.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/service/navigation_service.dart';
 import 'package:notelytask/theme.dart';
@@ -260,13 +262,24 @@ Future<void> uploadFile(BuildContext context, Note note) async {
   FilePickerResult? result = await FilePicker.platform.pickFiles();
   if (result == null) return;
 
+  if (!context.mounted) return;
+
+  final selectedFile = result.files.single;
+  if (selectedFile.size > attachmentMaxFileSizeBytes) {
+    showSnackBar(
+      context,
+      'Files must be ${formatAttachmentLimit(attachmentMaxFileSizeBytes)} or smaller.',
+    );
+    return;
+  }
+
   Uint8List? imageBytes;
   String fileName;
   if (kIsWeb) {
-    imageBytes = result.files.single.bytes;
-    fileName = result.files.single.name;
+    imageBytes = selectedFile.bytes;
+    fileName = selectedFile.name;
   } else {
-    final path = result.files.single.path;
+    final path = selectedFile.path;
     if (path == null) return;
 
     File file = File(path);
@@ -276,11 +289,15 @@ Future<void> uploadFile(BuildContext context, Note note) async {
 
   if (!context.mounted || imageBytes == null) return;
 
-  await context.read<NotesCubit>().uploadNewFileAndNotes(
+  final uploaded = await context.read<NotesCubit>().uploadNewFileAndNotes(
         note.id,
         fileName,
         imageBytes,
       );
+  if (!context.mounted || uploaded) return;
+
+  final message = context.read<SupabaseSyncCubit>().state.message;
+  showSnackBar(context, message ?? 'File could not be uploaded.');
 }
 
 Future<String?> encryptionKeyDialog({

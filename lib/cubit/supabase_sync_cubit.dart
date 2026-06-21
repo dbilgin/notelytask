@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notelytask/constants/attachment_limits.dart';
 import 'package:notelytask/models/file_data.dart';
 import 'package:notelytask/models/sync_state.dart';
 import 'package:notelytask/repository/models/get_notes_result.dart';
@@ -111,6 +112,18 @@ class SupabaseSyncCubit extends Cubit<SyncState> {
       return null;
     }
 
+    if (data.lengthInBytes > attachmentMaxFileSizeBytes) {
+      emit(
+        state.copyWith(
+          loading: false,
+          error: true,
+          message:
+              'Files must be ${formatAttachmentLimit(attachmentMaxFileSizeBytes)} or smaller.',
+        ),
+      );
+      return null;
+    }
+
     emit(state.copyWith(loading: true, error: false, clearMessage: true));
     try {
       final path = await syncRepository!.uploadAttachment(
@@ -124,7 +137,7 @@ class SupabaseSyncCubit extends Cubit<SyncState> {
         state.copyWith(
           loading: false,
           error: true,
-          message: error.toString(),
+          message: _attachmentUploadErrorMessage(error),
         ),
       );
       return null;
@@ -216,5 +229,18 @@ class SupabaseSyncCubit extends Cubit<SyncState> {
 
   String _filePath(FileData fileData) {
     return fileData.id.isEmpty ? fileData.name : fileData.id;
+  }
+
+  String _attachmentUploadErrorMessage(Object error) {
+    final message = error.toString();
+    if (message.contains('Attachment storage limit exceeded')) {
+      return 'Attachment storage is full. Delete files to upload more.';
+    }
+    if (message.contains('exceeded the maximum allowed size') ||
+        message.contains('maximum allowed size') ||
+        message.contains('file_size_limit')) {
+      return 'Files must be ${formatAttachmentLimit(attachmentMaxFileSizeBytes)} or smaller.';
+    }
+    return message;
   }
 }
