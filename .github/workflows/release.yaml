@@ -297,23 +297,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    steps:
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
-          generate_release_notes: true
-          draft: false
-          prerelease: false
-
-  upload-downloads:
-    needs: create-release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
     concurrency:
-      group: sftpgo-notelytask-releases
+      group: github-release-packages
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
@@ -331,14 +316,26 @@ jobs:
           name: android-apk
           path: release-packages
 
-      - name: Install HTTP client
-        run: sudo apt-get update && sudo apt-get install -y python3-requests
-
-      - name: Replace NotelyTask downloads
-        env:
-          SFTPGO_API_KEY: ${{ secrets.SFTPGO_API_KEY }}
+      - name: Prepare packages and test retention
         run: |
-          set -euo pipefail
-          test -n "$SFTPGO_API_KEY" || { echo 'SFTPGO_API_KEY secret is required'; exit 1; }
           mv release-packages/app-release.apk "release-packages/notelytask_${GITHUB_REF_NAME}.apk"
-          /usr/bin/python3 deploy/upload-release.py release-packages/*
+          python3 -m unittest discover -s deploy -p 'test_*.py'
+
+      - name: Create GitHub Release with packages
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          files: |
+            release-packages/*.apk
+            release-packages/*.deb
+            release-packages/*.rpm
+
+      - name: Verify new packages and remove older packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 deploy/retain_release.py

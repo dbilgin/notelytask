@@ -84,19 +84,16 @@ sudo dpkg -i notelytask_*_amd64.deb
 </div>
 # Dokploy Release Deployment
 
-Native releases are also copied through SFTPGo's HTTPS API at
-`https://download.dbilgin.com`, using Actions secret `SFTPGO_API_KEY`
-bound to user `ci-builds`. API-key authentication must be enabled for that
-user. No SSH key, known-hosts setting, or published SFTP port is needed.
-After all packages are built and the GitHub release is published, CI clears
-only `/notelytask` in that user's namespace and uploads the latest APK, DEB,
-and RPM. Old downloads are deleted first to respect storage limits; an
-interrupted upload may leave partial downloads, so rerun the upload job.
-GitHub releases contain generated release notes only, with no uploaded packages
-or package links. Packages are distributed through SFTPGo; Actions artifacts
-remain the intermediate handoff between build and upload jobs.
-`ci-builds` needs list, delete,
-create-directory, and upload access. CI verifies uploaded filenames and sizes.
+Native APK, DEB, and RPM packages are uploaded to GitHub Releases. After
+verifying all three uploaded package names, states, and sizes against the build
+artifacts, CI deletes NotelyTask package assets from lower stable versions.
+Tags, release notes, unrelated assets, drafts, prereleases, and newer versions
+are preserved. Publishing and cleanup are serialized; failed verification
+prevents cleanup. Failed cleanup fails the job and can be retried.
+This uses the existing `GITHUB_TOKEN` with `contents: write`.
+SFTPGo is no longer used; its existing files and credentials are not removed
+automatically. Run retention tests with
+`python3 -m unittest discover -s deploy -p 'test_*.py'`.
 
 Version tags also build the Flutter website in GitHub Actions, publish
 `ghcr.io/dbilgin/notelytask-web`, and deploy its immutable image digest after
