@@ -82,3 +82,37 @@ sudo dpkg -i notelytask_*_amd64.deb
   <img width="300" src="https://github.com/user-attachments/assets/7498131f-9d42-456d-bf73-a759444711f7" />
   <img width="300" src="https://github.com/user-attachments/assets/e412d497-5caf-41a9-a8e7-4c926ea0eefe" />
 </div>
+# Dokploy Release Deployment
+
+Native releases are also copied through SFTPGo's HTTPS API at
+`https://download.dbilgin.com`, using Actions secret `SFTPGO_API_KEY`
+bound to user `ci-builds`. API-key authentication must be enabled for that
+user. No SSH key, known-hosts setting, or published SFTP port is needed.
+After all packages are built and the GitHub release is published, CI clears
+only `/notelytask` in that user's namespace and uploads the latest APK, DEB,
+and RPM. Old downloads are deleted first to respect storage limits; an
+interrupted upload may leave partial downloads, so rerun the upload job.
+GitHub releases contain generated release notes only, with no uploaded packages
+or package links. Packages are distributed through SFTPGo; Actions artifacts
+remain the intermediate handoff between build and upload jobs.
+`ci-builds` needs list, delete,
+create-directory, and upload access. CI verifies uploaded filenames and sizes.
+
+Version tags also build the Flutter website in GitHub Actions, publish
+`ghcr.io/dbilgin/notelytask-web`, and deploy its immutable image digest after
+the native GitHub release succeeds. Dokploy needs no GitHub repository connection.
+The container serves port 8080 and supports `/auth-callback` and other SPA routes.
+
+Repository Actions secrets:
+- `ENV_FILE`: existing public Flutter/Supabase client configuration. Dokploy's
+  runtime environment cannot change the compiled web app.
+- `DOKPLOY_API_KEY`: API access to `https://app.omedacore.com`.
+- `GHCR_READ_TOKEN`: optional persistent token with `read:packages` for the
+  repository owner's private GHCR package. Alternatively make the web package
+  public after its first build, before rollout. A public repository does not
+  automatically make its container packages public.
+
+The workflow targets the existing NotelyTask web application and checks
+`https://notelytask.dbilgin.com/release.txt` for the released commit before
+reporting success. Failed rollouts fail the deployment job; a previous image
+digest can be restored through Dokploy. Firebase deployment remains manual.

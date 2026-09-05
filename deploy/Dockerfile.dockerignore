@@ -1,0 +1,7 @@
+**
+!deploy/
+!deploy/Dockerfile
+!deploy/nginx.conf
+!build/
+!build/web/
+!build/web/**
